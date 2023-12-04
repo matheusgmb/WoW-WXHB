@@ -1,0 +1,16 @@
+## Title: CrossHotbar
+## Notes: Implements a CrossHotbar as an actionbar.
+## Author: ChainStratagem
+## Version: 1.0
+## SavedVariables: NA
+
+
+CrossHotbar.xml
+Hotbar.lua
+CrossHotbar.lua
+
+GroupNavigator.xml
+GroupNavigator.lua
+
+
+

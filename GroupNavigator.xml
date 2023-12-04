@@ -1,0 +1,31 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+	<Script file="GroupNavigator.lua"/>	
+	<Button name="GroupNavigator" parent="UIParent" inherits="SecureActionButtonTemplate" frameStrata="BACKGROUND" hidden="true" mixin="GroupNavigatorMixin">
+		<Anchors><Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="0" y="0" /></Anchors>
+		<Attributes>
+			<Attribute name="player_unit" type="string" value="1"/>
+			<Attribute name="player_group" type="string" value="1"/>
+			<Attribute name="*type1" type="string" value="target"/>
+			<Attribute name="*type2" type="string" value="target"/>
+			<Attribute name="*type3" type="string" value="target"/>
+			<Attribute name="*type4" type="string" value="target"/>
+			<Attribute name="*type5" type="string" value="target"/>
+			<Attribute name="unit" type="string" value="player"/>
+			<Attribute name="group_change" type="string" value="true"/>
+			<Attribute name="group_units" type="string" value="[player party1 party2 party3 party4]"/>
+		</Attributes>
+		<Scripts>
+			<OnLoad method="OnLoad" inherit="append"/>
+			<OnEvent method="OnEvent" inherit="append"/>
+		</Scripts>
+	</Button>
+	<Frame name="SoftTarget" parent="UIParent" frameStrata="LOW" hidden="true" enableMouse="false" protected="true" >
+		<Size x="554" y="120"/>
+		<Anchors><Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="0" y="0" /></Anchors>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture name="$parentSelectionHighlight" parentKey="selectionHighlight"/>
+			</Layer>
+		</Layers>
+	</Frame>
+</Ui>
