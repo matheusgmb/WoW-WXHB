@@ -235,69 +235,61 @@ function GroupNavigatorMixin:WrapOnClickDiscrete()
       if num_units > 0 then
          if PlayerInGroup() == "party" or PlayerInGroup() == "raid" then
             
-            local ishighlighted = false
+            local unitfound = false
             local softtarget = self:GetFrameRef("softtarget")
+            local frame = group_units[lastgroup][lastunit]
             if softtarget then
-               local frame = group_units[lastgroup][lastunit]
                if frame and frame:IsVisible() then
                   if softtarget:GetParent() == frame then
-                     ishighlighted = true
+                     unitfound = true
                   end
                end
             end
             
-            if ishighlighted or
-               UnitPlayerOrPetInRaid("target") or
-               UnitPlayerOrPetInParty("target") then      
-               if button == "Button4" then
-                  lastunit = (lastunit + num_units - 1) % num_units
-               elseif button == "Button5" then
-                  lastunit = (lastunit + 1) % num_units
-               elseif button == "LeftButton" then
-                  lastgroup = (lastgroup + num_groups - 1) % num_groups
-               elseif button == "RightButton" then
-                  lastgroup = (lastgroup + 1) % num_groups
-               end
-               
-               if lastgroup == 0 then
-                  lastgroup = num_groups
-               end
-               
-               num_units = #(group_units[lastgroup])
-               
-               if lastunit > num_units then
-                  lastunit = num_units
-               elseif lastunit == 0 then
-                  lastunit = num_units
-               end
-               
-               local frame = group_units[lastgroup][lastunit]
-               if frame and frame:IsVisible() then
-                  newunit = frame:GetAttribute("unit")
-                  self:SetAttribute("unit", newunit)
+            if unitfound then
+               if UnitPlayerOrPetInRaid("target") or
+                  UnitPlayerOrPetInParty("target") then      
+                  if button == "Button4" then
+                     lastunit = (lastunit + num_units - 1) % num_units
+                  elseif button == "Button5" then
+                     lastunit = (lastunit + 1) % num_units
+                  elseif button == "LeftButton" then
+                     lastgroup = (lastgroup + num_groups - 1) % num_groups
+                  elseif button == "RightButton" then
+                     lastgroup = (lastgroup + 1) % num_groups
+                  end
+                  
+                  if lastgroup == 0 then
+                     lastgroup = num_groups
+                  end
+                  
+                  num_units = #(group_units[lastgroup])
+                  
+                  if lastunit > num_units then
+                     lastunit = num_units
+                  elseif lastunit == 0 then
+                     lastunit = num_units
+                  end
                end
             else 
                lastgroup = player_group
                lastunit = player_unit
-               local frame = group_units[lastgroup][lastunit]
-               if frame and frame:IsVisible() then
-                  newunit = frame:GetAttribute("unit")
-                  self:SetAttribute("unit", newunit)
-               end
             end
             
-            local softtarget = self:GetFrameRef("softtarget")
-            if softtarget then
-               local frame = group_units[lastgroup][lastunit]
-               if frame and frame:IsVisible() then
+            frame = group_units[lastgroup][lastunit]
+            if frame and frame:IsVisible() then
+               newunit = frame:GetAttribute("unit")
+               self:SetAttribute("unit", newunit)
+               if softtarget then
                   softtarget:SetParent(frame)
                   softtarget:ClearAllPoints()
                   softtarget:SetPoint("CENTER", frame, "CENTER")
                   softtarget:SetAlpha(0.75)
-               else
-                  softtarget:SetAlpha(0)
                end
+            elseif softtarget then               
+               softtarget:SetAlpha(0)
             end
+            
          else
             self:SetAttribute("unit", newunit)
          end
@@ -352,54 +344,52 @@ function GroupNavigatorMixin:WrapOnClickFlush()
       local num_units = #(group_units[lastgroup])
       if num_units > 0 then
          if PlayerInGroup() == "party" or PlayerInGroup() == "raid" then
-            local ishighlighted = false
             
+            local unitfound = false
             local softtarget = self:GetFrameRef("softtarget")
             if softtarget then
                local frame = self:GetFrameRef(group_units[lastgroup][lastunit])
                if frame and frame:IsVisible() then
                   local frame_unit = frame:GetAttribute("unit")
                   if frame_unit == group_units[lastgroup][lastunit] then
-                     ishighlighted = true
+                     unitfound = true
                   end
                end
             end
             
-            if ishighlighted or
-               UnitPlayerOrPetInRaid("target") 
-               or UnitPlayerOrPetInParty("target") then      
-               if button == "Button4" then
-                  lastunit = (lastunit + num_units - 1) % num_units
-               elseif button == "Button5" then
-                  lastunit = (lastunit + 1) % num_units
-               elseif button == "LeftButton" then
-                  lastgroup = (lastgroup + num_groups - 1) % num_groups
-               elseif button == "RightButton" then
-                  lastgroup = (lastgroup + 1) % num_groups
+            if unitfound then
+               if UnitPlayerOrPetInRaid("target") or
+                  UnitPlayerOrPetInParty("target") then      
+                  if button == "Button4" then
+                     lastunit = (lastunit + num_units - 1) % num_units
+                  elseif button == "Button5" then
+                     lastunit = (lastunit + 1) % num_units
+                  elseif button == "LeftButton" then
+                     lastgroup = (lastgroup + num_groups - 1) % num_groups
+                  elseif button == "RightButton" then
+                     lastgroup = (lastgroup + 1) % num_groups
+                  end
+                  
+                  if lastgroup == 0 then
+                     lastgroup = num_groups
+                  end
+                  
+                  num_units = #(group_units[lastgroup])
+                  
+                  if lastunit > num_units then
+                     lastunit = num_units
+                  elseif lastunit == 0 then
+                     lastunit = num_units
+                  end
                end
-               
-               if lastgroup == 0 then
-                  lastgroup = num_groups
-               end
-               
-               num_units = #(group_units[lastgroup])
-               
-               if lastunit > num_units then
-                  lastunit = num_units
-               elseif lastunit == 0 then
-                  lastunit = num_units
-               end
-               
-               newunit = group_units[lastgroup][lastunit]
-               self:SetAttribute("unit", newunit)
             else 
                lastgroup = player_group
                lastunit = player_unit
-               newunit = group_units[lastgroup][lastunit]
-               self:SetAttribute("unit", newunit)
             end
             
-            local softtarget = self:GetFrameRef("softtarget")
+            newunit = group_units[lastgroup][lastunit]
+            self:SetAttribute("unit", newunit)
+               
             if softtarget then
                local found = false
                local frame = self:GetFrameRef(newunit)

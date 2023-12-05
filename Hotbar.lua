@@ -148,7 +148,7 @@ function HotbarMixin:AddModHandler()
          if key2 then b:SetBindingClick(true, key2, b:GetName(), "LeftButton") end
       end
    else
-      bar:SetAlpha(0.2)
+      bar:SetAlpha(0.0)
    end
    bar:SetAttribute('state-page', newstate)
    self:SetAttribute('state-page', newstate)

@@ -4,7 +4,6 @@
 ## Version: 1.0
 ## SavedVariables: NA
 
-
 CrossHotbar.xml
 Hotbar.lua
 CrossHotbar.lua
