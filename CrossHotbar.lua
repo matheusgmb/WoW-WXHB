@@ -1,5 +1,4 @@
 
-
 CrossHotbarMixin = {}
 
 function CrossHotbarMixin:SetupCrosshotbar()
