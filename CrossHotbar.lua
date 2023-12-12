@@ -1,3 +1,5 @@
+local ADDON, addon = ...
+local config = addon.Config
 
 CrossHotbarMixin = {}
 
@@ -6,10 +8,10 @@ function CrossHotbarMixin:SetupCrosshotbar()
    self.RHotbar = { RHotbar1, RHotbar2, RHotbar3 }
    self.MHotbar = { LRHotbar1, RLHotbar1 }
    
-   self:OverrideKeyBindings(LHotbar1.ActionBar, "ACTIONBUTTON", LHotbar1.BtnPrefix)
-   self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix)
-   self:OverrideKeyBindings(LRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", LRHotbar1.BtnPrefix)
-   self:OverrideKeyBindings(RLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", RLHotbar1.BtnPrefix)
+   self:OverrideKeyBindings(LHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", config:GetKeyBindingsLeft())
+   self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix, config:GetKeyBindingsRight())
+   self:OverrideKeyBindings(LRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", LRHotbar1.BtnPrefix, config:GetKeyBindingsRightLeft())
+   self:OverrideKeyBindings(RLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", RLHotbar1.BtnPrefix, config:GetKeyBindingsRightLeft())
    
    UnregisterStateDriver(LHotbar1.ActionBar,'visibility')
    UnregisterStateDriver(LHotbar2.ActionBar,'visibility')
@@ -46,6 +48,18 @@ function CrossHotbarMixin:SetupCrosshotbar()
    
    RegisterStateDriver(LRHotbar1, 'mod', "[mod:shift,mod:ctrl]2;[mod:shift]6; [mod:ctrl]1;5")
    RegisterStateDriver(RLHotbar1, 'mod', "[mod:shift,mod:ctrl]2;[mod:shift]6; [mod:ctrl]1;5")
+
+   if GetCVar('GamePadEnable') == "1" then
+      print("Setting GamePad CVars")
+      SetCVar('GamePadEnable', 1);
+      SetCVar('GamePadEmulateShift', 'PADRTRIGGER');
+      SetCVar('GamePadEmulateCtrl', 'PADLTRIGGER');
+      SetCVar('GamePadEmulateAlt', 'PADLSHOULDER');
+      SetCVar('GamePadCursorLeftClick', 'PAD6');
+      SetCVar('GamePadCursorRightClick', 'PADBACK');
+      SetCVar('GamePadCameraYawSpeed', 3);
+      SetCVar('GamePadCameraPitchSpeed', 3);
+   end
    
    print("CrossHotbar Setup")
 end
@@ -65,19 +79,22 @@ function CrossHotbarMixin:OnEvent(event, ...)
    end
 end
 
-function CrossHotbarMixin:OverrideKeyBindings(ActBar, ActionPrefix, BtnPrefix)
+function CrossHotbarMixin:OverrideKeyBindings(ActBar, ActionPrefix, BtnPrefix, ConfigBindings)
+   local idx = 1
    local containers = { ActBar:GetChildren() }
    for i, container in ipairs(containers) do
       local buttons = { container:GetChildren() }
       for j, button in ipairs(buttons) do            
-         if button ~= nil and button:GetName() ~= nil then       
+         if button ~= nil and button:GetName() ~= nil then
             if string.find(button:GetName(), BtnPrefix) then
                local ActionName = string.gsub(button:GetName(), BtnPrefix, ActionPrefix)
-               local key1, key2 = GetBindingKey(ActionName)
-               if key1 then
+               --local key1, key2 = GetBindingKey(ActionName)
+               local key1, key2 = unpack(ConfigBindings[idx])
+               --print(key1 .. " " .. key2 .. " " .. ActionName)
+               if key1 and key1 ~= "" then
                   SetOverrideBindingClick(button, true, key1, button:GetName(), "LeftButton")
                end
-               if key2 then
+               if key2 and key2 ~= "" then
                   SetOverrideBindingClick(button, true, key2, button:GetName(), "LeftButton")
                end
                
@@ -86,6 +103,7 @@ function CrossHotbarMixin:OverrideKeyBindings(ActBar, ActionPrefix, BtnPrefix)
                --      print(ActionName, button:GetName(), key1, key2)
                button.HotKey:SetText(RANGE_INDICATOR);
                button.HotKey:Show();
+               idx = idx + 1
             end
          end
       end

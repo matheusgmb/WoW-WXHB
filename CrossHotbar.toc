@@ -5,8 +5,8 @@
 ## SavedVariables: NA
 
 Config.lua
-CrossHotbar.xml
 
+CrossHotbar.xml
 Hotbar.lua
 CrossHotbar.lua
 
@@ -15,3 +15,5 @@ GroupNavigator.lua
 
 UtilityButtons.xml
 UtilityButtons.lua
+
+Config_UI.lua
