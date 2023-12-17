@@ -2,18 +2,13 @@
 ## Notes: Implements a CrossHotbar as an actionbar.
 ## Author: ChainStratagem
 ## Version: 1.0
-## SavedVariables: NA
+## SavedVariables: 
 
 Config.lua
-
+GamePadButtons.lua
+GroupNavigator.xml
+GroupNavigator.lua
 CrossHotbar.xml
 Hotbar.lua
 CrossHotbar.lua
-
-GroupNavigator.xml
-GroupNavigator.lua
-
-UtilityButtons.xml
-UtilityButtons.lua
-
-Config_UI.lua
+ConfigUI.lua

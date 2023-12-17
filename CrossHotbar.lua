@@ -8,11 +8,6 @@ function CrossHotbarMixin:SetupCrosshotbar()
    self.RHotbar = { RHotbar1, RHotbar2, RHotbar3 }
    self.MHotbar = { LRHotbar1, RLHotbar1 }
    
-   self:OverrideKeyBindings(LHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", config:GetKeyBindingsLeft())
-   self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix, config:GetKeyBindingsRight())
-   self:OverrideKeyBindings(LRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", LRHotbar1.BtnPrefix, config:GetKeyBindingsRightLeft())
-   self:OverrideKeyBindings(RLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", RLHotbar1.BtnPrefix, config:GetKeyBindingsRightLeft())
-   
    UnregisterStateDriver(LHotbar1.ActionBar,'visibility')
    UnregisterStateDriver(LHotbar2.ActionBar,'visibility')
    UnregisterStateDriver(LHotbar3.ActionBar,'visibility')
@@ -59,9 +54,27 @@ function CrossHotbarMixin:SetupCrosshotbar()
       SetCVar('GamePadCursorRightClick', 'PADBACK');
       SetCVar('GamePadCameraYawSpeed', 3);
       SetCVar('GamePadCameraPitchSpeed', 3);
+      SetCVar('GamePadSingleActiveID', 5)
+      --[[
+         for _, i in ipairs(C_GamePad.GetAllDeviceIDs()) do
+   
+   local device = C_GamePad.GetDeviceRawState(i)
+   if(device) then
+      print(i .. " " .. table.concat(device[1]))
+   end
+   print(device)
+         end
+      --]]
    end
    
    print("CrossHotbar Setup")
+end
+
+function CrossHotbarMixin:ApplyConfig()
+   self:OverrideKeyBindings(LHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", config:GetKeyBindingsLeft())
+   self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix, config:GetKeyBindingsRight())
+   self:OverrideKeyBindings(LRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", LRHotbar1.BtnPrefix, config:GetKeyBindingsRightLeft())
+   self:OverrideKeyBindings(RLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", RLHotbar1.BtnPrefix, config:GetKeyBindingsRightLeft())
 end
 
 function CrossHotbarMixin:OnLoad()
@@ -75,6 +88,7 @@ end
 function CrossHotbarMixin:OnEvent(event, ...)
    if ( event == "PLAYER_ENTERING_WORLD" ) then
       self:SetupCrosshotbar()
+      self:ApplyConfig()
       self:UpdateCrosshotbar()
    end
 end

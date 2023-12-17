@@ -30,19 +30,40 @@
     </Scripts>
   </Frame>
   
-  <Frame name="SeperatorMover" parent="UIParent" frameStrata="MEDIUM" hidden="false" enableMouse="true" movable="true">
-    <Size x="2" y="112"/>
+  <Frame name="SeperatorMover" parent="UIParent" frameStrata="HIGH" hidden="false" enableMouse="true" movable="true">
+    <Size x="16" y="112"/>
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <Scripts>
       <OnLoad>self:RegisterForDrag("LeftButton");</OnLoad>
       <OnDragStart>self:StartMoving();</OnDragStart>
       <OnDragStop>self:StopMovingOrSizing();</OnDragStop>
+      <OnMouseDown>
+        self:SetWidth(Crosshotbar:GetWidth());
+        SeperatorDrag_Texture:SetWidth(Crosshotbar:GetWidth());
+        SeperatorDrag_Texture:Show();
+      </OnMouseDown>
+      <OnEnter>
+        SeperatorMover_Texture:SetWidth(8);
+      </OnEnter>
+      <OnLeave>
+        self:SetWidth(16);
+        SeperatorMover_Texture:SetWidth(2);
+        SeperatorDrag_Texture:SetWidth(2);
+        SeperatorDrag_Texture:Hide();
+      </OnLeave>
     </Scripts>
     <Layers>
       <Layer level="BACKGROUND">
         <Texture name="SeperatorMover_Texture" hidden="false">
           <Size x="2" y="60"/>
           <Color r="1.0" g="1.0" b="0.8" a="1.0"/>
+          <Anchors> <Anchor point="CENTER" relativePoint="CENTER" x="0" y="0"/></Anchors>
+        </Texture>
+      </Layer>
+      <Layer level="OVERLAY">
+        <Texture name="SeperatorDrag_Texture" hidden="true">
+          <Size x="2" y="60"/>
+          <Color r="0.5" g="0.8" b="0.8" a="0.5"/>
           <Anchors> <Anchor point="CENTER" relativePoint="CENTER" x="0" y="0"/></Anchors>
         </Texture>
       </Layer>

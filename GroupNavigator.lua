@@ -1,4 +1,22 @@
-GroupNavigatorMixin = {}
+local ADDON, addon = ...
+local config = addon.Config
+
+addon.Crosshotbar = Crosshotbar
+
+local ActionList = {
+   ["GROUPNAVIGATIONUP"] = true,
+   ["GROUPNAVIGATIONDOWN"] = true,
+   ["GROUPNAVIGATIONLEFT"] = true,
+   ["GROUPNAVIGATIONRIGHT"] = true,
+   ["CLEARTARGETING"] = true
+}
+
+addon.GroupNavigatorActions = ActionList
+
+local GroupNavigatorMixin = {
+   SoftTargetFrame = CrossHotbarAddon_GroupNavigator_SoftTarget,
+   ActiveBindings = {}
+}
 
 function GroupNavigatorMixin:OnLoad()
    self:RegisterEvent("GROUP_JOINED")
@@ -14,49 +32,100 @@ function GroupNavigatorMixin:OnEvent(event, ...)
       --self:SetOverrideBindings()
    elseif event == "GROUP_LEFT" then
       self:updateRoster()
-      SoftTarget:SetAlpha(0)
+      self.SoftTargetFrame:SetAlpha(0)
       --self:UnsetOverrideBindings()
    elseif event == 'GROUP_ROSTER_UPDATE' then
       self:updateRoster()               
    elseif event == 'PLAYER_ENTERING_WORLD' then
       self:updateRoster()
-      self:SetOverrideBindings()
+      self:ApplyConfig()
       if ChatFrame1EditBox then
          ChatFrame1EditBox:SetAltArrowKeyMode(false)
       end
       local texCoords = { ["Raid-TargetFrame"] = { 0.00781250, 0.55468750, 0.28906250, 0.55468750 }}
       
-      SoftTarget.selectionHighlight:SetTexture("Interface\\RaidFrame\\Raid-FrameHighlights");
-      SoftTarget.selectionHighlight:SetTexCoord(unpack(texCoords["Raid-TargetFrame"]));
-      SoftTarget.selectionHighlight:SetVertexColor(0.2, 1.0, 0.6);
-      SoftTarget.selectionHighlight:SetAllPoints(SoftTarget);
+      self.SoftTargetFrame.selectionHighlight:SetTexture("Interface\\RaidFrame\\Raid-FrameHighlights");
+      self.SoftTargetFrame.selectionHighlight:SetTexCoord(unpack(texCoords["Raid-TargetFrame"]));
+      self.SoftTargetFrame.selectionHighlight:SetVertexColor(0.2, 1.0, 0.6);
+      self.SoftTargetFrame.selectionHighlight:SetAllPoints(self.SoftTargetFrame);
       
       local frameWidth = EditModeManagerFrame:GetRaidFrameWidth(true);
       local frameHeight = EditModeManagerFrame:GetRaidFrameHeight(true);
       
-      SoftTarget:SetSize(frameWidth+8, frameHeight+8)
-      SoftTarget:SetAlpha(0)
-      SoftTarget:Hide()
+      self.SoftTargetFrame:SetSize(frameWidth+8, frameHeight+8)
+      self.SoftTargetFrame:SetAlpha(0)
+      self.SoftTargetFrame:Hide()
       
-      SecureHandlerSetFrameRef(self, "softtarget", SoftTarget)
+      SecureHandlerSetFrameRef(self, "softtarget", self.SoftTargetFrame)
       if UnitInRaid("player") or UnitInParty("player") then
          self:updateRoster()
       end
    end
 end
 
-function GroupNavigatorMixin:SetOverrideBindings()
-   SetOverrideBindingClick(self, true, "Up", self:GetName(), "Button4")
-   SetOverrideBindingClick(self, true, "Down", self:GetName(), "Button5")
-   SetOverrideBindingClick(self, true, "Left", self:GetName(), "LeftButton")
-   SetOverrideBindingClick(self, true, "Right", self:GetName(), "RightButton")
+function GroupNavigatorMixin:SetOverrideNavBinding(binding, action)
+   if action ~= nil then
+      if action == "GROUPNAVIGATIONUP" then
+         SetOverrideBindingClick(self, true, binding, self:GetName(), "Button4")
+         table.insert(self.ActiveBindings, {binding, "Button4"})
+      end
+      if action == "GROUPNAVIGATIONDOWN" then
+         SetOverrideBindingClick(self, true, binding, self:GetName(), "Button5")
+         table.insert(self.ActiveBindings, {binding, "Button5"})
+      end
+      if action == "GROUPNAVIGATIONLEFT" then
+         SetOverrideBindingClick(self, true, binding, self:GetName(), "LeftButton")
+         table.insert(self.ActiveBindings, {binding, "LeftButton"})
+      end
+      if action == "GROUPNAVIGATIONRIGHT" then
+         SetOverrideBindingClick(self, true, binding, self:GetName(), "RightButton")
+         table.insert(self.ActiveBindings, {binding, "RightButton"})
+      end
+      if action == "CLEARTARGETING" then
+         SetOverrideBindingClick(self, true, binding, self:GetName(), "MiddleButton")
+         table.insert(self.ActiveBindings, {binding, "MiddleButton"})
+      end
+   end
 end
 
-function GroupNavigatorMixin:UnsetOverrideBindings() 
-   SetOverrideBinding(self, true, "Up", nil)
-   SetOverrideBinding(self, true, "Down", nil)
-   SetOverrideBinding(self, true, "Left", nil)
-   SetOverrideBinding(self, true, "Right", nil)
+function GroupNavigatorMixin:ApplyConfig()
+   self.ActiveBindings = {}
+   for button, actions in pairs(config.PadActions) do
+      local action = nil
+      local binding, defaultaction, leftrightaction, swapaction = unpack(actions)
+      
+      if ActionList[defaultaction] then action = defaultaction end
+         
+      self:SetOverrideNavBinding(binding, action)
+          
+      if ActionList[leftrightaction] then action = leftrightaction end
+      
+      self:SetOverrideNavBinding("CTRL-" .. binding, action)
+      self:SetOverrideNavBinding("SHIFT-" .. binding, action)
+      self:SetOverrideNavBinding("CRTL-SHIFT-" .. binding, action)
+      
+      if ActionList[swapaction] then action = swapaction end
+      
+      self:SetOverrideNavBinding("ALT-" .. binding, action)
+      self:SetOverrideNavBinding("ALT-CTRL-" .. binding, action)
+      self:SetOverrideNavBinding("ALT-SHIFT-" .. binding, action)
+      self:SetOverrideNavBinding("ALT-CRTL-SHIFT-" .. binding, action)
+      
+      local swapbindings = addon.Config:GetSwapBinding(button)
+      
+      if swapbindings then
+         self:SetOverrideNavBinding("ALT-" .. swapbindings[1], action)
+         self:SetOverrideNavBinding("ALT-CTRL-" .. swapbindings[1], action)
+         self:SetOverrideNavBinding("ALT-SHIFT-" ..swapbindings[1], action)
+         self:SetOverrideNavBinding("ALT-CRTL-SHIFT-" .. swapbindings[1], action)
+      end
+   end
+end
+
+function GroupNavigatorMixin:UnsetOverrideBindings()
+   for binding, button in pairs(selfActiveBindings) do
+      SetOverrideBinding(self, true, binding, nil)
+   end
 end
 
 function GroupNavigatorMixin:updateRoster() 
@@ -186,11 +255,11 @@ function GroupNavigatorMixin:AddUnitFrameRefs()
    
    local frameWidth = EditModeManagerFrame:GetRaidFrameWidth(groupType);
    local frameHeight = EditModeManagerFrame:GetRaidFrameHeight(groupType);
-   SoftTarget:SetSize(frameWidth+8, frameHeight+8)
-   --SoftTarget:SetAlpha(0)
-   SoftTarget:Show()
+   self.SoftTargetFrame:SetSize(frameWidth+8, frameHeight+8)
+   --self.SoftTargetFrame:SetAlpha(0)
+   self.SoftTargetFrame:Show()
    
-   SecureHandlerSetFrameRef(self, "softtarget", SoftTarget)
+   SecureHandlerSetFrameRef(self, "softtarget", self.SoftTargetFrame)
 end
 
 function GroupNavigatorMixin:WrapOnClickDiscrete()
@@ -418,3 +487,42 @@ function GroupNavigatorMixin:WrapOnClickFlush()
    end
    ]])
 end
+
+local GroupNavigator = {
+   GroupNavigatorFrame = nil
+}
+
+local GroupNavigatorFrame = CreateFrame("Button", ADDON .. "GroupNavigatorFrame",
+                                        UIParent, "SecureActionButtonTemplate")
+
+Mixin(GroupNavigatorFrame, GroupNavigatorMixin)
+
+--[[
+   SoftTargetFrame = CreateFrame("Frame", ADDON .. "GroupNavigatorFrame",
+   UIParent, "SecureActionButtonTemplate")
+
+   SoftTargetFrame.SetFrameStrata("LOW")
+   SoftTargetFrame.EnableMouse(false)
+--]]
+
+GroupNavigatorFrame:SetFrameStrata("BACKGROUND")
+GroupNavigatorFrame:SetPoint("TOPLEFT", "UIParent", "TOPLEFT", 0, 0)
+GroupNavigatorFrame:Hide()
+
+GroupNavigatorFrame:SetAttribute("player_unit", "1")
+GroupNavigatorFrame:SetAttribute("player_group", "1")
+GroupNavigatorFrame:SetAttribute("*type1", "target")
+GroupNavigatorFrame:SetAttribute("*type2", "target")
+GroupNavigatorFrame:SetAttribute("*type3", "macro")
+GroupNavigatorFrame:SetAttribute("*type4", "target")
+GroupNavigatorFrame:SetAttribute("*type5", "target")
+GroupNavigatorFrame:SetAttribute("unit", "player")
+GroupNavigatorFrame:SetAttribute("group_change", "true")
+GroupNavigatorFrame:SetAttribute("group_units", "[player party1 party2 party3 party4]")
+GroupNavigatorFrame:SetAttribute("macrotext3", "/cleartarget\n/stopspelltarget\n")
+
+GroupNavigatorFrame:HookScript("OnEvent", GroupNavigatorFrame.OnEvent)
+GroupNavigatorFrame:OnLoad()
+
+addon.GroupNavigator = GroupNavigator
+
