@@ -30,6 +30,23 @@ local function Intersection(l1, l2)
    return matches
 end
 
+local function ActionDropDownDemo_OnClick(self, arg1, arg2, checked)
+   local newaction = self:GetText()
+   local currentaction = config.PadActions[arg1].ACTION
+   if currentaction ~= newaction then
+      for button, attributes in pairs(config.PadActions) do
+         if button ~= arg1 then
+            if attributes.ACTION == newaction then
+               config.PadActions[button].ACTION = currentaction
+               break
+            end
+         end
+      end
+      config.PadActions["arg1"].ACTION = newaction
+   end
+   UIDropDownMenu_SetText(arg2, newaction)
+end
+   
 StaticPopupDialogs["CROSSHOTBAR_ENABLEGAMEPAD"] = {
    text = [[This config requires GamePad mode enabled.
 CVar GamePadEnable is 0.
@@ -49,7 +66,6 @@ Click "Enable" to enable or use the Console command:
 local Locale = {
    LeftModifierToolTip = "Configures left modifier (CTRL) button binding. This modifier enables the left side of the Cross Hotbar",
    RightModifierToolTip = "Configures right modifier (SHIFT) button binding. This modifier enables the right side of the Cross Hotbar",
-   SwapModifierToolTip = "Configures swap modifier (ALT) button binding. This modifier allows certain options to be enabled when the modifier is active.",
    SwapTypeToolTip=[[Sets the unsage of the swap modifier.
 
 "disable":
@@ -101,7 +117,7 @@ function ConfigUI:Refresh()
    for i,callback in ipairs(ConfigUI.RefreshCallbacks) do
       callback()
    end
-   
+
    addon.GamePadButtons:ApplyConfig()
    addon.GroupNavigator:ApplyConfig()
    addon.Crosshotbar:ApplyConfig()
@@ -142,7 +158,7 @@ function ConfigUI:CreateFrame()
       local anchor = title
       anchor = ConfigUI:CreatePresets(scrollChild, anchor)
       anchor = ConfigUI:CreateApply(scrollChild, anchor)
-      anchor = ConfigUI:CreateModifiers(scrollChild, anchor)
+      anchor = ConfigUI:CreateTriggers(scrollChild, anchor)
       anchor = ConfigUI:CreateFeatures(scrollChild, anchor)
       anchor = ConfigUI:CreateBindings(scrollChild, anchor)
 
@@ -296,15 +312,11 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
 end
 
 --[[
-   Modifier button bindings
+   Trigger button actions
 --]]
 
-function ConfigUI:CreateModifiers(configFrame, anchorFrame)
-   local leftmodifiers = {"CTRL", "PADLTRIGGER", "PADRTRIGGER", "PADLSHOULDER", "PADRSHOULDER", "PADPADDLE1", "PADPADDLE2", "PADPADDLE3", "PADPADDLE4"}
-   local rightmodifiers = {"SHIFT", "PADLTRIGGER", "PADRTRIGGER", "PADLSHOULDER", "PADRSHOULDER", "PADPADDLE1", "PADPADDLE2", "PADPADDLE3", "PADPADDLE4"}
-   local swapmodifiers = {"ALT", "PADLTRIGGER", "PADRTRIGGER", "PADLSHOULDER", "PADRSHOULDER", "PADPADDLE1", "PADPADDLE2", "PADPADDLE3", "PADPADDLE4"}
-
-   local DropDownWidth = configFrame:GetWidth()/3 - 2*self.Inset
+function ConfigUI:CreateTriggers(configFrame, anchorFrame)
+   local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/3
    local leftsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    leftsubtitle:SetHeight(self.TextHeight)
    leftsubtitle:SetWidth(DropDownWidth)
@@ -312,7 +324,7 @@ function ConfigUI:CreateModifiers(configFrame, anchorFrame)
    leftsubtitle:SetNonSpaceWrap(true)
    leftsubtitle:SetJustifyH("LEFT")
    leftsubtitle:SetJustifyV("TOP")
-   leftsubtitle:SetText("Left Modifier")
+   leftsubtitle:SetText("Left Trigger")
 
    local rightsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    rightsubtitle:SetHeight(self.TextHeight)
@@ -321,130 +333,67 @@ function ConfigUI:CreateModifiers(configFrame, anchorFrame)
    rightsubtitle:SetNonSpaceWrap(true)
    rightsubtitle:SetJustifyH("LEFT")
    rightsubtitle:SetJustifyV("TOP")
-   rightsubtitle:SetText("Right Modifier")
+   rightsubtitle:SetText("Right Trigger")
    
-   local swapsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   swapsubtitle:SetHeight(self.TextHeight)
-   swapsubtitle:SetWidth(DropDownWidth)
-   swapsubtitle:SetPoint("TOPLEFT", rightsubtitle, "TOPRIGHT", 0, 0)
-   swapsubtitle:SetNonSpaceWrap(true)
-   swapsubtitle:SetJustifyH("LEFT")
-   swapsubtitle:SetJustifyV("TOP")
-   swapsubtitle:SetText("Swap Modifier")
+   local lefttriggerframe = CreateFrame("Frame", ADDON .. "LeftTriggerDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   lefttriggerframe:SetPoint("TOPLEFT", leftsubtitle, "BOTTOMLEFT", 0, 0)
    
-   local function ModifierDropDownDemo_OnClick(self, arg1, arg2, checked)
-      if arg1 == "left" then
-         config.LeftModifier = self:GetText()
-      end
-      if arg1 == "right" then
-         config.RightModifier = self:GetText()
-      end
-      if arg1 == "swap" then
-         config.SwapModifier = self:GetText()
-      end
-      
-      UIDropDownMenu_SetText(arg2, self:GetText())
-   end
-   
-   local leftmodifierframe = CreateFrame("Frame", ADDON .. "LeftModifierDropDownMenu", configFrame, "UIDropDownMenuTemplate")
-   leftmodifierframe:SetPoint("TOPLEFT", leftsubtitle, "BOTTOMLEFT", 0, 0)
-   
-   UIDropDownMenu_SetWidth(leftmodifierframe, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(leftmodifierframe, "LeftModifier")
-
-   UIDropDownMenu_Initialize(leftmodifierframe, function(self, level, menuList)     
+   UIDropDownMenu_SetWidth(lefttriggerframe, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(lefttriggerframe, "LeftTrigger")
+   UIDropDownMenu_JustifyText(lefttriggerframe, "RIGHT")
+   UIDropDownMenu_Initialize(lefttriggerframe, function(self, level, menuList)     
       local info = UIDropDownMenu_CreateInfo()
       UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
-         local bindings = {}
          local a = config.PadActions
-         for i, item in ipairs({a.TRIGL[1], a.TRIGR[1], a.SPADL[1], a.SPADR[1]}) do table.insert(bindings, item) end
-         for i, item in ipairs({a.STCKL[1], a.STCKR[1], a.PPADL[1], a.PPADR[1]}) do table.insert(bindings, item) end
-         local modifiers = Intersection(bindings,leftmodifiers)
-         for _,modifier in ipairs(modifiers) do
-            info.text, info.checked, info.disabled = modifier, (config.LeftModifier == modifier), (config.RightModifier == modifier) or (config.SwapModifier == modifier)
+         local actions = {a.TRIGL.ACTION, a.TRIGR.ACTION, a.SPADL.ACTION, a.SPADR.ACTION, a.PPADL.ACTION, a.PPADR.ACTION}
+         for _,action in ipairs(actions) do
+            info.text, info.checked = action, (a.TRIGL.ACTION == action)
             info.menuList, info.hasArrow = i, false
-            info.arg1 = "left"
-            info.arg2 = self
-            info.func = ModifierDropDownDemo_OnClick
+            info.arg1, info.arg2 = "left", self
+            info.func = ActionDropDownDemo_OnClick
             UIDropDownMenu_AddButton(info)
-            if (config.LeftModifier == modifier) then 
-               UIDropDownMenu_SetText(self, modifier)
+            if (a.TRIGL.ACTION == action) then 
+               UIDropDownMenu_SetText(self, action)
             end
          end
       end
    end)
 
-   local rightmodifierframe = CreateFrame("Frame", ADDON .. "RightModifierDropDownMenu", configFrame, "UIDropDownMenuTemplate")
-   rightmodifierframe:SetPoint("TOPLEFT", rightsubtitle, "BOTTOMLEFT", 0, 0)
+   local righttriggerframe = CreateFrame("Frame", ADDON .. "RightTriggerDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   righttriggerframe:SetPoint("TOPLEFT", rightsubtitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(rightmodifierframe, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(rightmodifierframe, "RightModifier")
-   
-   UIDropDownMenu_Initialize(rightmodifierframe, function(self, level, menuList)     
+   UIDropDownMenu_SetWidth(righttriggerframe, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(righttriggerframe, "RightTrigger")
+   UIDropDownMenu_JustifyText(righttriggerframe, "RIGHT")
+   UIDropDownMenu_Initialize(righttriggerframe, function(self, level, menuList)     
       local info = UIDropDownMenu_CreateInfo()
       UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
-         local bindings = {}
          local a = config.PadActions
-         for i, item in ipairs({a.TRIGL[1], a.TRIGR[1], a.SPADL[1], a.SPADR[1]}) do table.insert(bindings, item) end
-         for i, item in ipairs({a.STCKL[1], a.STCKR[1], a.PPADL[1], a.PPADR[1]}) do table.insert(bindings, item) end
-         local modifiers = Intersection(bindings,rightmodifiers)
-         for _,modifier in ipairs(modifiers) do
-            info.text, info.checked, info.disabled = modifier, (config.RightModifier == modifier), (config.LeftModifier == modifier) or (config.SwapModifier == modifier)
+         local actions = {a.TRIGL.ACTION, a.TRIGR.ACTION, a.SPADL.ACTION, a.SPADR.ACTION, a.PPADL.ACTION, a.PPADR.ACTION}
+         for _,action in ipairs(actions) do
+            info.text, info.checked = action, (a.TRIGR.ACTION == action)
             info.menuList, info.hasArrow = i, false
-            info.arg1 = "right"
-            info.arg2 = self
-            info.func = ModifierDropDownDemo_OnClick
+            info.arg1, info.arg2 = "left", self
+            info.func = ActionDropDownDemo_OnClick
             UIDropDownMenu_AddButton(info)
-            if (config.RightModifier == modifier) then 
-               UIDropDownMenu_SetText(self, modifier)
+            if (a.TRIGR.ACTION == action) then 
+               UIDropDownMenu_SetText(self, action)
             end
          end
       end
    end)
 
-   local swapmodifierframe = CreateFrame("Frame", ADDON .. "SwapModifierDropDownMenu", configFrame, "UIDropDownMenuTemplate")
-   swapmodifierframe:SetPoint("TOPLEFT", swapsubtitle, "BOTTOMLEFT", 0, 0)
-   
-   UIDropDownMenu_SetWidth(swapmodifierframe, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(swapmodifierframe, "SwapModifier")
-   
-   UIDropDownMenu_Initialize(swapmodifierframe, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
-      if (level or 1) == 1 then
-         local bindings = {}
-         local a = config.PadActions
-         for i, item in ipairs({a.TRIGL[1], a.TRIGR[1], a.SPADL[1], a.SPADR[1]}) do table.insert(bindings, item) end
-         for i, item in ipairs({a.STCKL[1], a.STCKR[1], a.PPADL[1], a.PPADR[1]}) do table.insert(bindings, item) end
-         local modifiers = Intersection(bindings,swapmodifiers)
-         table.insert(modifiers, 1, "disable")
-         for _,modifier in ipairs(modifiers) do
-            info.text, info.checked, info.disabled = modifier, (config.SwapModifier == modifier), (config.LeftModifier == modifier) or (config.RightModifier == modifier)
-            info.menuList, info.hasArrow = i, false
-            info.arg1 = "swap"
-            info.arg2 = self
-            info.func = ModifierDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
-            if (config.SwapModifier == modifier) then 
-               UIDropDownMenu_SetText(self, modifier)
-            end
-         end
-      end
-   end)
-
-   ConfigUI:AddToolTip(leftmodifierframe, Locale.LeftModifierToolTip, true)
-   ConfigUI:AddToolTip(rightmodifierframe, Locale.RightModifierToolTip, true)
-   ConfigUI:AddToolTip(swapmodifierframe, Locale.SwapModifierToolTip, true)
+   ConfigUI:AddToolTip(lefttriggerframe, Locale.LeftModifierToolTip, true)
+   ConfigUI:AddToolTip(righttriggerframe, Locale.RightModifierToolTip, true)
    
    table.insert(self.RefreshCallbacks, function()
-       UIDropDownMenu_SetText(leftmodifierframe, config.LeftModifier)
-       UIDropDownMenu_SetText(rightmodifierframe, config.RightModifier)
-       UIDropDownMenu_SetText(swapmodifierframe, config.SwapModifier)
+       UIDropDownMenu_SetText(lefttriggerframe, config.PadActions.TRIGL.ACTION)
+       UIDropDownMenu_SetText(righttriggerframe, config.PadActions.TRIGR.ACTION)
    end)
    
-   return leftmodifierframe
+   return lefttriggerframe
 end
 
 --[[
@@ -544,10 +493,10 @@ function ConfigUI:CreateBindings(configFrame, anchorFrame)
       if #facebindings == 4 and #dpadbindings == 4 and
          #tpadbindings == 4 and #spadbindings == 4 then
          local a = config.PadActions
-         a.FACER[1], a.FACEU[1], a.FACED[1], a.FACEL[1] = unpack(facebindings)
-         a.DPADR[1], a.DPADU[1], a.DPADD[1], a.DPADL[1] = unpack(dpadbindings)
-         a.TRIGL[1], a.TRIGR[1], a.SPADL[1], a.SPADR[1] = unpack(tpadbindings)
-         a.STCKL[1], a.STCKR[1], a.PPADL[1], a.PPADR[1] = unpack(spadbindings)
+         a.FACER.BIND, a.FACEU.BIND, a.FACED.BIND, a.FACEL.BIND = unpack(facebindings)
+         a.DPADR.BIND, a.DPADU.BIND, a.DPADD.BIND, a.DPADL.BIND = unpack(dpadbindings)
+         a.TRIGL.BIND, a.TRIGR.BIND, a.SPADL.BIND, a.SPADR.BIND = unpack(tpadbindings)
+         a.STCKL.BIND, a.STCKR.BIND, a.PPADL.BIND, a.PPADR.BIND = unpack(spadbindings)
       else
          message("ERROR: Incorrent number of bindings.")
       end
@@ -555,10 +504,10 @@ function ConfigUI:CreateBindings(configFrame, anchorFrame)
    
    table.insert(self.RefreshCallbacks, function()
       local a = config.PadActions
-      facebuttonseditbox:SetText(BindingsToStr({a.FACER[1], a.FACEU[1], a.FACED[1], a.FACEL[1]}))
-      dpadbuttonseditbox:SetText(BindingsToStr({a.DPADR[1], a.DPADU[1], a.DPADD[1], a.DPADL[1]}))
-      tpadbuttonseditbox:SetText(BindingsToStr({a.TRIGL[1], a.TRIGR[1], a.SPADL[1], a.DPADR[1]}))
-      spadbuttonseditbox:SetText(BindingsToStr({a.STCKL[1], a.STCKR[1], a.PPADL[1], a.PPADR[1]}))
+      facebuttonseditbox:SetText(BindingsToStr({a.FACER.BIND, a.FACEU.BIND, a.FACED.BIND, a.FACEL.BIND}))
+      dpadbuttonseditbox:SetText(BindingsToStr({a.DPADR.BIND, a.DPADU.BIND, a.DPADD.BIND, a.DPADL.BIND}))
+      tpadbuttonseditbox:SetText(BindingsToStr({a.TRIGL.BIND, a.TRIGR.BIND, a.SPADL.BIND, a.SPADR.BIND}))
+      spadbuttonseditbox:SetText(BindingsToStr({a.STCKL.BIND, a.STCKR.BIND, a.PPADL.BIND, a.PPADR.BIND}))
    end)
    
    return spadbuttonseditbox
@@ -577,7 +526,7 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
    local swaptypes = {"disable", "DPad to Face", "Expanded to Face", "DPad on Face only"}
    local wxhbtypes = {"disable", "Expanded to Face"}
    
-   local DropDownWidth = configFrame:GetWidth()/3 - 2*self.Inset
+   local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/3
    local swapsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    swapsubtitle:SetHeight(self.TextHeight)
    swapsubtitle:SetWidth(DropDownWidth)
@@ -595,7 +544,6 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
 
    local function SwapDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.SwapType = arg1
-      if config.SwapType == 1 then config.SwapModifier = "disable" end
       UIDropDownMenu_SetText(arg2, self:GetText())
    end
    

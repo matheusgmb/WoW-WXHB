@@ -6,109 +6,97 @@ CrossHotbar_DB = {
       [1] = {
          Mutable = false,
          Name = "Gamepad_Preset",
-         LeftModifier = "PADLTRIGGER",
-         RightModifier = "PADRTRIGGER",
-         SwapModifier = "PADLSHOULDER",
          SwapType = 2,
          WXHBType = 2,
          PadActions = {
-            FACER = {"PAD2", "CLEARTARGETING"},
-            FACEU = {"PAD4", "JUMP"},
-            FACED = {"PAD1", "INTERACTTARGET"},
-            FACEL = {"PAD3" ,"TOGGLEWORLDMAP"},
-            DPADR = {"PADDRIGHT", "GROUPNAVIGATIONRIGHT"},
-            DPADU = {"PADDUP", "GROUPNAVIGATIONUP"},
-            DPADD = {"PADDDOWN", "GROUPNAVIGATIONDOWN"},
-            DPADL = {"PADDLEFT", "GROUPNAVIGATIONLEFT"},
-            STCKL = {"PADLSTICK", "MACRO CH_MACRO_1"},
-            STCKR = {"PADRSTICK", "TOGGLESHEATH", "EXTRAACTIONBUTTON1"},
-            SPADL = {"PADLSHOULDER", "TARGETSCANENEMY", "TARGETPREVIOUSENEMY", "TARGETNEARESTENEMY"},
-            SPADR = {"PADRSHOULDER", "NEXTACTIONPAGE", "TARGETNEARESTENEMY", "TARGETPREVIOUSENEMY"},
-            TRIGL = {"PADLTRIGGER", "NONE"},
-            TRIGR = {"PADRTRIGGER", "NONE"},
-            PPADL = {"PADPADDLE1", "NONE"},
-            PPADR = {"PADPADDLE2", "NONE"}
+            FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="GRPNAVRIGHT",      SWAPTRIGACTION="HOTBARBTN5"},
+            FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="GRPNAVUP",         SWAPTRIGACTION="HOTBARBTN6"},
+            FACED = {BIND="PAD1",         ACTION="INTERACTTARGET",   TRIGACTION="HOTBARBTN3",          SWAPACTION="GRPNAVDOWN",       SWAPTRIGACTION="HOTBARBTN7"},
+            FACEL = {BIND="PAD3" ,        ACTION="TOGGLEWORLDMAP",   TRIGACTION="HOTBARBTN4",          SWAPACTION="GRPNAVLEFT",       SWAPTRIGACTION="HOTBARBTN8"},
+            DPADR = {BIND="PADDRIGHT",    ACTION="GRPNAVRIGHT",      TRIGACTION="HOTBARBTN5",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN9"},
+            DPADU = {BIND="PADDUP",       ACTION="GRPNAVUP",         TRIGACTION="HOTBARBTN6",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN10"},
+            DPADD = {BIND="PADDDOWN",     ACTION="GRPNAVDOWN",       TRIGACTION="HOTBARBTN7",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN11"},
+            DPADL = {BIND="PADDLEFT",     ACTION="GRPNAVLEFT",       TRIGACTION="HOTBARBTN8",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN12"},
+            STCKL = {BIND="PADLSTICK",    ACTION="MACRO CH_MACRO_1", TRIGACTION="MACRO CH_MACRO_1",    SWAPACTION="MACRO CH_MACRO_1", SWAPTRIGACTION="MACRO CH_MACRO_1"},
+            STCKR = {BIND="PADRSTICK",    ACTION="TOGGLESHEATH",     TRIGACTION="EXTRAACTIONBUTTON1",  SWAPACTION="TOGGLESHEATH",     SWAPTRIGACTION="EXTRAACTIONBUTTON1"},
+            SPADL = {BIND="PADLSHOULDER", ACTION="CAMERAPAGE1",      TRIGACTION="TARGETPREVIOUSENEMY", SWAPACTION="CAMERAPAGE2",      SWAPTRIGACTION="TARGETNEARESTENEMY"},
+            SPADR = {BIND="PADRSHOULDER", ACTION="CAMERAPAGE2",      TRIGACTION="TARGETNEARESTENEMY",  SWAPACTION="CAMERAPAGE1",      SWAPTRIGACTION="TARGETPREVIOUSENEMY"},
+            TRIGL = {BIND="PADLTRIGGER",  ACTION="LEFTHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            TRIGR = {BIND="PADRTRIGGER",  ACTION="RIGHTHOTBAR",      TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADL = {BIND="PADPADDLE1",   ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADR = {BIND="PADPADDLE2",   ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"}
          }
       },
       [2] = {
          Mutable = false,
          Name = "Keyboard_Preset",
-         LeftModifier = "CTRL",
-         RightModifier = "SHIFT",
-         SwapModifier = "ALT",
          SwapType = 4,
          WXHBType = 2,
          PadActions = {
-            FACER = {"1", "CLEARTARGETING"},
-            FACEU = {"2", "JUMP"},
-            FACED = {"3", "INTERACTTARGET"},
-            FACEL = {"4" ,"TOGGLEWORLDMAP"},
-            DPADR = {"5", "GROUPNAVIGATIONRIGHT"},
-            DPADU = {"6", "GROUPNAVIGATIONUP"},
-            DPADD = {"7", "GROUPNAVIGATIONDOWN"},
-            DPADL = {"8", "GROUPNAVIGATIONLEFT"},
-            STCKL = {"9", "MACRO CH_MACRO_1"},
-            STCKR = {"0", "TOGGLESHEATH", "EXTRAACTIONBUTTON1"},
-            SPADL = {"-", "TARGETSCANENEMY", "TARGETPREVIOUSENEMY", "TARGETNEARESTENEMY"},
-            SPADR = {"=", "NEXTACTIONPAGE", "TARGETNEARESTENEMY", "TARGETPREVIOUSENEMY"},
-            TRIGL = {"CTRL", "NONE"},
-            TRIGR = {"SHIFT", "NONE"},
-            PPADL = {"ALT", "NONE"},
-            PPADR = {"ALT", "NONE"}
+            FACER = {BIND="1",  ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="GRPNAVRIGHT",      SWAPTRIGACTION="HOTBARBTN5"},
+            FACEU = {BIND="2",  ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="GRPNAVUP",         SWAPTRIGACTION="HOTBARBTN6"},
+            FACED = {BIND="3",  ACTION="INTERACTTARGET",   TRIGACTION="HOTBARBTN3",          SWAPACTION="GRPNAVDOWN",       SWAPTRIGACTION="HOTBARBTN7"},
+            FACEL = {BIND="4" , ACTION="TOGGLEWORLDMAP",   TRIGACTION="HOTBARBTN4",          SWAPACTION="GRPNAVLEFT",       SWAPTRIGACTION="HOTBARBTN8"},
+            DPADR = {BIND="5",  ACTION="GRPNAVRIGHT",      TRIGACTION="HOTBARBTN5",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN9"},
+            DPADU = {BIND="6",  ACTION="GRPNAVUP",         TRIGACTION="HOTBARBTN6",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN10"},
+            DPADD = {BIND="7",  ACTION="GRPNAVDOWN",       TRIGACTION="HOTBARBTN7",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN11"},
+            DPADL = {BIND="8",  ACTION="GRPNAVLEFT",       TRIGACTION="HOTBARBTN8",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN12"},
+            STCKL = {BIND="9",  ACTION="MACRO CH_MACRO_1", TRIGACTION="MACRO CH_MACRO_1",    SWAPACTION="MACRO CH_MACRO_1", SWAPTRIGACTION="MACRO CH_MACRO_1"},
+            STCKR = {BIND="0",  ACTION="TOGGLESHEATH",     TRIGACTION="EXTRAACTIONBUTTON1",  SWAPACTION="TOGGLESHEATH",     SWAPTRIGACTION="EXTRAACTIONBUTTON1"},
+            SPADL = {BIND="-",  ACTION="CAMERAPAGE1",      TRIGACTION="TARGETPREVIOUSENEMY", SWAPACTION="CAMERAPAGE2",      SWAPTRIGACTION="TARGETNEARESTENEMY"},
+            SPADR = {BIND="=",  ACTION="CAMERAPAGE2",      TRIGACTION="TARGETNEARESTENEMY",  SWAPACTION="CAMERAPAGE1",      SWAPTRIGACTION="TARGETPREVIOUSENEMY"},
+            TRIGL = {BIND="[",  ACTION="LEFTHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            TRIGR = {BIND="]",  ACTION="RIGHTHOTBAR",      TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADL = {BIND="\\", ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADR = {BIND="'",  ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"}
          }
       },
       [3] = {
          Mutable = false,
          Name = "SC_Preset",
-         LeftModifier = "CTRL",
-         RightModifier = "SHIFT",
-         SwapModifier = "ALT",
          SwapType = 4,
          WXHBType = 2,
          PadActions = {
-            FACER = {"1", "CLEARTARGETING"},
-            FACEU = {"2", "JUMP"},
-            FACED = {"3", "INTERACTTARGET"},
-            FACEL = {"4" ,"TOGGLEWORLDMAP"},
-            DPADR = {"5", "CLEARTARGETING", "CLEARTARGETING", "GROUPNAVIGATIONRIGHT"},
-            DPADU = {"6", "JUMP", "JUMP", "GROUPNAVIGATIONUP"},
-            DPADD = {"7", "INTERACTTARGET", "INTERACTTARGET","GROUPNAVIGATIONDOWN"},
-            DPADL = {"8", "TOGGLEWORLDMAP", "TOGGLEWORLDMAP","GROUPNAVIGATIONLEFT"},
-            STCKL = {"9", "MACRO CH_MACRO_1"},
-            STCKR = {"0", "TOGGLESHEATH", "EXTRAACTIONBUTTON1"},
-            SPADL = {"-", "TARGETSCANENEMY", "TARGETPREVIOUSENEMY", "TARGETLASTHOSTILE"},
-            SPADR = {"=", "NEXTACTIONPAGE", "TARGETNEARESTENEMY", "ASSISTTARGET"},
-            TRIGL = {"CTRL", "NONE"},
-            TRIGR = {"SHIFT", "NONE"},
-            PPADL = {"ALT", "NONE"},
-            PPADR = {"ALT", "NONE"}
+            FACER = {BIND="1",  ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN5"},
+            FACEU = {BIND="2",  ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN6"},
+            FACED = {BIND="3",  ACTION="INTERACTTARGET",   TRIGACTION="HOTBARBTN3",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN7"},
+            FACEL = {BIND="4" , ACTION="TOGGLEWORLDMAP",   TRIGACTION="HOTBARBTN4",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN8"},
+            DPADR = {BIND="5",  ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN9",          SWAPACTION="GRPNAVRIGHT",      SWAPTRIGACTION="HOTBARBTN9"},
+            DPADU = {BIND="6",  ACTION="JUMP",             TRIGACTION="HOTBARBTN10",         SWAPACTION="GRPNAVUP",         SWAPTRIGACTION="HOTBARBTN10"},
+            DPADD = {BIND="7",  ACTION="INTERACTTARGET",   TRIGACTION="HOTBARBTN11",         SWAPACTION="GRPNAVDOWN",       SWAPTRIGACTION="HOTBARBTN11"},
+            DPADL = {BIND="8",  ACTION="TOGGLEWORLDMAP",   TRIGACTION="HOTBARBTN12",         SWAPACTION="GRPNAVLEFT",       SWAPTRIGACTION="HOTBARBTN12"},
+            STCKL = {BIND="9",  ACTION="MACRO CH_MACRO_1", TRIGACTION="MACRO CH_MACRO_1",    SWAPACTION="MACRO CH_MACRO_1", SWAPTRIGACTION="MACRO CH_MACRO_1"},
+            STCKR = {BIND="0",  ACTION="TOGGLESHEATH",     TRIGACTION="EXTRAACTIONBUTTON1",  SWAPACTION="TOGGLESHEATH",     SWAPTRIGACTION="EXTRAACTIONBUTTON1"},
+            SPADL = {BIND="-",  ACTION="CAMERAPAGE1",      TRIGACTION="TARGETPREVIOUSENEMY", SWAPACTION="CAMERAPAGE2",      SWAPTRIGACTION="TARGETNEARESTENEMY"},
+            SPADR = {BIND="=",  ACTION="CAMERAPAGE2",      TRIGACTION="TARGETNEARESTENEMY",  SWAPACTION="CAMERAPAGE1",      SWAPTRIGACTION="TARGETPREVIOUSENEMY"},
+            TRIGL = {BIND="[",  ACTION="LEFTHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            TRIGR = {BIND="]",  ACTION="RIGHTHOTBAR",      TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADL = {BIND="\\", ACTION="SWAPHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADR = {BIND="'",  ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"}
          }
       },
       [4] = {
          Mutable = true,
          Name = "Custom",
-         LeftModifier = "PADLTRIGGER",
-         RightModifier = "PADRTRIGGER",
-         SwapModifier = "PADLSHOULDER",
          SwapType = 2,
          WXHBType = 2,
          PadActions = {
-            FACER = {"PAD2", "CLEARTARGETING"},
-            FACEU = {"PAD4", "JUMP"},
-            FACED = {"PAD1", "INTERACTTARGET"},
-            FACEL = {"PAD3" ,"TOGGLEWORLDMAP"},
-            DPADR = {"PADDRIGHT", "GROUPNAVIGATIONRIGHT"},
-            DPADU = {"PADDUP", "GROUPNAVIGATIONUP"},
-            DPADD = {"PADDDOWN", "GROUPNAVIGATIONDOWN"},
-            DPADL = {"PADDLEFT", "GROUPNAVIGATIONLEFT"},
-            STCKL = {"PADLSTICK", "MACRO CH_MACRO_1"},
-            STCKR = {"PADRSTICK", "TOGGLESHEATH", "EXTRAACTIONBUTTON1"},
-            SPADL = {"PADLSHOULDER", "TARGETSCANENEMY", "TARGETPREVIOUSENEMY", "TARGETNEARESTENEMY"},
-            SPADR = {"PADRSHOULDER", "NEXTACTIONPAGE", "TARGETNEARESTENEMY", "TARGETPREVIOUSENEMY"},
-            TRIGL = {"PADLTRIGGER", "NONE"},
-            TRIGR = {"PADRTRIGGER", "NONE"},
-            PPADL = {"PADPADDLE1", "NONE"},
-            PPADR = {"PADPADDLE2", "NONE"}
+            FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="GRPNAVRIGHT",      SWAPTRIGACTION="HOTBARBTN5"},
+            FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="GRPNAVUP",         SWAPTRIGACTION="HOTBARBTN6"},
+            FACED = {BIND="PAD1",         ACTION="INTERACTTARGET",   TRIGACTION="HOTBARBTN3",          SWAPACTION="GRPNAVDOWN",       SWAPTRIGACTION="HOTBARBTN7"},
+            FACEL = {BIND="PAD3" ,        ACTION="TOGGLEWORLDMAP",   TRIGACTION="HOTBARBTN4",          SWAPACTION="GRPNAVLEFT",       SWAPTRIGACTION="HOTBARBTN8"},
+            DPADR = {BIND="PADDRIGHT",    ACTION="GRPNAVRIGHT",      TRIGACTION="HOTBARBTN5",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN5"},
+            DPADU = {BIND="PADDUP",       ACTION="GRPNAVUP",         TRIGACTION="HOTBARBTN6",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN6"},
+            DPADD = {BIND="PADDDOWN",     ACTION="GRPNAVDOWN",       TRIGACTION="HOTBARBTN7",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN7"},
+            DPADL = {BIND="PADDLEFT",     ACTION="GRPNAVLEFT",       TRIGACTION="HOTBARBTN8",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN8"},
+            STCKL = {BIND="PADLSTICK",    ACTION="MACRO CH_MACRO_1", TRIGACTION="MACRO CH_MACRO_1",    SWAPACTION="MACRO CH_MACRO_1", SWAPTRIGACTION="MACRO CH_MACRO_1"},
+            STCKR = {BIND="PADRSTICK",    ACTION="TOGGLESHEATH",     TRIGACTION="EXTRAACTIONBUTTON1",  SWAPACTION="TOGGLESHEATH",     SWAPTRIGACTION="EXTRAACTIONBUTTON1"},
+            SPADL = {BIND="PADLSHOULDER", ACTION="SWAPHOTBAR",       TRIGACTION="TARGETPREVIOUSENEMY", SWAPACTION="CAMERAPAGE2",      SWAPTRIGACTION="TARGETNEARESTENEMY"},
+            SPADR = {BIND="PADRSHOULDER", ACTION="CAMERAPAGE2",      TRIGACTION="TARGETNEARESTENEMY",  SWAPACTION="CAMERAPAGE1",      SWAPTRIGACTION="TARGETPREVIOUSENEMY"},
+            TRIGL = {BIND="PADLTRIGGER",  ACTION="LEFTHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            TRIGR = {BIND="PADRTRIGGER",  ACTION="RIGHTHOTBAR",      TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADL = {BIND="PADPADDLE1",   ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADR = {BIND="PADPADDLE2",   ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"}
          }
       }
    }
@@ -117,28 +105,25 @@ CrossHotbar_DB = {
 addon.Config = {
    Mutable = true,
    Name = "Custom",
-   LeftModifier = "PADLTRIGGER",
-   RightModifier = "PADRTRIGGER",
-   SwapModifier = "PADLSHOULDER",
    SwapType = 2,
    WXHBType = 2,
    PadActions = {
-         FACER = {"PAD2", "CLEARTARGETING"},
-         FACEU = {"PAD4", "JUMP"},
-         FACED = {"PAD1", "INTERACTTARGET"},
-         FACEL = {"PAD3" ,"TOGGLEWORLDMAP"},
-         DPADR = {"PADDRIGHT", "GROUPNAVIGATIONRIGHT"},
-         DPADU = {"PADDUP", "GROUPNAVIGATIONUP"},
-         DPADD = {"PADDDOWN", "GROUPNAVIGATIONDOWN"},
-         DPADL = {"PADDLEFT", "GROUPNAVIGATIONLEFT"},
-         STCKL = {"PADLSTICK", "MACRO CH_MACRO_1"},
-         STCKR = {"PADRSTICK", "TOGGLESHEATH", "EXTRAACTIONBUTTON1"},
-         SPADL = {"PADLSHOULDER", "TARGETSCANENEMY", "TARGETPREVIOUSENEMY", "TARGETNEARESTENEMY"},
-         SPADR = {"PADRSHOULDER", "NEXTACTIONPAGE", "TARGETNEARESTENEMY", "TARGETPREVIOUSENEMY"},
-         TRIGL = {"PADLTRIGGER", "NONE"},
-         TRIGR = {"PADRTRIGGER", "NONE"},
-         PPADL = {"PADPADDLE1", "NONE"},
-         PPADR = {"PADPADDLE2", "NONE"}
+      FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="GRPNAVRIGHT",      SWAPTRIGACTION="HOTBARBTN5"},
+      FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="GRPNAVUP",         SWAPTRIGACTION="HOTBARBTN6"},
+      FACED = {BIND="PAD1",         ACTION="INTERACTTARGET",   TRIGACTION="HOTBARBTN3",          SWAPACTION="GRPNAVDOWN",       SWAPTRIGACTION="HOTBARBTN7"},
+      FACEL = {BIND="PAD3" ,        ACTION="TOGGLEWORLDMAP",   TRIGACTION="HOTBARBTN4",          SWAPACTION="GRPNAVLEFT",       SWAPTRIGACTION="HOTBARBTN8"},
+      DPADR = {BIND="PADDRIGHT",    ACTION="GRPNAVRIGHT",      TRIGACTION="HOTBARBTN5",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN9"},
+      DPADU = {BIND="PADDUP",       ACTION="GRPNAVUP",         TRIGACTION="HOTBARBTN6",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN10"},
+      DPADD = {BIND="PADDDOWN",     ACTION="GRPNAVDOWN",       TRIGACTION="HOTBARBTN7",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN11"},
+      DPADL = {BIND="PADDLEFT",     ACTION="GRPNAVLEFT",       TRIGACTION="HOTBARBTN8",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN12"},
+      STCKL = {BIND="PADLSTICK",    ACTION="MACRO CH_MACRO_1", TRIGACTION="MACRO CH_MACRO_1",    SWAPACTION="MACRO CH_MACRO_1", SWAPTRIGACTION="MACRO CH_MACRO_1"},
+      STCKR = {BIND="PADRSTICK",    ACTION="TOGGLESHEATH",     TRIGACTION="EXTRAACTIONBUTTON1",  SWAPACTION="TOGGLESHEATH",     SWAPTRIGACTION="EXTRAACTIONBUTTON1"},
+      SPADL = {BIND="PADLSHOULDER", ACTION="CAMERAPAGE1",      TRIGACTION="TARGETPREVIOUSENEMY", SWAPACTION="CAMERAPAGE2",      SWAPTRIGACTION="TARGETNEARESTENEMY"},
+      SPADR = {BIND="PADRSHOULDER", ACTION="CAMERAPAGE2",      TRIGACTION="TARGETNEARESTENEMY",  SWAPACTION="CAMERAPAGE1",      SWAPTRIGACTION="TARGETPREVIOUSENEMY"},
+      TRIGL = {BIND="PADLTRIGGER",  ACTION="LEFTHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+      TRIGR = {BIND="PADRTRIGGER",  ACTION="RIGHTHOTBAR",      TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+      PPADL = {BIND="PADPADDLE1",   ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+      PPADR = {BIND="PADPADDLE2",   ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"}
    }
 }
 
@@ -167,11 +152,11 @@ end
 -- based on SwapType.
 function addon.Config:GetKeyBindings()
    local bindings = {}
-   local facebuttons = {self.PadActions.FACER[1], self.PadActions.FACEU[1],
-                        self.PadActions.FACED[1], self.PadActions.FACEL[1]}
-   local dpadbuttons = {self.PadActions.DPADR[1], self.PadActions.DPADU[1],
-                        self.PadActions.DPADD[1], self.PadActions.DPADL[1]}
-   
+   local facebuttons = {self.PadActions.FACER.BIND, self.PadActions.FACEU.BIND,
+                        self.PadActions.FACED.BIND, self.PadActions.FACEL.BIND}
+   local dpadbuttons = {self.PadActions.DPADR.BIND, self.PadActions.DPADU.BIND,
+                        self.PadActions.DPADD.BIND, self.PadActions.DPADL.BIND}
+
    for i,binding in ipairs(facebuttons) do
       table.insert(bindings, {binding, ""})
    end
@@ -264,35 +249,17 @@ function addon.Config:StorePreset(to, from)
       if from.Mutable then
          to.Name = from.Name
       end
-      to.LeftModifier = from.LeftModifier
-      to.RightModifier = from.RightModifier
-      to.SwapModifier = from.SwapModifier
       to.SwapType = from.SwapType
       to.WXHBType = from.WXHBType
-      for button, bindings in pairs(from.PadActions) do
-         to.PadActions[button] = {unpack(bindings)} 
+      for button, attributes in pairs(from.PadActions) do
+         for key, value in pairs(attributes) do
+            to.PadActions[button][key] = value 
+         end
       end
    end
 end
 
 function addon.Config:ProcessConfig(config)
-   if config.Mutable then
-      local a = config.PadActions
-      local leftfound, rightfound, swapfound = false,false,false
-      for i, item in ipairs({a.TRIGL[1], a.TRIGR[1], a.SPADL[1], a.SPADR[1]}) do
-         if item == config.LeftModifier then leftfound = true end
-         if item == config.RightModifier then rightfound = true end
-         if item == config.SwapModifier then swapfound = true end
-      end
-      for i, item in ipairs({a.STCKL[1], a.STCKR[1], a.PPADL[1], a.PPADR[1]}) do
-         if item == config.LeftModifier then leftfound = true end
-         if item == config.RightModifier then rightfound = true end
-         if item == config.SwapModifier then swapfound = true end
-      end
-      if leftfound == false then config.LeftModifier = nil end
-      if rightfound == false then config.RightModifier = nil end
-      if swapfound == false then config.SwapModifier = nil end
-   end
 end
 
 local config = addon.Config

@@ -1,60 +1,49 @@
 local ADDON, addon = ...
 local config = addon.Config
 
-CrossHotbarMixin = {}
+local ActionList = {
+   ["HOTBARBTN1"] = true,
+   ["HOTBARBTN2"] = true,
+   ["HOTBARBTN3"] = true,
+   ["HOTBARBTN4"] = true,
+   ["HOTBARBTN5"] = true,
+   ["HOTBARBTN6"] = true,
+   ["HOTBARBTN7"] = true,
+   ["HOTBARBTN8"] = true,
+   ["HOTBARBTN9"] = true,
+   ["HOTBARBTN10"] = true,
+   ["HOTBARBTN11"] = true,
+   ["HOTBARBTN12"] = true
+}
+
+CrossHotbarMixin = {
+}
 
 function CrossHotbarMixin:SetupCrosshotbar()
    self.LHotbar = { LHotbar1, LHotbar2, LHotbar3 }
    self.RHotbar = { RHotbar1, RHotbar2, RHotbar3 }
    self.MHotbar = { LRHotbar1, RLHotbar1 }
    
-   UnregisterStateDriver(LHotbar1.ActionBar,'visibility')
-   UnregisterStateDriver(LHotbar2.ActionBar,'visibility')
-   UnregisterStateDriver(LHotbar3.ActionBar,'visibility')
-   UnregisterStateDriver(RHotbar1.ActionBar,'visibility')
-   UnregisterStateDriver(RHotbar2.ActionBar,'visibility')
-   UnregisterStateDriver(RHotbar3.ActionBar,'visibility')
+   SecureHandlerSetFrameRef(self, 'Hotbar1', LHotbar1)
+   SecureHandlerSetFrameRef(self, 'Hotbar2', LHotbar2)
+   SecureHandlerSetFrameRef(self, 'Hotbar3', LHotbar3)
+   SecureHandlerSetFrameRef(self, 'Hotbar4', RHotbar1)
+   SecureHandlerSetFrameRef(self, 'Hotbar5', RHotbar2)
+   SecureHandlerSetFrameRef(self, 'Hotbar6', RHotbar3)
+   SecureHandlerSetFrameRef(self, 'Hotbar7', LRHotbar1)
+   SecureHandlerSetFrameRef(self, 'Hotbar8', RLHotbar1)
    
-   RegisterStateDriver(LHotbar1.ActionBar, "visibility", "[petbattle]hide;[mod:shift,mod:ctrl]hide;[mod:ctrl]show;hide")
-   RegisterStateDriver(LHotbar2.ActionBar, "visibility", "[petbattle]hide;[mod:shift,mod:ctrl]hide;[mod:shift]hide;[mod:ctrl]hide;show")
-   RegisterStateDriver(LHotbar3.ActionBar, "visibility", "[petbattle]hide;[mod:shift,mod:ctrl]hide;[mod:ctrl]hide;[mod:shift]show;hide")
-   RegisterStateDriver(RHotbar1.ActionBar, "visibility", "[petbattle]hide;[mod:shift,mod:ctrl]hide;[mod:shift]show;hide")
-   RegisterStateDriver(RHotbar2.ActionBar, "visibility", "[petbattle]hide;[mod:shift,mod:ctrl]hide;[mod:ctrl]hide;[mod:shift]hide;show")
-   RegisterStateDriver(RHotbar3.ActionBar, "visibility", "[petbattle]hide;[mod:shift,mod:ctrl]hide;[mod:shift]hide;[mod:ctrl]show;hide")
-   RegisterStateDriver(LRHotbar1.ActionBar, "visibility", "[petbattle]hide;[mod:shift,mod:ctrl]show;hide")
-   RegisterStateDriver(RLHotbar1.ActionBar, "visibility", "[petbattle]hide;[mod:shift,mod:ctrl]show;hide") 
-   
-   UnregisterStateDriver(LHotbar1,'page')
-   UnregisterStateDriver(LHotbar2,'page')
-   UnregisterStateDriver(LHotbar3,'page')
-   UnregisterStateDriver(RHotbar1,'page')
-   UnregisterStateDriver(RHotbar2,'page')
-   UnregisterStateDriver(RHotbar3,'page')
-   
-   RegisterStateDriver(LHotbar1, 'page', "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;1")
-   RegisterStateDriver(LHotbar2, 'page', "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;1")
-   RegisterStateDriver(LHotbar3, 'page', "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;1")
-   RegisterStateDriver(RHotbar1, 'page', "6")
-   RegisterStateDriver(RHotbar2, 'page', "6")
-   RegisterStateDriver(RHotbar3, 'page', "6")
-   
-   UnregisterStateDriver(LRHotbar1,'mod')
-   UnregisterStateDriver(RLHotbar1,'mod')
-   
-   RegisterStateDriver(LRHotbar1, 'mod', "[mod:shift,mod:ctrl]2;[mod:shift]6; [mod:ctrl]1;5")
-   RegisterStateDriver(RLHotbar1, 'mod', "[mod:shift,mod:ctrl]2;[mod:shift]6; [mod:ctrl]1;5")
-
    if GetCVar('GamePadEnable') == "1" then
       print("Setting GamePad CVars")
       SetCVar('GamePadEnable', 1);
-      SetCVar('GamePadEmulateShift', 'PADRTRIGGER');
-      SetCVar('GamePadEmulateCtrl', 'PADLTRIGGER');
-      SetCVar('GamePadEmulateAlt', 'PADLSHOULDER');
+      SetCVar('GamePadEmulateShift', 'NONE');
+      SetCVar('GamePadEmulateCtrl', 'NONE');
+      SetCVar('GamePadEmulateAlt', 'NONE');
       SetCVar('GamePadCursorLeftClick', 'PAD6');
       SetCVar('GamePadCursorRightClick', 'PADBACK');
       SetCVar('GamePadCameraYawSpeed', 3);
       SetCVar('GamePadCameraPitchSpeed', 3);
-      SetCVar('GamePadSingleActiveID', 5)
+      SetCVar('GamePadSingleActiveID', 1)
       --[[
          for _, i in ipairs(C_GamePad.GetAllDeviceIDs()) do
    
@@ -71,18 +60,42 @@ function CrossHotbarMixin:SetupCrosshotbar()
 end
 
 function CrossHotbarMixin:ApplyConfig()
-   self:OverrideKeyBindings(LHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", config:GetKeyBindingsLeft())
-   self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix, config:GetKeyBindingsRight())
-   self:OverrideKeyBindings(LRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", LRHotbar1.BtnPrefix, config:GetKeyBindingsRightLeft())
-   self:OverrideKeyBindings(RLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", RLHotbar1.BtnPrefix, config:GetKeyBindingsRightLeft())
+   local bindings = {}
+
+   for action,value in pairs(ActionList) do
+      bindings[action] = {"", "", ""}
+   end
+   
+   for button, attributes in pairs(config.PadActions) do
+      if ActionList[attributes.TRIGACTION] then
+         bindings[attributes.TRIGACTION][1] = attributes.BIND
+      end
+      if ActionList[attributes.SWAPTRIGACTION] then
+         bindings[attributes.SWAPTRIGACTION][2] = attributes.BIND
+      end
+   end
+   
+   bindings["HOTBARBTN9"][3] = bindings["HOTBARBTN1"][1]
+   bindings["HOTBARBTN10"][3] = bindings["HOTBARBTN2"][1]
+   bindings["HOTBARBTN11"][3] = bindings["HOTBARBTN3"][1]
+   bindings["HOTBARBTN12"][3] = bindings["HOTBARBTN4"][1]
+   
+   self:OverrideKeyBindings(LHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", bindings)
+   self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix, bindings)
+   self:OverrideKeyBindings(LRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", LRHotbar1.BtnPrefix, bindings)
+   self:OverrideKeyBindings(RLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", RLHotbar1.BtnPrefix, bindings)
 end
 
 function CrossHotbarMixin:OnLoad()
    self:SetScale(0.90)
-   --self:RegisterForDrag("LeftButton");
+   self:AddModHandler()
+   self:AddSwapHandler()
+   self:AddNextPageHandler()
    self:RegisterEvent("PLAYER_ENTERING_WORLD")
    self:HideHudElements()
-   --self:HideBlizzard()
+   addon.Crosshotbar = self
+   addon.CreateGamePadButtons(self)
+   addon.CreateGroupNavigator(self)
 end
 
 function CrossHotbarMixin:OnEvent(event, ...)
@@ -90,34 +103,91 @@ function CrossHotbarMixin:OnEvent(event, ...)
       self:SetupCrosshotbar()
       self:ApplyConfig()
       self:UpdateCrosshotbar()
+      self:Execute([[
+         self:SetAttribute("triggerstate", 4)
+         self:SetAttribute("state-trigger", 4)
+      ]])
    end
 end
 
+function CrossHotbarMixin:AddModHandler()
+   self:SetAttribute('_onstate-trigger', [[
+      local expanded = self:GetAttribute("expanded")
+      if expanded == 1 and newstate ~= 6 and newstate ~= 3 then
+         expanded = 0
+         self:SetAttribute("expanded", 0)
+      end
+      
+      if expanded == 2 and newstate ~= 7 and newstate ~= 5 then
+         expanded = 0
+         self:SetAttribute("expanded", 0)
+      end
+
+      local state = 0
+      if newstate == 6 or newstate == 2 then state = 1 end
+      if newstate == 7 or newstate == 1 then state = 2 end
+      if newstate == 3 then state = 3 end
+      if newstate == 5 then state = 4 end
+
+      for i=1,8 do
+         local hotbar = self:GetFrameRef('Hotbar'..i)
+         hotbar:SetAttribute("state-hotbar-expand", expanded)
+         hotbar:SetAttribute("state-hotbar-visibility", state)
+      end
+  ]])
+end
+
+function CrossHotbarMixin:AddSwapHandler()
+   self:SetAttribute('_onstate-swap', [[
+      local expanded = self:GetAttribute("expanded")
+      local triggerstate = self:GetAttribute("triggerstate")
+
+      if expanded == 0 then
+         local state = 0
+         if triggerstate == 6 or triggerstate == 2 then state = 1 end
+         if triggerstate == 7 or triggerstate == 1 then state = 2 end
+         if triggerstate == 3 then state = 3 end
+         if triggerstate == 5 then state = 4 end
+
+         for i=1,8 do
+            local hotbar = self:GetFrameRef('Hotbar'..i)
+            hotbar:SetAttribute("swap", newstate)
+            hotbar:SetAttribute("state-hotbar-visibility", state)
+         end
+      end
+
+  ]])
+end
+
+function CrossHotbarMixin:AddNextPageHandler()
+   self:SetAttribute('_onstate-nextpage', [[
+      for i=1,8 do
+         local hotbar = self:GetFrameRef('Hotbar'..i)
+         hotbar:SetAttribute("state-hotbar-nextpage", newstate)
+      end
+  ]])
+end
+
 function CrossHotbarMixin:OverrideKeyBindings(ActBar, ActionPrefix, BtnPrefix, ConfigBindings)
-   local idx = 1
+   --local idx = 1
    local containers = { ActBar:GetChildren() }
    for i, container in ipairs(containers) do
       local buttons = { container:GetChildren() }
       for j, button in ipairs(buttons) do            
          if button ~= nil and button:GetName() ~= nil then
             if string.find(button:GetName(), BtnPrefix) then
+               local index = button:GetID();
                local ActionName = string.gsub(button:GetName(), BtnPrefix, ActionPrefix)
                --local key1, key2 = GetBindingKey(ActionName)
-               local key1, key2 = unpack(ConfigBindings[idx])
-               --print(key1 .. " " .. key2 .. " " .. ActionName)
-               if key1 and key1 ~= "" then
-                  SetOverrideBindingClick(button, true, key1, button:GetName(), "LeftButton")
-               end
-               if key2 and key2 ~= "" then
-                  SetOverrideBindingClick(button, true, key2, button:GetName(), "LeftButton")
-               end
+               local key1, key2, key3 = unpack(ConfigBindings["HOTBARBTN"..index])
                
                button:SetAttribute('over_key1', key1)
                button:SetAttribute('over_key2', key2)
-               --      print(ActionName, button:GetName(), key1, key2)
+               button:SetAttribute('over_key3', key3)
+
                button.HotKey:SetText(RANGE_INDICATOR);
                button.HotKey:Show();
-               idx = idx + 1
+               --idx = idx + 1
             end
          end
       end

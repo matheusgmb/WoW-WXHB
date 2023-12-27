@@ -1,13 +1,11 @@
 local ADDON, addon = ...
 local config = addon.Config
 
-addon.Crosshotbar = Crosshotbar
-
 local ActionList = {
-   ["GROUPNAVIGATIONUP"] = true,
-   ["GROUPNAVIGATIONDOWN"] = true,
-   ["GROUPNAVIGATIONLEFT"] = true,
-   ["GROUPNAVIGATIONRIGHT"] = true,
+   ["GRPNAVUP"] = true,
+   ["GRPNAVDOWN"] = true,
+   ["GRPNAVLEFT"] = true,
+   ["GRPNAVRIGHT"] = true,
    ["CLEARTARGETING"] = true
 }
 
@@ -28,12 +26,10 @@ end
 
 function GroupNavigatorMixin:OnEvent(event, ...)
    if event == "GROUP_JOINED" then
-      self:updateRoster()                
-      --self:SetOverrideBindings()
+      self:updateRoster()
    elseif event == "GROUP_LEFT" then
       self:updateRoster()
       self.SoftTargetFrame:SetAlpha(0)
-      --self:UnsetOverrideBindings()
    elseif event == 'GROUP_ROSTER_UPDATE' then
       self:updateRoster()               
    elseif event == 'PLAYER_ENTERING_WORLD' then
@@ -63,69 +59,86 @@ function GroupNavigatorMixin:OnEvent(event, ...)
    end
 end
 
-function GroupNavigatorMixin:SetOverrideNavBinding(binding, action)
-   if action ~= nil then
-      if action == "GROUPNAVIGATIONUP" then
-         SetOverrideBindingClick(self, true, binding, self:GetName(), "Button4")
-         table.insert(self.ActiveBindings, {binding, "Button4"})
+function GroupNavigatorMixin:AddSwapHandler()
+   self:SetAttribute("GRPNAVUP", "")
+   self:SetAttribute("GRPNAVDOWN", "")
+   self:SetAttribute("GRPNAVLEFT", "")
+   self:SetAttribute("GRPNAVRIGHT", "")
+   self:SetAttribute("CLEARTARGETING", "")
+   self:SetAttribute("SWAPGRPNAVUP", "")
+   self:SetAttribute("SWAPGRPNAVDOWN", "")
+   self:SetAttribute("SWAPGRPNAVLEFT", "")
+   self:SetAttribute("SWAPGRPNAVRIGHT", "")
+   self:SetAttribute("SWAPCLEARTARGETING", "")
+
+   local SetActionBindings = [[
+      self:ClearBindings()
+      local binding = self:GetAttribute("GRPNAVUP")
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button4") end
+      binding = self:GetAttribute("GRPNAVDOWN")                  
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button5") end
+      binding = self:GetAttribute("GRPNAVLEFT")                  
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "LeftButton") end
+      binding = self:GetAttribute("GRPNAVRIGHT")
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "RightButton") end
+      binding = self:GetAttribute("CLEARTARGETING")                  
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "MiddleButton") end
+   ]]
+   
+   local SetSwapActionBindings = [[
+      local binding = self:GetAttribute("SWAPGRPNAVUP")
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button4") end
+      binding = self:GetAttribute("SWAPGRPNAVDOWN")                  
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button5") end
+      binding = self:GetAttribute("SWAPGRPNAVLEFT")                  
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "LeftButton") end
+      binding = self:GetAttribute("SWAPGRPNAVRIGHT")
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "RightButton") end
+      binding = self:GetAttribute("SWAPCLEARTARGETING")
+      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "MiddleButton") end
+   ]]
+
+   self:SetAttribute("SetActionBindings",
+                     SetActionBindings)
+   self:SetAttribute("SetSwapActionBindings",
+                     SetSwapActionBindings)
+   
+   self:SetAttribute("_onstate-swap", [[
+      self:SetAttribute("swap", newstate)
+      local trigger = self:GetAttribute("trigger")
+      if trigger == 4 then 
+         if newstate == 1 then
+            self:RunAttribute("SetSwapActionBindings")
+         else
+            self:RunAttribute("SetActionBindings")
+         end
       end
-      if action == "GROUPNAVIGATIONDOWN" then
-         SetOverrideBindingClick(self, true, binding, self:GetName(), "Button5")
-         table.insert(self.ActiveBindings, {binding, "Button5"})
+   ]])
+   
+   self:SetAttribute("_onstate-trigger", [[
+      self:SetAttribute("trigger", newstate)
+      local swap = self:GetAttribute("swap")
+      if newstate == 4 then 
+         if swap == 1 then
+            self:RunAttribute("SetSwapActionBindings")
+         else
+            self:RunAttribute("SetActionBindings")
+         end
       end
-      if action == "GROUPNAVIGATIONLEFT" then
-         SetOverrideBindingClick(self, true, binding, self:GetName(), "LeftButton")
-         table.insert(self.ActiveBindings, {binding, "LeftButton"})
-      end
-      if action == "GROUPNAVIGATIONRIGHT" then
-         SetOverrideBindingClick(self, true, binding, self:GetName(), "RightButton")
-         table.insert(self.ActiveBindings, {binding, "RightButton"})
-      end
-      if action == "CLEARTARGETING" then
-         SetOverrideBindingClick(self, true, binding, self:GetName(), "MiddleButton")
-         table.insert(self.ActiveBindings, {binding, "MiddleButton"})
-      end
-   end
+   ]])
 end
 
 function GroupNavigatorMixin:ApplyConfig()
    self.ActiveBindings = {}
-   for button, actions in pairs(config.PadActions) do
-      local action = nil
-      local binding, defaultaction, leftrightaction, swapaction = unpack(actions)
-      
-      if ActionList[defaultaction] then action = defaultaction end
-         
-      self:SetOverrideNavBinding(binding, action)
-          
-      if ActionList[leftrightaction] then action = leftrightaction end
-      
-      self:SetOverrideNavBinding("CTRL-" .. binding, action)
-      self:SetOverrideNavBinding("SHIFT-" .. binding, action)
-      self:SetOverrideNavBinding("CRTL-SHIFT-" .. binding, action)
-      
-      if ActionList[swapaction] then action = swapaction end
-      
-      self:SetOverrideNavBinding("ALT-" .. binding, action)
-      self:SetOverrideNavBinding("ALT-CTRL-" .. binding, action)
-      self:SetOverrideNavBinding("ALT-SHIFT-" .. binding, action)
-      self:SetOverrideNavBinding("ALT-CRTL-SHIFT-" .. binding, action)
-      
-      local swapbindings = addon.Config:GetSwapBinding(button)
-      
-      if swapbindings then
-         self:SetOverrideNavBinding("ALT-" .. swapbindings[1], action)
-         self:SetOverrideNavBinding("ALT-CTRL-" .. swapbindings[1], action)
-         self:SetOverrideNavBinding("ALT-SHIFT-" ..swapbindings[1], action)
-         self:SetOverrideNavBinding("ALT-CRTL-SHIFT-" .. swapbindings[1], action)
+   for button, attributes in pairs(config.PadActions) do
+      if ActionList[ attributes.ACTION ] then
+         self:SetAttribute(attributes.ACTION, attributes.BIND)
+      end
+      if ActionList[ attributes.SWAPACTION ] then
+         self:SetAttribute("Swap"..attributes.SWAPACTION, attributes.BIND)
       end
    end
-end
-
-function GroupNavigatorMixin:UnsetOverrideBindings()
-   for binding, button in pairs(selfActiveBindings) do
-      SetOverrideBinding(self, true, binding, nil)
-   end
+   self:Execute([[ self:RunAttribute("SetActionBindings") ]])
 end
 
 function GroupNavigatorMixin:updateRoster() 
@@ -488,41 +501,35 @@ function GroupNavigatorMixin:WrapOnClickFlush()
    ]])
 end
 
-local GroupNavigator = {
-   GroupNavigatorFrame = nil
-}
+local CreateGroupNavigator = function(parent)
+   local GroupNavigator = CreateFrame("Button", ADDON .. "GroupNavigator", parent,
+                                      "SecureActionButtonTemplate, SecureHandlerStateTemplate")
 
-local GroupNavigatorFrame = CreateFrame("Button", ADDON .. "GroupNavigatorFrame",
-                                        UIParent, "SecureActionButtonTemplate")
+   Mixin(GroupNavigator, GroupNavigatorMixin)
 
-Mixin(GroupNavigatorFrame, GroupNavigatorMixin)
+   GroupNavigator:SetFrameStrata("BACKGROUND")
+   GroupNavigator:SetPoint("TOP", parent:GetName(), "LEFT", 0, 0)
+   GroupNavigator:Hide()
 
---[[
-   SoftTargetFrame = CreateFrame("Frame", ADDON .. "GroupNavigatorFrame",
-   UIParent, "SecureActionButtonTemplate")
+   GroupNavigator:SetAttribute("player_unit", "1")
+   GroupNavigator:SetAttribute("player_group", "1")
+   GroupNavigator:SetAttribute("*type1", "target")
+   GroupNavigator:SetAttribute("*type2", "target")
+   GroupNavigator:SetAttribute("*type3", "macro")
+   GroupNavigator:SetAttribute("*type4", "target")
+   GroupNavigator:SetAttribute("*type5", "target")
+   GroupNavigator:SetAttribute("unit", "player")
+   GroupNavigator:SetAttribute("group_change", "true")
+   GroupNavigator:SetAttribute("group_units", "[player party1 party2 party3 party4]")
+   GroupNavigator:SetAttribute("macrotext3", "/cleartarget\n/stopspelltarget\n")
+   GroupNavigator:SetAttribute("trigger", 4)
+   GroupNavigator:SetAttribute("swap", 0)
+   GroupNavigator:AddSwapHandler()
 
-   SoftTargetFrame.SetFrameStrata("LOW")
-   SoftTargetFrame.EnableMouse(false)
---]]
+   GroupNavigator:HookScript("OnEvent", GroupNavigator.OnEvent)
+   GroupNavigator:OnLoad()
 
-GroupNavigatorFrame:SetFrameStrata("BACKGROUND")
-GroupNavigatorFrame:SetPoint("TOPLEFT", "UIParent", "TOPLEFT", 0, 0)
-GroupNavigatorFrame:Hide()
+   addon.GroupNavigator = GroupNavigator
+end
 
-GroupNavigatorFrame:SetAttribute("player_unit", "1")
-GroupNavigatorFrame:SetAttribute("player_group", "1")
-GroupNavigatorFrame:SetAttribute("*type1", "target")
-GroupNavigatorFrame:SetAttribute("*type2", "target")
-GroupNavigatorFrame:SetAttribute("*type3", "macro")
-GroupNavigatorFrame:SetAttribute("*type4", "target")
-GroupNavigatorFrame:SetAttribute("*type5", "target")
-GroupNavigatorFrame:SetAttribute("unit", "player")
-GroupNavigatorFrame:SetAttribute("group_change", "true")
-GroupNavigatorFrame:SetAttribute("group_units", "[player party1 party2 party3 party4]")
-GroupNavigatorFrame:SetAttribute("macrotext3", "/cleartarget\n/stopspelltarget\n")
-
-GroupNavigatorFrame:HookScript("OnEvent", GroupNavigatorFrame.OnEvent)
-GroupNavigatorFrame:OnLoad()
-
-addon.GroupNavigator = GroupNavigator
-
+addon.CreateGroupNavigator = CreateGroupNavigator

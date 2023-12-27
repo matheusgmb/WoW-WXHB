@@ -15,14 +15,14 @@ HotbarMixin = {
       GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
       SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
    },
-   LRHotbar = {
+   RLHotbar = {
       BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
       BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
       GrpPos = {{8.05, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
       GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
       SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
    },
-   RLHotbar = {
+   LRHotbar = {
       BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
       BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
       GrpPos = {{8.05, 0.0}, {4.90, 0.0}, { -2.25, 2.5}},
@@ -38,6 +38,16 @@ function HotbarMixin:OnLoad()
    self:AddActionBar()
    self:AddPageHandler()
    self:AddModHandler()
+   self:AddStateHandler()
+   self:AddExpandHandler()
+   self:AddNextPageHandler()
+   
+   local pageindex = self:GetAttribute("pageindex")
+   local pageprefix = self:GetAttribute("pageprefix")
+   
+   UnregisterStateDriver(self.ActionBar,'visibility')
+   UnregisterStateDriver(self,'page')
+   RegisterStateDriver(self, 'page', pageprefix .. pageindex)
    
    self.Locked = true
    self.Point = {self:GetPoint(1)}
@@ -122,7 +132,7 @@ function HotbarMixin:AddPageHandler()
       button:SetAttribute('actionpage', newstate)
    end
    
-   bar = self:GetFrameRef('ActionBar')
+   local bar = self:GetFrameRef('ActionBar')
    bar:SetAttribute('actionpage', newstate)
    self:SetAttribute('actionpage', newstate)
    ]])
@@ -136,7 +146,7 @@ function HotbarMixin:AddModHandler()
    end
    laststate = newstate
    local activestate = self:GetAttribute("activestate")
-   bar = self:GetFrameRef('ActionBar')
+   local bar = self:GetFrameRef('ActionBar')
    if newstate == activestate then
       bar:SetAlpha(1)
       for i = 1, 12 do
@@ -152,6 +162,118 @@ function HotbarMixin:AddModHandler()
    end
    bar:SetAttribute('state-page', newstate)
    self:SetAttribute('state-page', newstate)
+   ]])
+end
+
+function HotbarMixin:AddStateHandler()
+   self:SetAttribute('_onstate-hotbar-visibility', [[
+      local actionbar = self:GetFrameRef('ActionBar')
+      local shownstate = self:GetAttribute("shownstate")
+      local activestate = self:GetAttribute("activestate")
+      local swap = self:GetAttribute("swap")
+      local expanded = self:GetAttribute("expanded")
+      actionbar = self:GetFrameRef('ActionBar')
+      if newstate == shownstate then
+         RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;show")
+         if newstate == activestate then
+            for i = 1, 12 do
+               local b = self:GetFrameRef('ActionButton'..i)
+               local key1 = b:GetAttribute('over_key1')
+               local key2 = b:GetAttribute('over_key2')
+               local key3 = b:GetAttribute('over_key3')
+               --print("Here", key1, key2, b:GetName())
+               if swap == 0 then
+                  if key1 then b:SetBindingClick(true, key1, b:GetName(), "LeftButton") end
+               else
+                  if key2 then b:SetBindingClick(true, key2, b:GetName(), "LeftButton") end
+               end
+               if expanded == 1 then
+                  if key3 then b:SetBindingClick(true, key3, b:GetName(), "LeftButton") end
+               end
+            end
+         end
+      else
+         for i = 1, 12 do
+            local b = self:GetFrameRef('ActionButton'..i)
+            if b then b:ClearBindings() end
+         end
+         RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;hide")
+      end
+   ]])
+end
+
+function HotbarMixin:AddExpandHandler()
+   self:SetAttribute('_onstate-hotbar-expand', [[
+      local actionbar = self:GetFrameRef('ActionBar')
+      local activestate = self:GetAttribute("activestate")
+
+      local enable = 0
+      if newstate == 1 and (activestate == 1 or activestate == 3) then enable = 1 end 
+      if newstate == 2 and (activestate == 2 or activestate == 4) then enable = 1 end
+
+      self:SetAttribute("expanded", enable)
+
+      if enable == 1 then
+         for i = 1, 3 do
+            local highlight = self:GetFrameRef('Highlight'..i)
+            if highlight ~= nil then
+               if i == 3 then
+                  highlight:SetAlpha(1.0)
+               else 
+                  highlight:SetAlpha(0.0)
+               end
+            end
+         end
+      else
+         for i = 1, 3 do
+            local highlight = self:GetFrameRef('Highlight'..i)
+            if highlight ~= nil then
+               if i == 3 then
+                  highlight:SetAlpha(0.0)
+               else 
+                  highlight:SetAlpha(1.0)
+               end
+            end
+         end
+      end
+
+      if newstate ~= 0 then
+         for i = 1, 12 do
+            local b = self:GetFrameRef('ActionButton'..i)
+            if i >= 9 and enable == 1 then 
+               b:SetAlpha(1.0)
+            else
+               b:SetAlpha(0.5)
+            end
+         end
+      else
+         for i = 1, 12 do
+            local b = self:GetFrameRef('ActionButton'..i)
+            if i >= 9 then 
+               b:SetAlpha(0.0)
+            else
+               b:SetAlpha(1.0)
+            end
+         end
+      end
+   ]])
+end
+
+function HotbarMixin:AddNextPageHandler()
+   self:SetAttribute('_onstate-hotbar-nextpage', [[
+      local activestate = self:GetAttribute("activestate")
+      if activestate < 3 then
+         local pageindex = self:GetAttribute("pageindex")
+         local pageprefix = self:GetAttribute("pageprefix")
+
+         pageindex = (pageindex + newstate)%10
+
+         if pageindex == 0 then
+            pageindex = 10
+         end
+
+         RegisterStateDriver(self, 'page', pageprefix .. pageindex)
+      end
    ]])
 end
 
@@ -234,7 +356,7 @@ function HotbarMixin:UpdateHotbar()
       if self.hasHighlights then
          if #self.Highlights == 0 then
             for i,anchor in ipairs(self.AnchorButtons) do
-               local highlight = CreateFrame("Frame", self:GetName() .. "Highlight" .. i, anchor)
+               local highlight = CreateFrame("Frame", self:GetName() .. "Highlight" .. i, anchor, "SecureHandlerBaseTemplate")
                local tex = highlight:CreateTexture(nil, "BACKGROUND")
                tex:SetAllPoints()
                tex:SetAtlas("AftLevelup-WhiteIconGlow")
@@ -297,7 +419,10 @@ end
 
 function HotbarMixin:OnEvent(event, ...)
    if ( event == "PLAYER_ENTERING_WORLD" ) then
-      self:UpdateHotbar();      
+      self:UpdateHotbar();
+      for i,highlight in ipairs(self.Highlights) do
+         SecureHandlerSetFrameRef(self, 'Highlight'..i, highlight)
+      end
    elseif ( event == "UPDATE_BINDINGS" or
             event == "GAME_PAD_ACTIVE_CHANGED" ) then
       self:UpdateHotkeys(self.buttonType);

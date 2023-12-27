@@ -15,6 +15,11 @@
     <Attributes>
       <Attribute name="actionpage" type="number" value="1"/>
       <Attribute name="activestate" type="number" value="0"/>
+      <Attribute name="shownstate" type="number" value="0"/>
+      <Attribute name="swap" type="number" value="0"/>
+      <Attribute name="expanded" type="number" value="0"/>
+      <Attribute name="pageindex" type="number" value="1"/>
+      <Attribute name="pageprefix" type="string" value=""/>
     </Attributes>
     <Scripts>
       <OnLoad method="OnLoad" inherit="append"/>
@@ -22,7 +27,7 @@
     </Scripts>
   </Frame>
   
-  <Frame name="CrosshotbarTemplate" virtual="true" parent="UIParent" frameStrata="MEDIUM" hidden="true" mixin="CrossHotbarMixin">
+  <Frame name="CrosshotbarTemplate" virtual="true" inherits="SecureHandlerStateTemplate" parent="UIParent" frameStrata="MEDIUM" hidden="true" mixin="CrossHotbarMixin">
     <Size x="554" y="120"/>
     <Scripts>
       <OnLoad method="OnLoad" inherit="append"/>
@@ -30,7 +35,7 @@
     </Scripts>
   </Frame>
   
-  <Frame name="SeperatorMover" parent="UIParent" frameStrata="HIGH" hidden="false" enableMouse="true" movable="true">
+  <Frame name="SeperatorMover" parent="UIParent" frameStrata="MEDIUM" hidden="false" enableMouse="true" movable="true">
     <Size x="16" y="112"/>
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <Scripts>
@@ -38,6 +43,7 @@
       <OnDragStart>self:StartMoving();</OnDragStart>
       <OnDragStop>self:StopMovingOrSizing();</OnDragStop>
       <OnMouseDown>
+        self:SetFrameStrata("HIGH")
         self:SetWidth(Crosshotbar:GetWidth());
         SeperatorDrag_Texture:SetWidth(Crosshotbar:GetWidth());
         SeperatorDrag_Texture:Show();
@@ -46,6 +52,7 @@
         SeperatorMover_Texture:SetWidth(8);
       </OnEnter>
       <OnLeave>
+        self:SetFrameStrata("MEDIUM")
         self:SetWidth(16);
         SeperatorMover_Texture:SetWidth(2);
         SeperatorDrag_Texture:SetWidth(2);
@@ -53,14 +60,14 @@
       </OnLeave>
     </Scripts>
     <Layers>
-      <Layer level="BACKGROUND">
+      <Layer level="MEDIUM">
         <Texture name="SeperatorMover_Texture" hidden="false">
           <Size x="2" y="60"/>
           <Color r="1.0" g="1.0" b="0.8" a="1.0"/>
           <Anchors> <Anchor point="CENTER" relativePoint="CENTER" x="0" y="0"/></Anchors>
         </Texture>
       </Layer>
-      <Layer level="OVERLAY">
+      <Layer level="BACKGROUND">
         <Texture name="SeperatorDrag_Texture" hidden="true">
           <Size x="2" y="60"/>
           <Color r="0.5" g="0.8" b="0.8" a="0.5"/>
@@ -73,6 +80,13 @@
   <Frame name="Crosshotbar" inherits="CrossHotbarTemplate" parent="SeperatorMover" frameStrata="MEDIUM" hidden="false">
     <Size x="554" y="120"/>
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
+    <Attributes>
+      <Attribute name="expanded" type="number" value="0"/>
+      <Attribute name="triggerstate" type="number" value="4"/>
+      <Attribute name="shoulderstate" type="number" value="4"/>
+      <Attribute name="paddlestate" type="number" value="4"/>
+      <Attribute name="pageoffset" type="number" value="0"/>
+    </Attributes>
   </Frame>
   
   <Frame name="LHotbar1" inherits="HotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
@@ -84,6 +98,12 @@
       <KeyValue key="Scaling" value="1.15" type="number"/>
       <KeyValue key="hasHighlights" value="true" type="boolean"/>
     </KeyValues>
+    <Attributes>
+      <Attribute name="activestate" type="number" value="1"/>
+      <Attribute name="shownstate" type="number" value="1"/>
+      <Attribute name="pageindex" type="number" value="2"/>
+      <Attribute name="pageprefix" type="string" value="[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;"/>
+    </Attributes>
   </Frame>
   
   <Frame name="LHotbar2" inherits="HotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
@@ -95,6 +115,10 @@
       <KeyValue key="Scaling" value="1.00" type="number"/>
       <KeyValue key="hasHighlights" value="false" type="boolean"/>
     </KeyValues>
+    <Attributes>
+      <Attribute name="pageindex" type="number" value="2"/>
+      <Attribute name="pageprefix" type="string" value="[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;"/>
+    </Attributes>
   </Frame>
   
   <Frame name="LHotbar3" inherits="HotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
@@ -107,6 +131,11 @@
       <KeyValue key="Scaling" value="0.85" type="number"/>
       <KeyValue key="hasHighlights" value="false" type="boolean"/>
     </KeyValues>
+    <Attributes>
+      <Attribute name="shownstate" type="number" value="2"/>
+      <Attribute name="pageindex" type="number" value="2"/>
+      <Attribute name="pageprefix" type="string" value="[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;"/>
+    </Attributes>
   </Frame>
   
   <Frame name="RHotbar1" inherits="HotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
@@ -118,6 +147,12 @@
       <KeyValue key="Scaling" value="1.15" type="number"/>
       <KeyValue key="hasHighlights" value="true" type="boolean"/>
     </KeyValues>
+    <Attributes>
+      <Attribute name="activestate" type="number" value="2"/>
+      <Attribute name="shownstate" type="number" value="2"/>
+      <Attribute name="pageindex" type="number" value="1"/>
+      <Attribute name="pageprefix" type="string" value=""/>
+    </Attributes>
   </Frame>
   
   <Frame name="RHotbar2" inherits="SecureHandlerStateTemplate, HotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
@@ -129,6 +164,10 @@
       <KeyValue key="Scaling" value="1.00" type="number"/>
       <KeyValue key="hasHighlights" value="false" type="boolean"/>
     </KeyValues>
+    <Attributes>
+      <Attribute name="pageindex" type="number" value="1"/>
+      <Attribute name="pageprefix" type="string" value=""/>
+    </Attributes>
   </Frame>
   
   <Frame name="RHotbar3" inherits="HotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
@@ -140,6 +179,11 @@
       <KeyValue key="Scaling" value="0.85" type="number"/>
       <KeyValue key="hasHighlights" value="false" type="boolean"/>
     </KeyValues>
+    <Attributes>
+      <Attribute name="shownstate" type="number" value="1"/>
+      <Attribute name="pageindex" type="number" value="1"/>
+      <Attribute name="pageprefix" type="string" value=""/>
+    </Attributes>
   </Frame>
   
   <Frame name="LRHotbar1" inherits="HotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
@@ -152,7 +196,10 @@
       <KeyValue key="hasHighlights" value="true" type="boolean"/>
     </KeyValues>
     <Attributes>
-      <Attribute name="activestate" type="number" value="5"/>
+      <Attribute name="activestate" type="number" value="3"/>
+      <Attribute name="shownstate" type="number" value="3"/>
+      <Attribute name="pageindex" type="number" value="6"/>
+      <Attribute name="pageprefix" type="string" value=""/>
     </Attributes>
   </Frame>
   
@@ -166,7 +213,10 @@
       <KeyValue key="hasHighlights" value="true" type="boolean"/>
     </KeyValues>
     <Attributes>
-      <Attribute name="activestate" type="number" value="2"/>
+      <Attribute name="activestate" type="number" value="4"/>
+      <Attribute name="shownstate" type="number" value="4"/>
+      <Attribute name="pageindex" type="number" value="5"/>
+      <Attribute name="pageprefix" type="string" value=""/>
     </Attributes>
   </Frame>
   
