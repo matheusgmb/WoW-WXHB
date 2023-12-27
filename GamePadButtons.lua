@@ -229,6 +229,7 @@ function GamePadButtonsMixin:OnLoad()
    --self:SetAttribute("_onstate-trigger", [[]])
    self:SetAttribute("_onstate-shoulder", [[
       local Crosshotbar = self:GetFrameRef('Crosshotbar')
+      local swapbutton = self:GetAttribute("swapbutton")
       if Crosshotbar ~= nil then
          local triggerstate = Crosshotbar:GetAttribute("triggerstate")
          if triggerstate == 4 then
@@ -255,13 +256,23 @@ function GamePadButtonsMixin:OnLoad()
                if swap == 1 then attrname = "padswapaction" end
                local leftaction = LeftShoulderButton:GetAttribute(attrname)
                local rightaction = RightShoulderButton:GetAttribute(attrname)
-               LeftShoulderButton:SetAttribute("macrotext1", leftaction)
-               RightShoulderButton:SetAttribute("macrotext1", rightaction)
+               if swapbutton ~= "SPADL" then
+                  LeftShoulderButton:SetAttribute("macrotext1", leftaction)
+               end
+               if swapbutton ~= "SPADR" then
+                  RightShoulderButton:SetAttribute("macrotext1", rightaction)
+               end
             end
          end
-         local swapbutton = self:GetAttribute("swapbutton")
          if swapbutton == "SPADL" then
-            if newstate == 6 or newstate == 2 then
+            if newstate == 6 or newstate == 3 or newstate == 2 then
+               self:RunAttribute("SetButtonSwapped", true)
+            else
+               self:RunAttribute("SetButtonSwapped", false)
+            end
+         end
+         if swapbutton == "SPADR" then
+            if newstate == 7 or newstate == 5 or newstate == 1 then
                self:RunAttribute("SetButtonSwapped", true)
             else
                self:RunAttribute("SetButtonSwapped", false)
@@ -272,7 +283,14 @@ function GamePadButtonsMixin:OnLoad()
    self:SetAttribute("_onstate-paddle", [[
       local swapbutton = self:GetAttribute("swapbutton")
       if swapbutton == "PPADL" then
-         if newstate == 6 or newstate == 2 then
+         if newstate == 6 or newstate == 3 or newstate == 2 then
+            self:RunAttribute("SetButtonSwapped", true)
+         else
+            self:RunAttribute("SetButtonSwapped", false)
+         end
+      end
+      if swapbutton == "PPADR" then
+         if newstate == 7 or newstate == 5 or newstate == 1 then
             self:RunAttribute("SetButtonSwapped", true)
          else
             self:RunAttribute("SetButtonSwapped", false)
@@ -307,7 +325,7 @@ function GamePadButtonsMixin:OnEvent(event, ...)
 end
 
 function GamePadButtonsMixin:ApplyConfig()
-   local swapbutton = nil
+   local swapbutton = ""
    for button, attributes in pairs(config.PadActions) do
       if ActionList[attributes.ACTION] then
          SetOverrideBinding(self, true, attributes.BIND, attributes.ACTION)
@@ -331,9 +349,7 @@ function GamePadButtonsMixin:ApplyConfig()
    SetOverrideBindingClick(self.RightPaddleButton, true, config.PadActions.PPADR.BIND,
                            self.RightPaddleButton:GetName(), "LeftButton")
 
-   if swapbutton ~= nil then
-      self:SetAttribute("swapbutton", swapbutton)
-   end
+   self:SetAttribute("swapbutton", swapbutton)
    
 end
 

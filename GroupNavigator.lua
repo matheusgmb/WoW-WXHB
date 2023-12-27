@@ -2,10 +2,10 @@ local ADDON, addon = ...
 local config = addon.Config
 
 local ActionList = {
-   ["GRPNAVUP"] = true,
-   ["GRPNAVDOWN"] = true,
-   ["GRPNAVLEFT"] = true,
-   ["GRPNAVRIGHT"] = true,
+   ["UNITNAVUP"] = true,
+   ["UNITNAVDOWN"] = true,
+   ["UNITNAVLEFT"] = true,
+   ["UNITNAVRIGHT"] = true,
    ["CLEARTARGETING"] = true
 }
 
@@ -60,39 +60,39 @@ function GroupNavigatorMixin:OnEvent(event, ...)
 end
 
 function GroupNavigatorMixin:AddSwapHandler()
-   self:SetAttribute("GRPNAVUP", "")
-   self:SetAttribute("GRPNAVDOWN", "")
-   self:SetAttribute("GRPNAVLEFT", "")
-   self:SetAttribute("GRPNAVRIGHT", "")
+   self:SetAttribute("UNITNAVUP", "")
+   self:SetAttribute("UNITNAVDOWN", "")
+   self:SetAttribute("UNITNAVLEFT", "")
+   self:SetAttribute("UNITNAVRIGHT", "")
    self:SetAttribute("CLEARTARGETING", "")
-   self:SetAttribute("SWAPGRPNAVUP", "")
-   self:SetAttribute("SWAPGRPNAVDOWN", "")
-   self:SetAttribute("SWAPGRPNAVLEFT", "")
-   self:SetAttribute("SWAPGRPNAVRIGHT", "")
+   self:SetAttribute("SWAPUNITNAVUP", "")
+   self:SetAttribute("SWAPUNITNAVDOWN", "")
+   self:SetAttribute("SWAPUNITNAVLEFT", "")
+   self:SetAttribute("SWAPUNITNAVRIGHT", "")
    self:SetAttribute("SWAPCLEARTARGETING", "")
 
    local SetActionBindings = [[
       self:ClearBindings()
-      local binding = self:GetAttribute("GRPNAVUP")
+      local binding = self:GetAttribute("UNITNAVUP")
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button4") end
-      binding = self:GetAttribute("GRPNAVDOWN")                  
+      binding = self:GetAttribute("UNITNAVDOWN")                  
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button5") end
-      binding = self:GetAttribute("GRPNAVLEFT")                  
+      binding = self:GetAttribute("UNITNAVLEFT")                  
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "LeftButton") end
-      binding = self:GetAttribute("GRPNAVRIGHT")
+      binding = self:GetAttribute("UNITNAVRIGHT")
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "RightButton") end
       binding = self:GetAttribute("CLEARTARGETING")                  
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "MiddleButton") end
    ]]
    
    local SetSwapActionBindings = [[
-      local binding = self:GetAttribute("SWAPGRPNAVUP")
+      local binding = self:GetAttribute("SWAPUNITNAVUP")
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button4") end
-      binding = self:GetAttribute("SWAPGRPNAVDOWN")                  
+      binding = self:GetAttribute("SWAPUNITNAVDOWN")                  
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button5") end
-      binding = self:GetAttribute("SWAPGRPNAVLEFT")                  
+      binding = self:GetAttribute("SWAPUNITNAVLEFT")                  
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "LeftButton") end
-      binding = self:GetAttribute("SWAPGRPNAVRIGHT")
+      binding = self:GetAttribute("SWAPUNITNAVRIGHT")
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "RightButton") end
       binding = self:GetAttribute("SWAPCLEARTARGETING")
       if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "MiddleButton") end

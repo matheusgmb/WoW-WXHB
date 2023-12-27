@@ -90,16 +90,15 @@ function HotbarMixin.hSetPoint(f, ...)
 end
 
 function HotbarMixin:AddActionBar()
-   local idx = 1
    local containers = { self.ActionBar:GetChildren() }
    for i,container in ipairs(containers) do
       SecureHandlerSetFrameRef(self, 'Container'..i, container)
       local buttons = { container:GetChildren() }
       for j,button in ipairs(buttons) do
          if button ~= nil and button:GetName() ~= nil then
+            local index = button:GetID();
             if string.find(button:GetName(), "Button") then -- self.BtnPrefix 
-               SecureHandlerSetFrameRef(self, 'ActionButton'..idx, button)
-               idx = idx + 1
+               SecureHandlerSetFrameRef(self, 'ActionButton'..index, button)
             end
          end
       end

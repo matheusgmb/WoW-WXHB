@@ -35,15 +35,17 @@
     </Scripts>
   </Frame>
   
-  <Frame name="SeperatorMover" parent="UIParent" frameStrata="MEDIUM" hidden="false" enableMouse="true" movable="true">
+  <Button name="SeperatorMover" inherits="SecureActionButtonTemplate" parent="UIParent" frameStrata="MEDIUM" hidden="false" enableMouse="true" movable="true">
     <Size x="16" y="112"/>
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <Scripts>
-      <OnLoad>self:RegisterForDrag("LeftButton");</OnLoad>
+      <OnLoad>
+        self:SetToplevel(true)
+        self:RegisterForDrag("LeftButton");
+      </OnLoad>
       <OnDragStart>self:StartMoving();</OnDragStart>
       <OnDragStop>self:StopMovingOrSizing();</OnDragStop>
       <OnMouseDown>
-        self:SetFrameStrata("HIGH")
         self:SetWidth(Crosshotbar:GetWidth());
         SeperatorDrag_Texture:SetWidth(Crosshotbar:GetWidth());
         SeperatorDrag_Texture:Show();
@@ -52,7 +54,6 @@
         SeperatorMover_Texture:SetWidth(8);
       </OnEnter>
       <OnLeave>
-        self:SetFrameStrata("MEDIUM")
         self:SetWidth(16);
         SeperatorMover_Texture:SetWidth(2);
         SeperatorDrag_Texture:SetWidth(2);
@@ -75,7 +76,7 @@
         </Texture>
       </Layer>
     </Layers>
-  </Frame>
+  </Button>
   
   <Frame name="Crosshotbar" inherits="CrossHotbarTemplate" parent="SeperatorMover" frameStrata="MEDIUM" hidden="false">
     <Size x="554" y="120"/>
