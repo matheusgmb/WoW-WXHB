@@ -1,32 +1,62 @@
 local ADDON, addon = ...
 local config = addon.Config
 
+local ModifierList = {
+   ["CAMERAPAGE1"] = true,
+   ["CAMERAPAGE2"] = true,
+   ["LEFTHOTBAR"] = true,
+   ["RIGHTHOTBAR"] = true,
+   ["SWAPHOTBAR"] = true
+}
+
+
+local keys = {}
+for key in pairs(ModifierList) do
+   table.insert(keys, key)
+end
+table.sort(keys)
+
+if addon.GamePadModifiers == nil then
+   addon.GamePadModifiers = {"NONE"}
+end
+
+for i,key in ipairs(keys) do
+   table.insert(addon.GamePadModifiers, key)
+end
+
 local ActionList = {
-   ["MACRO CH_MACRO_1"] = true,
-   ["MACRO CH_MACRO_2"] = true,
-   ["MACRO CH_MACRO_3"] = true,
-   ["MACRO CH_MACRO_4"] = true,
    ["JUMP"] = true,
-   ["INTERACTMOUSEOVER"] = true,
    ["INTERACTTARGET"] = true,
    ["TOGGLEWORLDMAP"] = true,
-   ["TOGGLEGAMEMENU"] = true,
    ["TOGGLESHEATH"] = true,
+   ["ASSISTTARGET"] = true,
+   ["FOCUSTARGET"] = true,
+   ["TARGETFOCUS"] = true,
+   ["TARGETLASTHOSTILE"] = true,
+   ["TARGETLASTTARGET"] = true,
    ["TARGETNEARESTFRIEND"] = true,
    ["TARGETPREVIOUSFRIEND"] = true,
    ["TARGETNEARESTENEMY"] = true,
    ["TARGETPREVIOUSENEMY"] = true,
-   ["TARGETSCANENEMY"] = true,
-   ["TARGETLASTHOSTILE"] = true,
-   ["ASSISTTARGET"] = true,
-   ["NEXTACTIONPAGE"] = true,
-   ["PREVIOUSACTIONPAGE"] = true,
-   ["EXTRAACTIONBUTTON1"] = true,
-   ["SHAPESHIFTBUTTON1"] = true,
-   ["SHAPESHIFTBUTTON2"] = true,
-   ["BONUSACTIONBUTTON1"] = true,
-   ["BONUSACTIONBUTTON"] = true
+   ["MACRO CH_MACRO_1"] = true,
+   ["MACRO CH_MACRO_2"] = true,
+   ["MACRO CH_MACRO_3"] = true,
+   ["MACRO CH_MACRO_4"] = true
 }
+
+local keys = {}
+for key in pairs(ActionList) do
+   table.insert(keys, key)
+end
+table.sort(keys)
+
+if addon.GamePadActions == nil then
+   addon.GamePadActions = {"NONE"}
+end
+
+for i,key in ipairs(keys) do
+   table.insert(addon.GamePadActions, key)
+end
 
 local SetButtonPairState = [[
    local button, down, pairname  = ...
@@ -38,9 +68,8 @@ local SetButtonPairState = [[
    local Crosshotbar = self:GetFrameRef('Crosshotbar')
    local GamePadButtons = self:GetFrameRef('GamePadButtons')
    local GroupNavigator = self:GetFrameRef('GroupNavigator')
-
-   if Crosshotbar ~= nill and GamePadButtons ~= nil and type ~= 0 then
-      local state = Crosshotbar:GetAttribute(pairname.."state")
+   if GamePadButtons ~= nil and type ~= 0 then
+      local state = GamePadButtons:GetAttribute(pairname.."state")
 
       local a = 0
       if state == 6 or state == 3 then a = 2 end
@@ -67,10 +96,9 @@ local SetButtonPairState = [[
 
       if found then
          state = a - b + 4
-         Crosshotbar:SetAttribute(pairname.."state", state)
-         Crosshotbar:SetAttribute("state-"..pairname, state)
          GamePadButtons:SetAttribute("state-"..pairname, state)
-         GroupNavigator:SetAttribute("state-"..pairname, state)
+         if GroupNavigator ~= nil then GroupNavigator:SetAttribute("state-"..pairname, state) end
+         if Crosshotbar ~= nil then Crosshotbar:SetAttribute("state-"..pairname, state) end
       else
          print("Error " .. state .. " " .. a .. " " .. b .. " " .. type)
       end
@@ -90,9 +118,9 @@ local SetButtonExpanded = [[
       local expanded = Crosshotbar:GetAttribute("expanded")
       if expanded == 0 then
          if type == 2 then
-            Crosshotbar:SetAttribute("expanded", 1)
+            Crosshotbar:SetAttribute("state-expanded", 1)
          else
-            Crosshotbar:SetAttribute("expanded", 2)
+            Crosshotbar:SetAttribute("state-expanded", 2)
          end
       end
    end
@@ -100,12 +128,6 @@ local SetButtonExpanded = [[
 
 local SetButtonSwapped = [[
    local down = ...
-
-   local Crosshotbar = self:GetFrameRef('Crosshotbar')
-   if Crosshotbar ~= nil then
-      if down then Crosshotbar:SetAttribute("state-swap", 1)
-      else Crosshotbar:SetAttribute("state-swap", 0) end
-   end
 
    local GamePadButtons = self:GetFrameRef('GamePadButtons')
    if GamePadButtons ~= nil then
@@ -119,9 +141,12 @@ local SetButtonSwapped = [[
       else GroupNavigator:SetAttribute("state-swap", 0) end
    end
 
+   local Crosshotbar = self:GetFrameRef('Crosshotbar')
+   if Crosshotbar ~= nil then
+      if down then Crosshotbar:SetAttribute("state-swap", 1)
+      else Crosshotbar:SetAttribute("state-swap", 0) end
+   end
 ]]
-
-addon.GamePadActions = ActionList
 
 local GamePadButtonsMixin = {
    LeftTriggerButton = nil,
@@ -222,12 +247,18 @@ function GamePadButtonsMixin:CreateRightPaddleButton()
                            [[self:RunAttribute("SetButtonPairState", "RightButton", down, "paddle")]])
 end
 
-function GamePadButtonsMixin:OnLoad()
-   self:SetAttribute("GetActionBindings", GetActionBindings)
-   self:SetAttribute("SetActionBindings", SetActionBindings)
-   self:SetAttribute("SetButtonSwapped", SetButtonSwapped)
-   --self:SetAttribute("_onstate-trigger", [[]])
+function GamePadButtonsMixin:AddTriggerHandler()
+   self:SetAttribute("triggerstate", 4)
+   self:SetAttribute("_onstate-trigger", [[
+      self:SetAttribute("triggerstate", newstate)
+   ]])
+end
+
+function GamePadButtonsMixin:AddShoulderHandler()
+   self:SetAttribute("shoulderstate", 4)
    self:SetAttribute("_onstate-shoulder", [[
+      self:SetAttribute("shoulderstate", newstate)
+
       local Crosshotbar = self:GetFrameRef('Crosshotbar')
       local swapbutton = self:GetAttribute("swapbutton")
       if Crosshotbar ~= nil then
@@ -280,7 +311,13 @@ function GamePadButtonsMixin:OnLoad()
          end
       end
    ]])
+end
+
+function GamePadButtonsMixin:AddPaddleHandler()
+   self:SetAttribute("paddlestate", 4)
    self:SetAttribute("_onstate-paddle", [[
+      self:SetAttribute("paddlestate", newstate)
+
       local swapbutton = self:GetAttribute("swapbutton")
       if swapbutton == "PPADL" then
          if newstate == 6 or newstate == 3 or newstate == 2 then
@@ -297,19 +334,33 @@ function GamePadButtonsMixin:OnLoad()
          end
       end
    ]])
+end
 
+function GamePadButtonsMixin:AddSwapHandler()
+   self:SetAttribute("swap", 0)
    self:SetAttribute("_onstate-swap", [[
       self:SetAttribute("swap", newstate)
    ]])
-   
-   self:RegisterEvent("PLAYER_ENTERING_WORLD")
+end
 
+function GamePadButtonsMixin:OnLoad()
+   self:SetAttribute("GetActionBindings", GetActionBindings)
+   self:SetAttribute("SetActionBindings", SetActionBindings)
+   self:SetAttribute("SetButtonSwapped", SetButtonSwapped)
+
+   self:AddTriggerHandler()
+   self:AddShoulderHandler()
+   self:AddPaddleHandler()
+   self:AddSwapHandler()
+   
    self:CreateLeftTriggerButton()
    self:CreateRightTriggerButton()
    self:CreateLeftShoulderButton()
    self:CreateRightShoulderButton()
    self:CreateLeftPaddleButton()
    self:CreateRightPaddleButton()
+   
+   self:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
 
 function GamePadButtonsMixin:OnEvent(event, ...)
@@ -324,16 +375,29 @@ function GamePadButtonsMixin:OnEvent(event, ...)
    end
 end
 
+function GamePadButtonsMixin:ClearConfig()
+   for button, attributes in pairs(config.PadActions) do
+      self:SetAttribute(button, "")
+   end
+   ClearOverrideBindings(self.LeftTriggerButton);
+   ClearOverrideBindings(self.RightTriggerButton);
+   ClearOverrideBindings(self.LeftShoulderButton);
+   ClearOverrideBindings(self.RightShoulderButton);
+   ClearOverrideBindings(self.LeftPaddleButton);
+   ClearOverrideBindings(self.RightPaddleButton);
+end
+
 function GamePadButtonsMixin:ApplyConfig()
+   self:ClearConfig()
    local swapbutton = ""
    for button, attributes in pairs(config.PadActions) do
       if ActionList[attributes.ACTION] then
          SetOverrideBinding(self, true, attributes.BIND, attributes.ACTION)
       end
-      self:SetAttribute(button, attributes.BIND)
-      if attributes.ACTION == "SWAPHOTBAR" then
+      if attributes.ACTION == "SWAPACTIONS" then
          swapbutton = button
       end
+      self:SetAttribute(button, attributes.BIND)
    end
    
    SetOverrideBindingClick(self.LeftTriggerButton, true, config.PadActions.TRIGL.BIND,

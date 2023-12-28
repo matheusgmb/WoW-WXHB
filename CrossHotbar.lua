@@ -16,6 +16,31 @@ local ActionList = {
    ["HOTBARBTN12"] = true
 }
 
+local keys = {}
+for key in pairs(ActionList) do
+   table.insert(keys, key)
+end
+table.sort(keys, function(k1, k2)
+   if string.len(k1) == string.len(k2) then
+      return (k1 < k2)
+   else
+      return (string.len(k1) < string.len(k2))
+   end
+end)
+
+if addon.HotbarActions == nil then
+   addon.HotbarActions = {"NONE"}
+end
+
+if addon.HotbarSwapActions == nil then
+   addon.HotbarSwapActions = {"NONE"}
+end
+
+for i,key in ipairs(keys) do
+   table.insert(addon.HotbarActions, key)
+   table.insert(addon.HotbarSwapActions, key)
+end
+
 CrossHotbarMixin = {
 }
 
@@ -84,12 +109,22 @@ function CrossHotbarMixin:ApplyConfig()
    self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix, bindings)
    self:OverrideKeyBindings(LRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", LRHotbar1.BtnPrefix, bindings)
    self:OverrideKeyBindings(RLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", RLHotbar1.BtnPrefix, bindings)
+
+   local hotbars = { self:GetChildren() }
+   for k,hotbar in pairs(hotbars) do
+      if hotbar.ApplyConfig then
+         hotbar:ApplyConfig()
+      end
+   end
+   
+   self:UpdateCrosshotbar()
 end
 
 function CrossHotbarMixin:OnLoad()
    self:SetScale(0.90)
-   self:AddModHandler()
+   self:AddStateHandler()
    self:AddSwapHandler()
+   self:AddExpandHandler()
    self:AddNextPageHandler()
    self:RegisterEvent("PLAYER_ENTERING_WORLD")
    self:HideHudElements()
@@ -110,15 +145,13 @@ function CrossHotbarMixin:OnEvent(event, ...)
    end
 end
 
-function CrossHotbarMixin:AddModHandler()
+function CrossHotbarMixin:AddStateHandler()
    self:SetAttribute('_onstate-trigger', [[
+      self:SetAttribute("triggerstate", newstate)
+
       local expanded = self:GetAttribute("expanded")
-      if expanded == 1 and newstate ~= 6 and newstate ~= 3 then
-         expanded = 0
-         self:SetAttribute("expanded", 0)
-      end
-      
-      if expanded == 2 and newstate ~= 7 and newstate ~= 5 then
+      if not ((expanded == 1 and (newstate == 6 or newstate == 3)) or
+              (expanded == 2 and (newstate == 7 or newstate == 5))) then
          expanded = 0
          self:SetAttribute("expanded", 0)
       end
@@ -131,7 +164,7 @@ function CrossHotbarMixin:AddModHandler()
 
       for i=1,8 do
          local hotbar = self:GetFrameRef('Hotbar'..i)
-         hotbar:SetAttribute("state-hotbar-expand", expanded)
+         hotbar:SetAttribute("state-hotbar-expanded", expanded)
          hotbar:SetAttribute("state-hotbar-visibility", state)
       end
   ]])
@@ -139,23 +172,23 @@ end
 
 function CrossHotbarMixin:AddSwapHandler()
    self:SetAttribute('_onstate-swap', [[
-      local expanded = self:GetAttribute("expanded")
-      local triggerstate = self:GetAttribute("triggerstate")
+      for i=1,8 do
+         local hotbar = self:GetFrameRef('Hotbar'..i)
+         hotbar:SetAttribute("state-hotbar-swap", newstate)
+      end
+   ]])
+end
 
-      if expanded == 0 then
-         local state = 0
-         if triggerstate == 6 or triggerstate == 2 then state = 1 end
-         if triggerstate == 7 or triggerstate == 1 then state = 2 end
-         if triggerstate == 3 then state = 3 end
-         if triggerstate == 5 then state = 4 end
-
+function CrossHotbarMixin:AddExpandHandler()
+   self:SetAttribute('_onstate-expanded', [[
+      local hotbarstate = self:GetAttribute("triggerstate")
+      if hotbarstate == 4 then               
+         self:SetAttribute("expanded", newstate)
          for i=1,8 do
             local hotbar = self:GetFrameRef('Hotbar'..i)
-            hotbar:SetAttribute("swap", newstate)
-            hotbar:SetAttribute("state-hotbar-visibility", state)
+            hotbar:SetAttribute("state-hotbar-expanded", newstate)
          end
       end
-
   ]])
 end
 

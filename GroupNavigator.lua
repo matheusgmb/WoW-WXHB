@@ -9,7 +9,24 @@ local ActionList = {
    ["CLEARTARGETING"] = true
 }
 
-addon.GroupNavigatorActions = ActionList
+local keys = {}
+for key in pairs(ActionList) do
+   table.insert(keys, key)
+end
+table.sort(keys)
+
+if addon.GamePadActions == nil then
+   addon.GamePadActions = {"NONE"}
+end
+
+if addon.GamePadSwaoActions == nil then
+   addon.GamePadSwapActions = {"NONE"}
+end
+
+for i,key in ipairs(keys) do
+   table.insert(addon.GamePadActions, key)
+   table.insert(addon.GamePadSwapActions, key)
+end
 
 local GroupNavigatorMixin = {
    SoftTargetFrame = CrossHotbarAddon_GroupNavigator_SoftTarget,
@@ -59,7 +76,7 @@ function GroupNavigatorMixin:OnEvent(event, ...)
    end
 end
 
-function GroupNavigatorMixin:AddSwapHandler()
+function GroupNavigatorMixin:AddStateHandlers()
    self:SetAttribute("UNITNAVUP", "")
    self:SetAttribute("UNITNAVDOWN", "")
    self:SetAttribute("UNITNAVLEFT", "")
@@ -128,7 +145,14 @@ function GroupNavigatorMixin:AddSwapHandler()
    ]])
 end
 
+function GroupNavigatorMixin:ClearConfig()
+   for action in pairs(ActionList) do
+      self:SetAttribute(action, "")
+   end
+end
+
 function GroupNavigatorMixin:ApplyConfig()
+   self:ClearConfig()
    self.ActiveBindings = {}
    for button, attributes in pairs(config.PadActions) do
       if ActionList[ attributes.ACTION ] then
@@ -524,7 +548,8 @@ local CreateGroupNavigator = function(parent)
    GroupNavigator:SetAttribute("macrotext3", "/cleartarget\n/stopspelltarget\n")
    GroupNavigator:SetAttribute("trigger", 4)
    GroupNavigator:SetAttribute("swap", 0)
-   GroupNavigator:AddSwapHandler()
+
+   GroupNavigator:AddStateHandlers()
 
    GroupNavigator:HookScript("OnEvent", GroupNavigator.OnEvent)
    GroupNavigator:OnLoad()

@@ -6,8 +6,9 @@ CrossHotbar_DB = {
       [1] = {
          Mutable = false,
          Name = "Gamepad_Preset",
-         SwapType = 2,
-         WXHBType = 2,
+         SwapType = 1,
+         WXHBType = 3,
+         DDAAType = 1,
          PadActions = {
             FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="UNITNAVRIGHT",     SWAPTRIGACTION="HOTBARBTN5"},
             FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="UNITNAVUP",        SWAPTRIGACTION="HOTBARBTN6"},
@@ -30,8 +31,9 @@ CrossHotbar_DB = {
       [2] = {
          Mutable = false,
          Name = "Keyboard_Preset",
-         SwapType = 4,
-         WXHBType = 2,
+         SwapType = 1,
+         WXHBType = 3,
+         DDAAType = 1,
          PadActions = {
             FACER = {BIND="1",  ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="UNITNAVRIGHT",     SWAPTRIGACTION="HOTBARBTN5"},
             FACEU = {BIND="2",  ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="UNITNAVUP",        SWAPTRIGACTION="HOTBARBTN6"},
@@ -54,8 +56,9 @@ CrossHotbar_DB = {
       [3] = {
          Mutable = false,
          Name = "SC_Preset",
-         SwapType = 4,
-         WXHBType = 2,
+         SwapType = 1,
+         WXHBType = 3,
+         DDAAType = 2,
          PadActions = {
             FACER = {BIND="1",  ACTION="NONE",             TRIGACTION="HOTBARBTN1",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN5"},
             FACEU = {BIND="2",  ACTION="NONE",             TRIGACTION="HOTBARBTN2",          SWAPACTION="NONE",             SWAPTRIGACTION="HOTBARBTN6"},
@@ -71,15 +74,16 @@ CrossHotbar_DB = {
             SPADR = {BIND="=",  ACTION="CAMERAPAGE2",      TRIGACTION="TARGETNEARESTENEMY",  SWAPACTION="CAMERAPAGE1",      SWAPTRIGACTION="TARGETPREVIOUSENEMY"},
             TRIGL = {BIND="[",  ACTION="LEFTHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
             TRIGR = {BIND="]",  ACTION="RIGHTHOTBAR",      TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
-            PPADL = {BIND="\\", ACTION="SWAPHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
+            PPADL = {BIND="\\", ACTION="SWAPACTIONS",      TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
             PPADR = {BIND="'",  ACTION="NONE",             TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"}
          }
       },
       [4] = {
          Mutable = true,
          Name = "Custom",
-         SwapType = 2,
-         WXHBType = 2,
+         SwapType = 1,
+         WXHBType = 3,
+         DDAAType = 2,
          PadActions = {
             FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="UNITNAVRIGHT",     SWAPTRIGACTION="HOTBARBTN5"},
             FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="UNITNAVUP",        SWAPTRIGACTION="HOTBARBTN6"},
@@ -91,7 +95,7 @@ CrossHotbar_DB = {
             DPADL = {BIND="PADDLEFT",     ACTION="UNITNAVLEFT",      TRIGACTION="HOTBARBTN8",          SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
             STCKL = {BIND="PADLSTICK",    ACTION="MACRO CH_MACRO_1", TRIGACTION="NONE",                SWAPACTION="MACRO CH_MACRO_1", SWAPTRIGACTION="MACRO CH_MACRO_1"},
             STCKR = {BIND="PADRSTICK",    ACTION="TOGGLESHEATH",     TRIGACTION="EXTRAACTIONBUTTON1",  SWAPACTION="TOGGLESHEATH",     SWAPTRIGACTION="EXTRAACTIONBUTTON1"},
-            SPADL = {BIND="PADLSHOULDER", ACTION="SWAPHOTBAR",       TRIGACTION="TARGETPREVIOUSENEMY", SWAPACTION="CAMERAPAGE2",      SWAPTRIGACTION="TARGETNEARESTENEMY"},
+            SPADL = {BIND="PADLSHOULDER", ACTION="SWAPACTIONS",      TRIGACTION="TARGETPREVIOUSENEMY", SWAPACTION="CAMERAPAGE2",      SWAPTRIGACTION="TARGETNEARESTENEMY"},
             SPADR = {BIND="PADRSHOULDER", ACTION="CAMERAPAGE2",      TRIGACTION="TARGETNEARESTENEMY",  SWAPACTION="CAMERAPAGE1",      SWAPTRIGACTION="TARGETPREVIOUSENEMY"},
             TRIGL = {BIND="PADLTRIGGER",  ACTION="LEFTHOTBAR",       TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
             TRIGR = {BIND="PADRTRIGGER",  ACTION="RIGHTHOTBAR",      TRIGACTION="NONE",                SWAPACTION="NONE",             SWAPTRIGACTION="NONE"},
@@ -105,8 +109,9 @@ CrossHotbar_DB = {
 addon.Config = {
    Mutable = true,
    Name = "Custom",
-   SwapType = 2,
-   WXHBType = 2,
+   SwapType = 1,
+   WXHBType = 3,
+   DDAAType = 2,
    PadActions = {
       FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SWAPACTION="UNITNAVRIGHT",     SWAPTRIGACTION="HOTBARBTN5"},
       FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SWAPACTION="UNITNAVUP",        SWAPTRIGACTION="HOTBARBTN6"},
@@ -134,6 +139,7 @@ function addon.Config:StorePreset(to, from)
       end
       to.SwapType = from.SwapType
       to.WXHBType = from.WXHBType
+      to.DDAAType = from.DDAAType
       for button, attributes in pairs(from.PadActions) do
          for key, value in pairs(attributes) do
             to.PadActions[button][key] = value 

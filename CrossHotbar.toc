@@ -9,6 +9,4 @@ GamePadButtons.lua
 GroupNavigator.xml
 GroupNavigator.lua
 CrossHotbar.xml
-Hotbar.lua
-CrossHotbar.lua
 ConfigUI.lua

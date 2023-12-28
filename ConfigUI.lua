@@ -3,67 +3,6 @@ local ADDON, addon = ...
 local config = addon.Config
 local preset = CrossHotbar_DB.ActivePreset
 
-local GamePadBindingList = {
-   "PAD2",        
-   "PAD4",        
-   "PAD1",        
-   "PAD3" ,       
-   "PADDRIGHT",   
-   "PADDUP",      
-   "PADDDOWN",    
-   "PADDLEFT",    
-   "PADLSTICK",   
-   "PADRSTICK",   
-   "PADLSHOULDER",
-   "PADRSHOULDER",   
-   "PADLTRIGGER",    
-   "PADRTRIGGER", 
-   "PADPADDLE1",  
-   "PADPADDLE2"
-}
-
-local ActionList1 = {
-   "CLEARTARGETING",  
-   "JUMP",
-   "INTERACTTARGET",  
-   "TOGGLEWORLDMAP",  
-   "UNITNAVRIGHT",        
-   "UNITNAVUP",        
-   "UNITNAVDOWN",      
-   "UNITNAVLEFT",  
-   "TOGGLESHEATH",        
-   "MACRO CH_MACRO_1",
-   "MACRO CH_MACRO_2", 
-   "MACRO CH_MACRO_3",
-   "MACRO CH_MACRO_4",  
-   "NONE"        
-}
-
-local ActionList2 = {
-   "CAMERAPAGE1",     
-   "CAMERAPAGE2",     
-   "LEFTHOTBAR",      
-   "RIGHTHOTBAR",
-   "SWAPHOTBAR",
-   "NONE"                           
-}
-
-local HotbarBtnList = {
-   "HOTBARBTN1",
-   "HOTBARBTN2",
-   "HOTBARBTN3",
-   "HOTBARBTN4",
-   "HOTBARBTN5",
-   "HOTBARBTN6",
-   "HOTBARBTN7",
-   "HOTBARBTN8",
-   "HOTBARBTN9",
-   "HOTBARBTN10",
-   "HOTBARBTN11",
-   "HOTBARBTN12",
-   "NONE"
-}
-
 local GamePadButtonList = {
    "FACER",
    "FACEU",
@@ -83,6 +22,23 @@ local GamePadButtonList = {
    "PPADR"
 }
 
+local GamePadSwapButtonList = {
+   "FACER",
+   "FACEU",
+   "FACED",
+   "FACEL",
+   "DPADR",
+   "DPADU",
+   "DPADD",
+   "DPADL"
+}
+
+local GamePadBindingList = {}
+for i,button in ipairs(GamePadButtonList) do
+   table.insert(GamePadBindingList, config.PadActions[button].BIND)
+end
+
+   
 local GamePadButtonShp = {
    FACER="Shp_Circle",
    FACEU="Shp_Triangle",
@@ -103,37 +59,75 @@ local GamePadButtonShp = {
 }
 
 local GamePadActionMap = {
-   FACER=ActionList1,
-   FACEU=ActionList1,
-   FACED=ActionList1,
-   FACEL=ActionList1,
-   DPADR=ActionList1,
-   DPADU=ActionList1,
-   DPADD=ActionList1,
-   DPADL=ActionList1,
-   STCKL=ActionList1,
-   STCKR=ActionList1,
-   SPADL=ActionList2,
-   SPADR=ActionList2,
-   TRIGL=ActionList2,
-   TRIGR=ActionList2,
-   PPADL=ActionList2,
-   PPADR=ActionList2
+   FACER=addon.GamePadActions,
+   FACEU=addon.GamePadActions,
+   FACED=addon.GamePadActions,
+   FACEL=addon.GamePadActions,
+   DPADR=addon.GamePadActions,
+   DPADU=addon.GamePadActions,
+   DPADD=addon.GamePadActions,
+   DPADL=addon.GamePadActions,
+   STCKL=addon.GamePadActions,
+   STCKR=addon.GamePadActions,
+   SPADL=addon.GamePadModifiers,
+   SPADR=addon.GamePadModifiers,
+   TRIGL=addon.GamePadModifiers,
+   TRIGR=addon.GamePadModifiers,
+   PPADL=addon.GamePadModifiers,
+   PPADR=addon.GamePadModifiers
 }
 
 local GamePadHotbarMap = {
-   FACER=HotbarBtnList,
-   FACEU=HotbarBtnList,
-   FACED=HotbarBtnList,
-   FACEL=HotbarBtnList,
-   DPADR=HotbarBtnList,
-   DPADU=HotbarBtnList,
-   DPADD=HotbarBtnList,
-   DPADL=HotbarBtnList,
+   FACER=addon.HotbarActions,
+   FACEU=addon.HotbarActions,
+   FACED=addon.HotbarActions,
+   FACEL=addon.HotbarActions,
+   DPADR=addon.HotbarActions,
+   DPADU=addon.HotbarActions,
+   DPADD=addon.HotbarActions,
+   DPADL=addon.HotbarActions,
    STCKL={"NONE"},
-   STCKR={"EXTRAACTIONBUTTON1"},
-   SPADL={"TARGETPREVIOUSENEMY"},
-   SPADR={"TARGETNEARESTENEMY"},
+   STCKR={"NONE"},
+   SPADL={"NONE"},
+   SPADR={"NONE"},
+   TRIGL={"NONE"},
+   TRIGR={"NONE"},
+   PPADL={"NONE"},
+   PPADR={"NONE"}
+}
+
+local GamePadSwapActionMap = {
+   FACER=addon.GamePadSwapActions,
+   FACEU=addon.GamePadSwapActions,
+   FACED=addon.GamePadSwapActions,
+   FACEL=addon.GamePadSwapActions,
+   DPADR=addon.GamePadSwapActions,
+   DPADU=addon.GamePadSwapActions,
+   DPADD=addon.GamePadSwapActions,
+   DPADL=addon.GamePadSwapActions,
+   STCKL={"NONE"},
+   STCKR={"NONE"},
+   SPADL={"NONE"},
+   SPADR={"NONE"},
+   TRIGL={"NONE"},
+   TRIGR={"NONE"},
+   PPADL={"NONE"},
+   PPADR={"NONE"}
+}
+
+local GamePadSwapHotbarMap = {
+   FACER=addon.HotbarSwapActions,
+   FACEU=addon.HotbarSwapActions,
+   FACED=addon.HotbarSwapActions,
+   FACEL=addon.HotbarSwapActions,
+   DPADR=addon.HotbarSwapActions,
+   DPADU=addon.HotbarSwapActions,
+   DPADD=addon.HotbarSwapActions,
+   DPADL=addon.HotbarSwapActions,
+   STCKL={"NONE"},
+   STCKR={"NONE"},
+   SPADL={"NONE"},
+   SPADR={"NONE"},
    TRIGL={"NONE"},
    TRIGR={"NONE"},
    PPADL={"NONE"},
@@ -267,6 +261,11 @@ function ConfigUI:Refresh()
    
    config:ProcessConfig(config)
 
+   GamePadBindingList = {}
+   for i,button in ipairs(GamePadButtonList) do
+      table.insert(GamePadBindingList, config.PadActions[button].BIND)
+   end
+   
    for i,callback in ipairs(ConfigUI.RefreshCallbacks) do
       callback()
    end
@@ -276,8 +275,7 @@ function ConfigUI:Refresh()
    addon.Crosshotbar:ApplyConfig()
 end
 
-function ConfigUI:Apply()
-  
+function ConfigUI:Apply()  
    if GetCVar('GamePadEnable') == "0" then
       StaticPopup_Show ("CROSSHOTBAR_ENABLEGAMEPAD")
    end
@@ -311,9 +309,10 @@ function ConfigUI:CreateFrame()
       local anchor = title
       anchor = ConfigUI:CreatePresets(scrollChild, anchor)
       anchor = ConfigUI:CreateApply(scrollChild, anchor)
+      anchor = ConfigUI:CreateFeatures(scrollChild, anchor)
       anchor = ConfigUI:CreatePadBindingActions(scrollChild, anchor)
+      anchor = ConfigUI:CreateSwapActions(scrollChild, anchor)
       --anchor = ConfigUI:CreateTriggers(scrollChild, anchor)
-      --anchor = ConfigUI:CreateFeatures(scrollChild, anchor)
       --anchor = ConfigUI:CreateBindings(scrollChild, anchor)
 
       self.InterfaceFrame:SetScript("OnShow", ConfigUI.Refresh) 
@@ -467,34 +466,179 @@ function ConfigUI:CreateApply(configFrame, anchorFrame)
 end
 
 --[[
+   Features
+--]]  
+
+function ConfigUI:CreateFeatures(configFrame, anchorFrame)
+
+   --[[
+      Swap button bindings
+   --]]    
+
+   local swaptypes = {"custom", "activate wxhb"}
+   local wxhbtypes = {"hide", "faded", "show always"}
+   local ddaatypes = {"DPad + Action / DPad + Action", "DPad + DPad / Action + Action"}   
+   local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/3
+   local swapsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   swapsubtitle:SetHeight(self.TextHeight)
+   swapsubtitle:SetWidth(DropDownWidth)
+   swapsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   swapsubtitle:SetNonSpaceWrap(true)
+   swapsubtitle:SetJustifyH("LEFT")
+   swapsubtitle:SetJustifyV("TOP")
+   swapsubtitle:SetText("Swap Type")
+   
+   local swapdropdown = CreateFrame("Frame", ADDON .. "SwapDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   swapdropdown:SetPoint("TOPLEFT", swapsubtitle, "BOTTOMLEFT", 0, 0)
+   
+   UIDropDownMenu_SetWidth(swapdropdown, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(swapdropdown, "Type")
+
+   local function SwapDropDownDemo_OnClick(self, arg1, arg2, checked)
+      config.SwapType = arg1
+      UIDropDownMenu_SetText(arg2, self:GetText())
+   end
+   
+   UIDropDownMenu_Initialize(swapdropdown, function(self, level, menuList)     
+      local info = UIDropDownMenu_CreateInfo()
+      UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i,swaptype in ipairs(swaptypes) do
+            info.text, info.checked = swaptype, (config.SwapType == i)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = i
+            info.arg2 = self
+            info.func = SwapDropDownDemo_OnClick
+            UIDropDownMenu_AddButton(info)
+            UIDropDownMenu_SetText(self, swaptype)
+         end
+      end
+   end)
+   
+   --[[
+      Expanded button settings
+   --]]    
+
+   local expdsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   expdsubtitle:SetHeight(self.TextHeight)
+   expdsubtitle:SetWidth(DropDownWidth)
+   expdsubtitle:SetPoint("TOPLEFT", swapsubtitle, "TOPRIGHT", 0, 0)
+   expdsubtitle:SetNonSpaceWrap(true)
+   expdsubtitle:SetJustifyH("LEFT")
+   expdsubtitle:SetJustifyV("TOP")
+   expdsubtitle:SetText("Expanded Type")
+
+   local expddropdown = CreateFrame("Frame", ADDON .. "ExpandedDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   expddropdown:SetPoint("TOPLEFT", expdsubtitle, "BOTTOMLEFT", 0, 0)
+   
+   UIDropDownMenu_SetWidth(expddropdown, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(expddropdown, "Type")
+
+   local function ExpdDropDownDemo_OnClick(self, arg1, arg2, checked)
+      config.WXHBType = arg1
+      UIDropDownMenu_SetText(arg2, self:GetText())
+   end
+   
+   UIDropDownMenu_Initialize(expddropdown, function(self, level, menuList)     
+      local info = UIDropDownMenu_CreateInfo()
+      UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i,wxhbtype in ipairs(wxhbtypes) do
+            info.text, info.checked = wxhbtype, (config.WXHBType == i)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = i
+            info.arg2 = self
+            info.func = ExpdDropDownDemo_OnClick
+            UIDropDownMenu_AddButton(info)
+            if config.WXHBType == i then 
+               UIDropDownMenu_SetText(self, wxhbtype)
+            end
+         end
+      end
+   end)
+   
+   --[[
+      DDAA hotbar button layout
+   --]]    
+
+   local ddaasubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   ddaasubtitle:SetHeight(self.TextHeight)
+   ddaasubtitle:SetWidth(DropDownWidth)
+   ddaasubtitle:SetPoint("TOPLEFT", expdsubtitle, "TOPRIGHT", 0, 0)
+   ddaasubtitle:SetNonSpaceWrap(true)
+   ddaasubtitle:SetJustifyH("LEFT")
+   ddaasubtitle:SetJustifyV("TOP")
+   ddaasubtitle:SetText("Hotbar Layout")
+
+   local ddaadropdown = CreateFrame("Frame", ADDON .. "DDAADropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   ddaadropdown:SetPoint("TOPLEFT", ddaasubtitle, "BOTTOMLEFT", 0, 0)
+   
+   UIDropDownMenu_SetWidth(ddaadropdown, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(ddaadropdown, "Type")
+
+   local function DdaaDropDownDemo_OnClick(self, arg1, arg2, checked)
+      config.DDAAType = arg1
+      UIDropDownMenu_SetText(arg2, self:GetText())
+   end
+   
+   UIDropDownMenu_Initialize(ddaadropdown, function(self, level, menuList)     
+      local info = UIDropDownMenu_CreateInfo()
+      UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i,ddaatype in ipairs(ddaatypes) do
+            info.text, info.checked = ddaatype, (config.DDAAType == i)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = i
+            info.arg2 = self
+            info.func = DdaaDropDownDemo_OnClick
+            UIDropDownMenu_AddButton(info)
+            if config.DDAAType == i then 
+               UIDropDownMenu_SetText(self, ddaatype)
+            end
+         end
+      end
+   end)
+
+   ConfigUI:AddToolTip(swapdropdown, Locale.SwapTypeToolTip, false)
+   
+   table.insert(self.RefreshCallbacks, function()
+                   UIDropDownMenu_SetText(swapdropdown, swaptypes[config.SwapType])
+                   UIDropDownMenu_SetText(expddropdown, wxhbtypes[config.WXHBType])
+                   UIDropDownMenu_SetText(ddaadropdown, ddaatypes[config.DDAAType])
+   end)
+   
+   return swapdropdown
+end
+
+--[[
    Pad bindings and actions.
 --]]
 
 function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
    local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset - self.SymbolWidth - self.Inset)/3
    
-   local buttontitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   buttontitle:SetHeight(self.TextHeight)
-   buttontitle:SetWidth(self.SymbolWidth+self.Inset)
-   buttontitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
-   buttontitle:SetNonSpaceWrap(true)
-   buttontitle:SetJustifyH("LEFT")
-   buttontitle:SetJustifyV("TOP")
-   buttontitle:SetText("Button")
+   local buttonsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   buttonsubtitle:SetHeight(self.TextHeight)
+   buttonsubtitle:SetWidth(self.SymbolWidth+self.Inset)
+   buttonsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   buttonsubtitle:SetNonSpaceWrap(true)
+   buttonsubtitle:SetJustifyH("LEFT")
+   buttonsubtitle:SetJustifyV("TOP")
+   buttonsubtitle:SetText("Button")
    
-   local bindingtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   bindingtitle:SetHeight(self.TextHeight)
-   bindingtitle:SetWidth(DropDownWidth)
-   bindingtitle:SetPoint("TOPLEFT", buttontitle, "TOPRIGHT", 0, 0)
-   bindingtitle:SetNonSpaceWrap(true)
-   bindingtitle:SetJustifyH("LEFT")
-   bindingtitle:SetJustifyV("TOP")
-   bindingtitle:SetText("Binding")
+   local bindingsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   bindingsubtitle:SetHeight(self.TextHeight)
+   bindingsubtitle:SetWidth(DropDownWidth)
+   bindingsubtitle:SetPoint("TOPLEFT", buttonsubtitle, "TOPRIGHT", 0, 0)
+   bindingsubtitle:SetNonSpaceWrap(true)
+   bindingsubtitle:SetJustifyH("LEFT")
+   bindingsubtitle:SetJustifyV("TOP")
+   bindingsubtitle:SetText("Binding")
 
    local actionsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    actionsubtitle:SetHeight(self.TextHeight)
    actionsubtitle:SetWidth(DropDownWidth)
-   actionsubtitle:SetPoint("TOPLEFT", bindingtitle, "TOPRIGHT", 0, 0)
+   actionsubtitle:SetPoint("TOPLEFT", bindingsubtitle, "TOPRIGHT", 0, 0)
    actionsubtitle:SetNonSpaceWrap(true)
    actionsubtitle:SetJustifyH("LEFT")
    actionsubtitle:SetJustifyV("TOP")
@@ -507,12 +651,12 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
    hotbarsubtitle:SetNonSpaceWrap(true)
    hotbarsubtitle:SetJustifyH("LEFT")
    hotbarsubtitle:SetJustifyV("TOP")
-   hotbarsubtitle:SetText("Hotbar Button")
+   hotbarsubtitle:SetText("Hotbar Action")
 
 
    local buttoninset = self.Inset
-   local buttonanchor = buttontitle
-   local bindinganchor = bindingtitle
+   local buttonanchor = buttonsubtitle
+   local bindinganchor = bindingsubtitle
    local actionanchor = actionsubtitle
    local hotbaranchor = hotbarsubtitle
    for i,button in ipairs(GamePadButtonList) do
@@ -531,7 +675,7 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
          bindingframe:SetPoint("TOPLEFT", bindinganchor, "BOTTOMLEFT", 0, 0)
          
          UIDropDownMenu_SetWidth(bindingframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(bindingframe, "Binding")
+         UIDropDownMenu_SetText(bindingframe, "NONE")
          UIDropDownMenu_JustifyText(bindingframe, "LEFT")
          UIDropDownMenu_Initialize(bindingframe, function(self, level, menuList)     
             local info = UIDropDownMenu_CreateInfo()
@@ -555,7 +699,7 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
          actionframe:SetPoint("TOPLEFT", actionanchor, "BOTTOMLEFT", 0, 0)
          
          UIDropDownMenu_SetWidth(actionframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(actionframe, "Action")
+         UIDropDownMenu_SetText(actionframe, "NONE")
          UIDropDownMenu_JustifyText(actionframe, "LEFT")
          UIDropDownMenu_Initialize(actionframe, function(self, level, menuList)     
             local info = UIDropDownMenu_CreateInfo()
@@ -579,7 +723,7 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
          hotbaractionframe:SetPoint("TOPLEFT", hotbaranchor, "BOTTOMLEFT", 0, 0)
          
          UIDropDownMenu_SetWidth(hotbaractionframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(hotbaractionframe, "Hotbar Action")
+         UIDropDownMenu_SetText(hotbaractionframe, "NONE")
          UIDropDownMenu_JustifyText(hotbaractionframe, "LEFT")
          UIDropDownMenu_Initialize(hotbaractionframe, function(self, level, menuList)     
             local info = UIDropDownMenu_CreateInfo()
@@ -620,105 +764,120 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
 end
 
 --[[
-   Features
---]]  
+   Pad swap actions.
+--]]
 
-function ConfigUI:CreateFeatures(configFrame, anchorFrame)
+function ConfigUI:CreateSwapActions(configFrame, anchorFrame)
+   local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset - self.SymbolWidth - self.Inset)/3
+   
+   local buttonsuntitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   buttonsuntitle:SetHeight(self.TextHeight)
+   buttonsuntitle:SetWidth(self.SymbolWidth+self.Inset)
+   buttonsuntitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", -self.Inset, -self.ConfigSpacing)
+   buttonsuntitle:SetNonSpaceWrap(true)
+   buttonsuntitle:SetJustifyH("LEFT")
+   buttonsuntitle:SetJustifyV("TOP")
+   buttonsuntitle:SetText("Button")
+   
+   local actionsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   actionsubtitle:SetHeight(self.TextHeight)
+   actionsubtitle:SetWidth(DropDownWidth)
+   actionsubtitle:SetPoint("TOPLEFT", buttonsuntitle, "TOPRIGHT", 0, 0)
+   actionsubtitle:SetNonSpaceWrap(true)
+   actionsubtitle:SetJustifyH("LEFT")
+   actionsubtitle:SetJustifyV("TOP")
+   actionsubtitle:SetText("Swap Action")
 
-   --[[
-      Swap button bindings
-   --]]    
+   local hotbarsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   hotbarsubtitle:SetHeight(self.TextHeight)
+   hotbarsubtitle:SetWidth(DropDownWidth)
+   hotbarsubtitle:SetPoint("TOPLEFT", actionsubtitle, "TOPRIGHT", 0, 0)
+   hotbarsubtitle:SetNonSpaceWrap(true)
+   hotbarsubtitle:SetJustifyH("LEFT")
+   hotbarsubtitle:SetJustifyV("TOP")
+   hotbarsubtitle:SetText("Hotbar Swap Action")
 
-   local swaptypes = {"disable", "DPad to Face", "Expanded to Face", "DPad on Face only"}
-   local wxhbtypes = {"disable", "Expanded to Face"}
-   
-   local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/3
-   local swapsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   swapsubtitle:SetHeight(self.TextHeight)
-   swapsubtitle:SetWidth(DropDownWidth)
-   swapsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
-   swapsubtitle:SetNonSpaceWrap(true)
-   swapsubtitle:SetJustifyH("LEFT")
-   swapsubtitle:SetJustifyV("TOP")
-   swapsubtitle:SetText("Swap Type")
-   
-   local swapdropdown = CreateFrame("Frame", ADDON .. "SwapDropDownMenu", configFrame, "UIDropDownMenuTemplate")
-   swapdropdown:SetPoint("TOPLEFT", swapsubtitle, "BOTTOMLEFT", 0, 0)
-   
-   UIDropDownMenu_SetWidth(swapdropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(swapdropdown, "Type")
-
-   local function SwapDropDownDemo_OnClick(self, arg1, arg2, checked)
-      config.SwapType = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
-   end
-   
-   UIDropDownMenu_Initialize(swapdropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
-      if (level or 1) == 1 then
-         for i,swaptype in ipairs(swaptypes) do
-            info.text, info.checked = swaptype, (config.SwapType == i)
-            info.menuList, info.hasArrow = i, false
-            info.arg1 = i
-            info.arg2 = self
-            info.func = SwapDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
-            UIDropDownMenu_SetText(self, swaptype)
-         end
-      end
-   end)
-   
-   --[[
-      Expanded button bindings
-   --]]    
-
-   local expdsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   expdsubtitle:SetHeight(self.TextHeight)
-   expdsubtitle:SetWidth(DropDownWidth)
-   expdsubtitle:SetPoint("TOPLEFT", swapsubtitle, "TOPRIGHT", 0, 0)
-   expdsubtitle:SetNonSpaceWrap(true)
-   expdsubtitle:SetJustifyH("LEFT")
-   expdsubtitle:SetJustifyV("TOP")
-   expdsubtitle:SetText("Expanded Type")
-
-   local expddropdown = CreateFrame("Frame", ADDON .. "ExpandedDropDownMenu", configFrame, "UIDropDownMenuTemplate")
-   expddropdown:SetPoint("TOPLEFT", expdsubtitle, "BOTTOMLEFT", 0, 0)
-   
-   UIDropDownMenu_SetWidth(expddropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(expddropdown, "Type")
-
-   local function ExpdDropDownDemo_OnClick(self, arg1, arg2, checked)
-      config.WXHBType = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
-   end
-   
-   UIDropDownMenu_Initialize(expddropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
-      if (level or 1) == 1 then
-         for i,wxhbtype in ipairs(wxhbtypes) do
-            info.text, info.checked = wxhbtype, (config.WXHBType == i)
-            info.menuList, info.hasArrow = i, false
-            info.arg1 = i
-            info.arg2 = self
-            info.func = ExpdDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
-            if config.WXHBType == i then 
-               UIDropDownMenu_SetText(self, wxhbtype)
+   local buttoninset = self.Inset
+   local buttonanchor = buttonsuntitle
+   local actionanchor = actionsubtitle
+   local hotbaranchor = hotbarsubtitle
+   for i,button in ipairs(GamePadSwapButtonList) do
+      if config.PadActions[button] then
+         local attributes = config.PadActions[button]
+         local buttonsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+         buttonsubtitle:SetHeight(32)
+         buttonsubtitle:SetWidth(self.SymbolWidth+100)
+         buttonsubtitle:SetPoint("TOPLEFT", buttonanchor, "BOTTOMLEFT", buttoninset, 0)
+         buttonsubtitle:SetNonSpaceWrap(true)
+         buttonsubtitle:SetJustifyH("LEFT")
+         buttonsubtitle:SetJustifyV("TOP")
+         buttonsubtitle:SetText(("|A:Gamepad_%s_64:24:24|a"):format(GamePadButtonShp[button]))
+         
+         local swapactionframe = CreateFrame("Frame", ADDON .. button .. "SwapActionDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+         swapactionframe:SetPoint("TOPLEFT", actionanchor, "BOTTOMLEFT", 0, 0)
+         
+         UIDropDownMenu_SetWidth(swapactionframe, DropDownWidth-self.DropDownSpacing)
+         UIDropDownMenu_SetText(swapactionframe, "NONE")
+         UIDropDownMenu_JustifyText(swapactionframe, "LEFT")
+         UIDropDownMenu_Initialize(swapactionframe, function(self, level, menuList)     
+            local info = UIDropDownMenu_CreateInfo()
+            UIDropDownMenu_SetText(self, "")
+            if (level or 1) == 1 then
+               local a = config.PadActions
+               for _,action in ipairs(GamePadSwapActionMap[button]) do
+                  info.text, info.checked = action, (a[button].SWAPACTION == action)
+                  info.menuList, info.hasArrow = i, false
+                  info.arg1, info.arg2 = button, ConfigUI
+                  info.func = ActionDropDownDemo_OnClick
+                  UIDropDownMenu_AddButton(info)
+                  if (a[button].SWAPACTION == action) then 
+                     UIDropDownMenu_SetText(self, action)
+                  end
+               end
             end
-         end
-      end
-   end)
+         end)
 
-   ConfigUI:AddToolTip(swapdropdown, Locale.SwapTypeToolTip, false)
+         local hotbarswapactionframe = CreateFrame("Frame", ADDON .. button .. "HotbarSwapActionDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+         hotbarswapactionframe:SetPoint("TOPLEFT", hotbaranchor, "BOTTOMLEFT", 0, 0)
+         
+         UIDropDownMenu_SetWidth(hotbarswapactionframe, DropDownWidth-self.DropDownSpacing)
+         UIDropDownMenu_SetText(hotbarswapactionframe, "NONE")
+         UIDropDownMenu_JustifyText(hotbarswapactionframe, "LEFT")
+         UIDropDownMenu_Initialize(hotbarswapactionframe, function(self, level, menuList)     
+            local info = UIDropDownMenu_CreateInfo()
+            UIDropDownMenu_SetText(self, "")
+            if (level or 1) == 1 then
+               local a = config.PadActions
+               for _,action in ipairs(GamePadSwapHotbarMap[button]) do
+                  info.text, info.checked = action, (a[button].SWAPTRIGACTION == action)
+                  info.menuList, info.hasArrow = i, false
+                  info.arg1, info.arg2 = button, ConfigUI
+                  info.func = HotbarBtnDropDownDemo_OnClick
+                  UIDropDownMenu_AddButton(info)
+                  if (a[button].SWAPTRIGACTION == action) then 
+                     UIDropDownMenu_SetText(self, action)
+                  end
+               end
+            end
+         end)
+         
+         ConfigUI:AddToolTip(swapactionframe, Locale.LeftModifierToolTip, true)
+         ConfigUI:AddToolTip(hotbarswapactionframe, Locale.RightModifierToolTip, true)
+         
+         table.insert(self.RefreshCallbacks, function()
+                         UIDropDownMenu_SetText(swapactionframe, config.PadActions[button].SWAPACTION)
+                         UIDropDownMenu_SetText(hotbarswapactionframe, config.PadActions[button].SWAPTRIGACTION)
+         end)
+         
+         buttoninset = 0
+         buttonanchor = buttonsubtitle
+         bindinganchor = bindingframe
+         actionanchor = swapactionframe
+         hotbaranchor = hotbarswapactionframe
+      end
+   end
    
-   table.insert(self.RefreshCallbacks, function()
-                   UIDropDownMenu_SetText(swapdropdown, swaptypes[config.SwapType])
-                   UIDropDownMenu_SetText(expddropdown, wxhbtypes[config.WXHBType])
-   end)
-   
-   return swapdropdown
+   return buttonanchor
 end
 
 ConfigUI:CreateFrame()

@@ -1,35 +1,87 @@
+local ADDON, addon = ...
+local config = addon.Config
 
-HotbarMixin = {
-   Padding = 0.0,
-   LHotbar = {
-      BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
-      BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-      GrpPos = {{8.05, 0.0}, {1.70, 0.0}, {-2.25, 2.5}},
-      GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {0.0, 0.0}},
-      SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
+local ButtonLayout = {
+   [1] = {
+      Padding = 0.0,
+      LHotbar = {
+         BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
+         BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
+         GrpPos = {{4.90, 0.0}, {1.1, 0.0}, {-2.25, 2.5}},
+         GrpOff = {{-12.0, 0.0}, {10.0, 0.0}, {0.0, 0.0}},
+         SclOff = {{-0.5, 0.5}, {1.5, 0.5}, {-0.5, 0.5}}
+      },
+      RHotbar = {
+         BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
+         BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
+         GrpPos = {{11.9, 0.0}, {8.05, 0.0}, {14.90, 2.5}},
+         GrpOff = {{-12.0, 0.0}, {10.0, 0.0}, {10.0, 0.0}},
+         SclOff = {{-2.8, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
+      },
+      RLHotbar = {
+         BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
+         BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
+         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
+         GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
+         SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
+      },
+      LRHotbar = {
+         BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
+         BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
+         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, { -2.25, 2.5}},
+         GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {0.0, 0.0}},
+         SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
+      }
    },
-   RHotbar = {
-      BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
-      BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-      GrpPos = {{11.30, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
-      GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
-      SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
-   },
-   RLHotbar = {
-      BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
-      BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-      GrpPos = {{8.05, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
-      GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
-      SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
-   },
-   LRHotbar = {
-      BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
-      BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-      GrpPos = {{8.05, 0.0}, {4.90, 0.0}, { -2.25, 2.5}},
-      GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {0.0, 0.0}},
-      SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
+   [2] = {
+      Padding = 0.0,
+      LHotbar = {
+         BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
+         BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
+         GrpPos = {{8.05, 0.0}, {1.70, 0.0}, {-2.25, 2.5}},
+         GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {0.0, 0.0}},
+         SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
+      },
+      RHotbar = {
+         BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
+         BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
+         GrpPos = {{11.30, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
+         GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
+         SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
+      },
+      RLHotbar = {
+         BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
+         BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
+         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
+         GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
+         SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
+      },
+      LRHotbar = {
+         BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
+         BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
+         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, { -2.25, 2.5}},
+         GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {0.0, 0.0}},
+         SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
+      }
    }
 }
+
+HotbarMixin = {
+   Padding = ButtonLayout[1].Padding,
+   LHotbar = ButtonLayout[1].LHotbar,
+   RHotbar = ButtonLayout[1].RHotbar,
+   RLHotbar = ButtonLayout[1].RLHotbar,
+   LRHotbar = ButtonLayout[1].LRHotbar
+}
+
+
+function HotbarMixin:SetHotbarLayout(type)
+   self.Padding = ButtonLayout[type].Padding
+   self.LHotbar = ButtonLayout[type].LHotbar
+   self.RHotbar = ButtonLayout[type].RHotbar
+   self.RLHotbar = ButtonLayout[type].RLHotbar
+   self.LRHotbar = ButtonLayout[type].LRHotbar
+end
 
 function HotbarMixin:OnLoad()
    self.AnchorButtons = {}
@@ -37,8 +89,9 @@ function HotbarMixin:OnLoad()
    self.ActionBar = _G[self.BarName]
    self:AddActionBar()
    self:AddPageHandler()
-   self:AddModHandler()
-   self:AddStateHandler()
+   self:AddBindingHandler()
+   self:AddVisibilityHandler()
+   self:AddSwapHandler()
    self:AddExpandHandler()
    self:AddNextPageHandler()
    
@@ -137,60 +190,44 @@ function HotbarMixin:AddPageHandler()
    ]])
 end
 
-function HotbarMixin:AddModHandler()
-   self:SetAttribute('_onstate-mod', [[
-   local laststate = self:GetAttribute("state-page")
-   if newstate == 2 and laststate == 6 then
-      newstate = 5
-   end
-   laststate = newstate
-   local activestate = self:GetAttribute("activestate")
-   local bar = self:GetFrameRef('ActionBar')
-   if newstate == activestate then
-      bar:SetAlpha(1)
-      for i = 1, 12 do
-         local b = self:GetFrameRef('ActionButton'..i)
-         local key1 = b:GetAttribute('over_key1')
-         local key2 = b:GetAttribute('over_key2')
-         --print("Here", key1, key2, b:GetName())
-         if key1 then b:SetBindingClick(true, key1, b:GetName(), "LeftButton") end
-         if key2 then b:SetBindingClick(true, key2, b:GetName(), "LeftButton") end
+
+function HotbarMixin:AddBindingHandler()
+   self:SetAttribute('SetHotbarBindings', [[
+      local currentstate = self:GetAttribute("currentstate")
+      local activestate = self:GetAttribute("activestate")
+      local expanded = self:GetAttribute("expanded")
+      local swap = self:GetAttribute("swap")
+      if currentstate == activestate then
+         for i = 1, 12 do
+            local b = self:GetFrameRef('ActionButton'..i)
+            local key1 = b:GetAttribute('over_key1')
+            local key2 = b:GetAttribute('over_key2')
+            local key3 = b:GetAttribute('over_key3')
+            --print("Here", key1, key2, b:GetName())
+            if swap == 0 then
+               if key1 then b:SetBindingClick(true, key1, b:GetName(), "LeftButton") end
+            else
+               if key2 then b:SetBindingClick(true, key2, b:GetName(), "LeftButton") end
+            end
+            if expanded ~= 0 then
+               if key3 then b:SetBindingClick(true, key3, b:GetName(), "LeftButton") end
+            end
+         end
       end
-   else
-      bar:SetAlpha(0.0)
-   end
-   bar:SetAttribute('state-page', newstate)
-   self:SetAttribute('state-page', newstate)
    ]])
 end
 
-function HotbarMixin:AddStateHandler()
+function HotbarMixin:AddVisibilityHandler()
    self:SetAttribute('_onstate-hotbar-visibility', [[
       local actionbar = self:GetFrameRef('ActionBar')
       local shownstate = self:GetAttribute("shownstate")
-      local activestate = self:GetAttribute("activestate")
-      local swap = self:GetAttribute("swap")
-      local expanded = self:GetAttribute("expanded")
+
+      self:SetAttribute("currentstate", newstate)
+
       actionbar = self:GetFrameRef('ActionBar')
       if newstate == shownstate then
          RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;show")
-         if newstate == activestate then
-            for i = 1, 12 do
-               local b = self:GetFrameRef('ActionButton'..i)
-               local key1 = b:GetAttribute('over_key1')
-               local key2 = b:GetAttribute('over_key2')
-               local key3 = b:GetAttribute('over_key3')
-               --print("Here", key1, key2, b:GetName())
-               if swap == 0 then
-                  if key1 then b:SetBindingClick(true, key1, b:GetName(), "LeftButton") end
-               else
-                  if key2 then b:SetBindingClick(true, key2, b:GetName(), "LeftButton") end
-               end
-               if expanded == 1 then
-                  if key3 then b:SetBindingClick(true, key3, b:GetName(), "LeftButton") end
-               end
-            end
-         end
+         self:RunAttribute("SetHotbarBindings")
       else
          for i = 1, 12 do
             local b = self:GetFrameRef('ActionButton'..i)
@@ -198,63 +235,90 @@ function HotbarMixin:AddStateHandler()
          end
          RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;hide")
       end
+
+      local expanded = self:GetAttribute("expanded")
+      local activestate = self:GetAttribute("activestate")
+      local expandedstate = self:GetAttribute("expanded-state")
+      self:CallMethod("SetExpandIconsActive", expandedstate, expanded)
    ]])
 end
 
+function HotbarMixin:AddSwapHandler()
+   self:SetAttribute('_onstate-hotbar-swap', [[
+      self:SetAttribute("swap", newstate)
+      self:RunAttribute("SetHotbarBindings")
+   ]])
+end
+
+function HotbarMixin:SetExpandIconsActive(newstate, enable)
+   local active = false
+   if self.Type == "LHotbar" and newstate == 1 then active = true end
+   if self.Type == "RHotbar" and newstate == 2 then active = true end
+   if self.Type == "LRHotbar" and newstate == 1 then active = true end
+   if self.Type == "RLHotbar" and newstate == 2 then active = true end
+
+   for i,highlight in ipairs(self.Highlights) do
+      if i == 3 then
+         if enable ~= 0 and active then
+            highlight:SetAlpha(1.0)
+         else
+            highlight:SetAlpha(0.0)
+         end
+      else 
+         if enable ~= 0 and active then
+            highlight:SetAlpha(0.0)
+         else
+            highlight:SetAlpha(1.0)
+         end
+      end
+   end
+   
+   local containers = { self.ActionBar:GetChildren() }
+   for i,container in ipairs(containers) do
+      local buttons = { container:GetChildren() }
+      for j,button in ipairs(buttons) do
+         if button ~= nil and button:GetName() ~= nil then
+            if string.find(button:GetName(), "Button") then
+               if  button:GetID() >= 9 then 
+                  if newstate ~= 0 and active then
+                     button:SetAlpha(1.0)
+                     button.icon:SetDesaturated(nil);
+                  else
+                     button:SetAlpha(self.ExpandedAlpha1)
+                     if newstate ~= 0 then
+                        button.icon:SetDesaturated(self.DesatExpanded);
+                     else
+                        button.icon:SetDesaturated(nil);
+                     end
+                  end
+               else
+                  if newstate ~= 0 and active then
+                     button:SetAlpha(self.ExpandedAlpha2)
+                     button.icon:SetDesaturated(self.DesatExpanded);
+                  else
+                     button:SetAlpha(1.0)
+                     button.icon:SetDesaturated(nil);
+                  end
+               end
+            end
+         end
+      end
+   end
+end
+
 function HotbarMixin:AddExpandHandler()
-   self:SetAttribute('_onstate-hotbar-expand', [[
+   self:SetAttribute('_onstate-hotbar-expanded', [[
       local actionbar = self:GetFrameRef('ActionBar')
       local activestate = self:GetAttribute("activestate")
 
       local enable = 0
-      if newstate == 1 and (activestate == 1 or activestate == 3) then enable = 1 end 
-      if newstate == 2 and (activestate == 2 or activestate == 4) then enable = 1 end
+      if newstate ~= 0 and (activestate == 1 or activestate == 3) then enable = 1 end 
+      if newstate ~= 0 and (activestate == 2 or activestate == 4) then enable = 1 end
 
       self:SetAttribute("expanded", enable)
+      self:SetAttribute("expanded-state", newstate)
 
-      if enable == 1 then
-         for i = 1, 3 do
-            local highlight = self:GetFrameRef('Highlight'..i)
-            if highlight ~= nil then
-               if i == 3 then
-                  highlight:SetAlpha(1.0)
-               else 
-                  highlight:SetAlpha(0.0)
-               end
-            end
-         end
-      else
-         for i = 1, 3 do
-            local highlight = self:GetFrameRef('Highlight'..i)
-            if highlight ~= nil then
-               if i == 3 then
-                  highlight:SetAlpha(0.0)
-               else 
-                  highlight:SetAlpha(1.0)
-               end
-            end
-         end
-      end
-
-      if newstate ~= 0 then
-         for i = 1, 12 do
-            local b = self:GetFrameRef('ActionButton'..i)
-            if i >= 9 and enable == 1 then 
-               b:SetAlpha(1.0)
-            else
-               b:SetAlpha(0.5)
-            end
-         end
-      else
-         for i = 1, 12 do
-            local b = self:GetFrameRef('ActionButton'..i)
-            if i >= 9 then 
-               b:SetAlpha(0.0)
-            else
-               b:SetAlpha(1.0)
-            end
-         end
-      end
+      self:CallMethod("SetExpandIconsActive", newstate, enable)
    ]])
 end
 
@@ -289,6 +353,7 @@ function HotbarMixin:StopTargettingReticleAnim()
       end
    end
 end
+
 function HotbarMixin:UpdateHotbar()
    local parent_scaling = self:GetParent():GetScale()
    local bar = self[self.Type]
@@ -327,7 +392,6 @@ function HotbarMixin:UpdateHotbar()
       
       local anchor = nil
       local anchorIdx = 0
-      
       
       local idx = 0
       self.AnchorButtons = {}
@@ -435,4 +499,28 @@ function HotbarMixin:OnEvent(event, ...)
             event == "UNIT_SPELLCAST_STOP" ) then
       self:StopTargettingReticleAnim()
    end
+end
+
+function HotbarMixin:ApplyConfig()
+   self.ExpandedAlpha1 = 0.5 
+   self.DesatExpanded2 = 0.5
+   self.EnableExpanded = true
+   self:AddSwapHandler()
+
+   if config.WXHBType == 1 then
+      self.ExpandedAlpha1 = 0.0
+   end
+
+   if config.WXHBType == 2 then
+      self.ExpandedAlpha1 = 0.5
+   end
+
+   if config.WXHBType == 3 then
+      self.ExpandedAlpha1 = 1.0
+      self.ExpandedAlpha2 = 0.5
+   end
+   
+   self:SetHotbarLayout(config.DDAAType)
+   local expanded = self:GetAttribute("expanded")
+   self:SetExpandIconsActive(expanded, expanded)
 end
