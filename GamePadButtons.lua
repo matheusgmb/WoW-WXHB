@@ -1,28 +1,23 @@
 local ADDON, addon = ...
 local config = addon.Config
 
+local SwapList = {
+   ["CAMERAZOOM"] = true,
+   ["ACTIONPAGE"] = true,
+   ["LEFTPADDLE"] = true,
+   ["RIGHTPADDLE"] = true,
+}
+config:ConfigListAdd("GamePadSwapModifiers", SwapList, "NONE")
+
 local ModifierList = {
-   ["CAMERAPAGE1"] = true,
-   ["CAMERAPAGE2"] = true,
+   ["CAMERAZOOM"] = true,
+   ["ACTIONPAGE"] = true,
    ["LEFTHOTBAR"] = true,
    ["RIGHTHOTBAR"] = true,
-   ["SWAPHOTBAR"] = true
+   ["LEFTPADDLE"] = true,
+   ["RIGHTPADDLE"] = true
 }
-
-
-local keys = {}
-for key in pairs(ModifierList) do
-   table.insert(keys, key)
-end
-table.sort(keys)
-
-if addon.GamePadModifiers == nil then
-   addon.GamePadModifiers = {"NONE"}
-end
-
-for i,key in ipairs(keys) do
-   table.insert(addon.GamePadModifiers, key)
-end
+config:ConfigListAdd("GamePadModifiers", ModifierList, "NONE")
 
 local ActionList = {
    ["JUMP"] = true,
@@ -43,20 +38,7 @@ local ActionList = {
    ["MACRO CH_MACRO_3"] = true,
    ["MACRO CH_MACRO_4"] = true
 }
-
-local keys = {}
-for key in pairs(ActionList) do
-   table.insert(keys, key)
-end
-table.sort(keys)
-
-if addon.GamePadActions == nil then
-   addon.GamePadActions = {"NONE"}
-end
-
-for i,key in ipairs(keys) do
-   table.insert(addon.GamePadActions, key)
-end
+config:ConfigListAdd("GamePadActions", ActionList, "NONE")
 
 local SetButtonPairState = [[
    local button, down, pairname  = ...
@@ -295,14 +277,14 @@ function GamePadButtonsMixin:AddShoulderHandler()
                end
             end
          end
-         if swapbutton == "SPADL" then
+         if swapbutton == "CAMERAZOOM" then
             if newstate == 6 or newstate == 3 or newstate == 2 then
                self:RunAttribute("SetButtonSwapped", true)
             else
                self:RunAttribute("SetButtonSwapped", false)
             end
          end
-         if swapbutton == "SPADR" then
+         if swapbutton == "ACTIONPAGE" then
             if newstate == 7 or newstate == 5 or newstate == 1 then
                self:RunAttribute("SetButtonSwapped", true)
             else
@@ -319,14 +301,14 @@ function GamePadButtonsMixin:AddPaddleHandler()
       self:SetAttribute("paddlestate", newstate)
 
       local swapbutton = self:GetAttribute("swapbutton")
-      if swapbutton == "PPADL" then
+      if swapbutton == "LEFTPADDLE" then
          if newstate == 6 or newstate == 3 or newstate == 2 then
             self:RunAttribute("SetButtonSwapped", true)
          else
             self:RunAttribute("SetButtonSwapped", false)
          end
       end
-      if swapbutton == "PPADR" then
+      if swapbutton == "RIGHTPADDLE" then
          if newstate == 7 or newstate == 5 or newstate == 1 then
             self:RunAttribute("SetButtonSwapped", true)
          else
@@ -389,32 +371,40 @@ end
 
 function GamePadButtonsMixin:ApplyConfig()
    self:ClearConfig()
-   local swapbutton = ""
+   self:SetAttribute("swapbutton", config.SwapType)
    for button, attributes in pairs(config.PadActions) do
       if ActionList[attributes.ACTION] then
          SetOverrideBinding(self, true, attributes.BIND, attributes.ACTION)
-      end
-      if attributes.ACTION == "SWAPACTIONS" then
-         swapbutton = button
+      elseif ModifierList[attributes.ACTION] then
+         if attributes.ACTION == "LEFTHOTBAR" then
+            SetOverrideBindingClick(self.LeftTriggerButton, true, attributes.BIND,
+                                    self.LeftTriggerButton:GetName(), "LeftButton")            
+         end
+         if attributes.ACTION == "RIGHTHOTBAR" then
+            SetOverrideBindingClick(self.RightTriggerButton, true, attributes.BIND,
+                                    self.RightTriggerButton:GetName(), "LeftButton")
+         end
+         if attributes.ACTION == "CAMERAZOOM" then
+            SetOverrideBindingClick(self.LeftShoulderButton, true, attributes.BIND,
+                                    self.LeftShoulderButton:GetName(), "LeftButton")
+         end
+         if attributes.ACTION == "ACTIONPAGE" then
+            SetOverrideBindingClick(self.RightShoulderButton, true, attributes.BIND,
+                                    self.RightShoulderButton:GetName(), "LeftButton")
+         end
+         if attributes.ACTION == "LEFTPADDLE" then
+            SetOverrideBindingClick(self.LeftPaddleButton, true, attributes.BIND,
+                                    self.LeftPaddleButton:GetName(), "LeftButton")
+         end
+         if attributes.ACTION == "RIGHTPADDLE" then
+            SetOverrideBindingClick(self.RightPaddleButton, true, attributes.BIND,
+                                    self.RightPaddleButton:GetName(), "LeftButton")
+         end
+         if attributes.ACTION == config.SwapType then
+         end
       end
       self:SetAttribute(button, attributes.BIND)
    end
-   
-   SetOverrideBindingClick(self.LeftTriggerButton, true, config.PadActions.TRIGL.BIND,
-                           self.LeftTriggerButton:GetName(), "LeftButton")
-   SetOverrideBindingClick(self.RightTriggerButton, true, config.PadActions.TRIGR.BIND,
-                           self.RightTriggerButton:GetName(), "LeftButton")
-   SetOverrideBindingClick(self.LeftShoulderButton, true, config.PadActions.SPADL.BIND,
-                           self.LeftShoulderButton:GetName(), "LeftButton")
-   SetOverrideBindingClick(self.RightShoulderButton, true, config.PadActions.SPADR.BIND,
-                           self.RightShoulderButton:GetName(), "LeftButton")
-   SetOverrideBindingClick(self.LeftPaddleButton, true, config.PadActions.PPADL.BIND,
-                           self.LeftPaddleButton:GetName(), "LeftButton")
-   SetOverrideBindingClick(self.RightPaddleButton, true, config.PadActions.PPADR.BIND,
-                           self.RightPaddleButton:GetName(), "LeftButton")
-
-   self:SetAttribute("swapbutton", swapbutton)
-   
 end
 
 local CreateGamePadButtons = function(parent)

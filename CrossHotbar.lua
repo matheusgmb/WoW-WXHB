@@ -15,31 +15,8 @@ local ActionList = {
    ["HOTBARBTN11"] = true,
    ["HOTBARBTN12"] = true
 }
-
-local keys = {}
-for key in pairs(ActionList) do
-   table.insert(keys, key)
-end
-table.sort(keys, function(k1, k2)
-   if string.len(k1) == string.len(k2) then
-      return (k1 < k2)
-   else
-      return (string.len(k1) < string.len(k2))
-   end
-end)
-
-if addon.HotbarActions == nil then
-   addon.HotbarActions = {"NONE"}
-end
-
-if addon.HotbarSwapActions == nil then
-   addon.HotbarSwapActions = {"NONE"}
-end
-
-for i,key in ipairs(keys) do
-   table.insert(addon.HotbarActions, key)
-   table.insert(addon.HotbarSwapActions, key)
-end
+config:ConfigListAdd("HotbarActions", ActionList, "NONE")
+config:ConfigListAdd("HotbarSwapActions", ActionList, "NONE")
 
 CrossHotbarMixin = {
 }

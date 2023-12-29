@@ -1,8 +1,21 @@
 local ADDON, addon = ...
 local config = addon.Config
 
+local WXHBList = {
+   ["HIDE"] = true,
+   ["FADE"] = true,
+   ["SHOW"] = true
+}
+config:ConfigListAdd("HotbarWXHBTypes", WXHBList)
+
+local DDAAList = {
+   ["DADA"] = true,
+   ["DDAA"] = true,
+}
+config:ConfigListAdd("HotbarDDAATypes", DDAAList)
+
 local ButtonLayout = {
-   [1] = {
+   ["DADA"] = {
       Padding = 0.0,
       LHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
@@ -33,7 +46,7 @@ local ButtonLayout = {
          SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
       }
    },
-   [2] = {
+   ["DDAA"] = {
       Padding = 0.0,
       LHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
@@ -67,20 +80,19 @@ local ButtonLayout = {
 }
 
 HotbarMixin = {
-   Padding = ButtonLayout[1].Padding,
-   LHotbar = ButtonLayout[1].LHotbar,
-   RHotbar = ButtonLayout[1].RHotbar,
-   RLHotbar = ButtonLayout[1].RLHotbar,
-   LRHotbar = ButtonLayout[1].LRHotbar
+   Padding = ButtonLayout["DADA"].Padding,
+   LHotbar = ButtonLayout["DADA"].LHotbar,
+   RHotbar = ButtonLayout["DADA"].RHotbar,
+   RLHotbar = ButtonLayout["DADA"].RLHotbar,
+   LRHotbar = ButtonLayout["DADA"].LRHotbar
 }
 
-
-function HotbarMixin:SetHotbarLayout(type)
-   self.Padding = ButtonLayout[type].Padding
-   self.LHotbar = ButtonLayout[type].LHotbar
-   self.RHotbar = ButtonLayout[type].RHotbar
-   self.RLHotbar = ButtonLayout[type].RLHotbar
-   self.LRHotbar = ButtonLayout[type].LRHotbar
+function HotbarMixin:SetHotbarLayout(layouttype)
+   self.Padding = ButtonLayout[layouttype].Padding
+   self.LHotbar = ButtonLayout[layouttype].LHotbar
+   self.RHotbar = ButtonLayout[layouttype].RHotbar
+   self.RLHotbar = ButtonLayout[layouttype].RLHotbar
+   self.LRHotbar = ButtonLayout[layouttype].LRHotbar
 end
 
 function HotbarMixin:OnLoad()
@@ -507,15 +519,15 @@ function HotbarMixin:ApplyConfig()
    self.EnableExpanded = true
    self:AddSwapHandler()
 
-   if config.WXHBType == 1 then
+   if config.WXHBType == "HIDE" then
       self.ExpandedAlpha1 = 0.0
    end
 
-   if config.WXHBType == 2 then
+   if config.WXHBType == "FADE" then
       self.ExpandedAlpha1 = 0.5
    end
 
-   if config.WXHBType == 3 then
+   if config.WXHBType == "SHOW" then
       self.ExpandedAlpha1 = 1.0
       self.ExpandedAlpha2 = 0.5
    end

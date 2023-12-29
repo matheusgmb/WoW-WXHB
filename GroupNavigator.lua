@@ -8,25 +8,8 @@ local ActionList = {
    ["UNITNAVRIGHT"] = true,
    ["CLEARTARGETING"] = true
 }
-
-local keys = {}
-for key in pairs(ActionList) do
-   table.insert(keys, key)
-end
-table.sort(keys)
-
-if addon.GamePadActions == nil then
-   addon.GamePadActions = {"NONE"}
-end
-
-if addon.GamePadSwaoActions == nil then
-   addon.GamePadSwapActions = {"NONE"}
-end
-
-for i,key in ipairs(keys) do
-   table.insert(addon.GamePadActions, key)
-   table.insert(addon.GamePadSwapActions, key)
-end
+config:ConfigListAdd("GamePadActions", ActionList, "NONE")
+config:ConfigListAdd("GamePadSwapActions", ActionList, "NONE")
 
 local GroupNavigatorMixin = {
    SoftTargetFrame = CrossHotbarAddon_GroupNavigator_SoftTarget,

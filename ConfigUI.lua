@@ -334,7 +334,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetsubtitle:SetWidth(DropDownWidth)
    presetsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    presetsubtitle:SetNonSpaceWrap(true)
-   presetsubtitle:SetJustifyH("LEFT")
+   presetsubtitle:SetJustifyH("Middle")
    presetsubtitle:SetJustifyV("TOP")
    presetsubtitle:SetText("Presets")
    
@@ -456,9 +456,9 @@ end
 
 function ConfigUI:CreateApply(configFrame, anchorFrame)
    local applybutton = CreateFrame("Button", ADDON .. "ApplyButton", configFrame, "UIPanelButtonTemplate")
-   applybutton:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", -self.Inset, -self.Inset)
+   applybutton:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.Inset)
    applybutton:SetHeight(self.ButtonHeight)
-   applybutton:SetWidth(configFrame:GetWidth() + -2*self.Inset)
+   applybutton:SetWidth(configFrame:GetWidth() + -3*self.Inset)
    applybutton:SetText("Apply")
    
    applybutton:SetScript("OnClick", ConfigUI.Apply)
@@ -475,8 +475,6 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
       Swap button bindings
    --]]    
 
-   local swaptypes = {"custom", "activate wxhb"}
-   local wxhbtypes = {"hide", "faded", "show always"}
    local ddaatypes = {"DPad + Action / DPad + Action", "DPad + DPad / Action + Action"}   
    local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/3
    local swapsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -484,7 +482,7 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
    swapsubtitle:SetWidth(DropDownWidth)
    swapsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    swapsubtitle:SetNonSpaceWrap(true)
-   swapsubtitle:SetJustifyH("LEFT")
+   swapsubtitle:SetJustifyH("MIDDLE")
    swapsubtitle:SetJustifyV("TOP")
    swapsubtitle:SetText("Swap Type")
    
@@ -503,14 +501,16 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
       local info = UIDropDownMenu_CreateInfo()
       UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
-         for i,swaptype in ipairs(swaptypes) do
-            info.text, info.checked = swaptype, (config.SwapType == i)
+         for i,swaptype in ipairs(addon.GamePadSwapModifiers) do
+            info.text, info.checked = swaptype, (config.SwapType == swaptype)
             info.menuList, info.hasArrow = i, false
-            info.arg1 = i
+            info.arg1 = swaptype
             info.arg2 = self
             info.func = SwapDropDownDemo_OnClick
             UIDropDownMenu_AddButton(info)
-            UIDropDownMenu_SetText(self, swaptype)
+            if config.SwapType == swaptype then 
+               UIDropDownMenu_SetText(self, swaptype)
+            end
          end
       end
    end)
@@ -524,7 +524,7 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
    expdsubtitle:SetWidth(DropDownWidth)
    expdsubtitle:SetPoint("TOPLEFT", swapsubtitle, "TOPRIGHT", 0, 0)
    expdsubtitle:SetNonSpaceWrap(true)
-   expdsubtitle:SetJustifyH("LEFT")
+   expdsubtitle:SetJustifyH("MIDDLE")
    expdsubtitle:SetJustifyV("TOP")
    expdsubtitle:SetText("Expanded Type")
 
@@ -543,14 +543,14 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
       local info = UIDropDownMenu_CreateInfo()
       UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
-         for i,wxhbtype in ipairs(wxhbtypes) do
-            info.text, info.checked = wxhbtype, (config.WXHBType == i)
+         for i,wxhbtype in ipairs(addon.HotbarWXHBTypes) do
+            info.text, info.checked = wxhbtype, (config.WXHBType == wxhbtype)
             info.menuList, info.hasArrow = i, false
-            info.arg1 = i
+            info.arg1 = wxhbtype
             info.arg2 = self
             info.func = ExpdDropDownDemo_OnClick
             UIDropDownMenu_AddButton(info)
-            if config.WXHBType == i then 
+            if config.WXHBType == wxhbtype then 
                UIDropDownMenu_SetText(self, wxhbtype)
             end
          end
@@ -566,7 +566,7 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
    ddaasubtitle:SetWidth(DropDownWidth)
    ddaasubtitle:SetPoint("TOPLEFT", expdsubtitle, "TOPRIGHT", 0, 0)
    ddaasubtitle:SetNonSpaceWrap(true)
-   ddaasubtitle:SetJustifyH("LEFT")
+   ddaasubtitle:SetJustifyH("MIDDLE")
    ddaasubtitle:SetJustifyV("TOP")
    ddaasubtitle:SetText("Hotbar Layout")
 
@@ -585,14 +585,14 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
       local info = UIDropDownMenu_CreateInfo()
       UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
-         for i,ddaatype in ipairs(ddaatypes) do
-            info.text, info.checked = ddaatype, (config.DDAAType == i)
+         for i,ddaatype in ipairs(addon.HotbarDDAATypes) do
+            info.text, info.checked = ddaatype, (config.DDAAType == ddaatype)
             info.menuList, info.hasArrow = i, false
-            info.arg1 = i
+            info.arg1 = ddaatype
             info.arg2 = self
             info.func = DdaaDropDownDemo_OnClick
             UIDropDownMenu_AddButton(info)
-            if config.DDAAType == i then 
+            if config.DDAAType == ddaatype then 
                UIDropDownMenu_SetText(self, ddaatype)
             end
          end
@@ -602,9 +602,9 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
    ConfigUI:AddToolTip(swapdropdown, Locale.SwapTypeToolTip, false)
    
    table.insert(self.RefreshCallbacks, function()
-                   UIDropDownMenu_SetText(swapdropdown, swaptypes[config.SwapType])
-                   UIDropDownMenu_SetText(expddropdown, wxhbtypes[config.WXHBType])
-                   UIDropDownMenu_SetText(ddaadropdown, ddaatypes[config.DDAAType])
+                   UIDropDownMenu_SetText(swapdropdown, config.SwapType)
+                   UIDropDownMenu_SetText(expddropdown, config.WXHBType)
+                   UIDropDownMenu_SetText(ddaadropdown, config.DDAAType)
    end)
    
    return swapdropdown
@@ -622,7 +622,7 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
    buttonsubtitle:SetWidth(self.SymbolWidth+self.Inset)
    buttonsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    buttonsubtitle:SetNonSpaceWrap(true)
-   buttonsubtitle:SetJustifyH("LEFT")
+   buttonsubtitle:SetJustifyH("MIDDLE")
    buttonsubtitle:SetJustifyV("TOP")
    buttonsubtitle:SetText("Button")
    
@@ -631,7 +631,7 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
    bindingsubtitle:SetWidth(DropDownWidth)
    bindingsubtitle:SetPoint("TOPLEFT", buttonsubtitle, "TOPRIGHT", 0, 0)
    bindingsubtitle:SetNonSpaceWrap(true)
-   bindingsubtitle:SetJustifyH("LEFT")
+   bindingsubtitle:SetJustifyH("MIDDLE")
    bindingsubtitle:SetJustifyV("TOP")
    bindingsubtitle:SetText("Binding")
 
@@ -640,7 +640,7 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
    actionsubtitle:SetWidth(DropDownWidth)
    actionsubtitle:SetPoint("TOPLEFT", bindingsubtitle, "TOPRIGHT", 0, 0)
    actionsubtitle:SetNonSpaceWrap(true)
-   actionsubtitle:SetJustifyH("LEFT")
+   actionsubtitle:SetJustifyH("MIDDLE")
    actionsubtitle:SetJustifyV("TOP")
    actionsubtitle:SetText("Action")
 
@@ -649,7 +649,7 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
    hotbarsubtitle:SetWidth(DropDownWidth)
    hotbarsubtitle:SetPoint("TOPLEFT", actionsubtitle, "TOPRIGHT", 0, 0)
    hotbarsubtitle:SetNonSpaceWrap(true)
-   hotbarsubtitle:SetJustifyH("LEFT")
+   hotbarsubtitle:SetJustifyH("MIDDLE")
    hotbarsubtitle:SetJustifyV("TOP")
    hotbarsubtitle:SetText("Hotbar Action")
 
@@ -667,7 +667,7 @@ function ConfigUI:CreatePadBindingActions(configFrame, anchorFrame)
          buttonsubtitle:SetWidth(self.SymbolWidth+100)
          buttonsubtitle:SetPoint("TOPLEFT", buttonanchor, "BOTTOMLEFT", buttoninset, 0)
          buttonsubtitle:SetNonSpaceWrap(true)
-         buttonsubtitle:SetJustifyH("LEFT")
+         buttonsubtitle:SetJustifyH("MIDDLE")
          buttonsubtitle:SetJustifyV("TOP")
          buttonsubtitle:SetText(("|A:Gamepad_%s_64:24:24|a"):format(GamePadButtonShp[button]))
          
@@ -775,7 +775,7 @@ function ConfigUI:CreateSwapActions(configFrame, anchorFrame)
    buttonsuntitle:SetWidth(self.SymbolWidth+self.Inset)
    buttonsuntitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", -self.Inset, -self.ConfigSpacing)
    buttonsuntitle:SetNonSpaceWrap(true)
-   buttonsuntitle:SetJustifyH("LEFT")
+   buttonsuntitle:SetJustifyH("MIDDLE")
    buttonsuntitle:SetJustifyV("TOP")
    buttonsuntitle:SetText("Button")
    
@@ -784,7 +784,7 @@ function ConfigUI:CreateSwapActions(configFrame, anchorFrame)
    actionsubtitle:SetWidth(DropDownWidth)
    actionsubtitle:SetPoint("TOPLEFT", buttonsuntitle, "TOPRIGHT", 0, 0)
    actionsubtitle:SetNonSpaceWrap(true)
-   actionsubtitle:SetJustifyH("LEFT")
+   actionsubtitle:SetJustifyH("MIDDLE")
    actionsubtitle:SetJustifyV("TOP")
    actionsubtitle:SetText("Swap Action")
 
@@ -793,7 +793,7 @@ function ConfigUI:CreateSwapActions(configFrame, anchorFrame)
    hotbarsubtitle:SetWidth(DropDownWidth)
    hotbarsubtitle:SetPoint("TOPLEFT", actionsubtitle, "TOPRIGHT", 0, 0)
    hotbarsubtitle:SetNonSpaceWrap(true)
-   hotbarsubtitle:SetJustifyH("LEFT")
+   hotbarsubtitle:SetJustifyH("MIDDLE")
    hotbarsubtitle:SetJustifyV("TOP")
    hotbarsubtitle:SetText("Hotbar Swap Action")
 
@@ -809,7 +809,7 @@ function ConfigUI:CreateSwapActions(configFrame, anchorFrame)
          buttonsubtitle:SetWidth(self.SymbolWidth+100)
          buttonsubtitle:SetPoint("TOPLEFT", buttonanchor, "BOTTOMLEFT", buttoninset, 0)
          buttonsubtitle:SetNonSpaceWrap(true)
-         buttonsubtitle:SetJustifyH("LEFT")
+         buttonsubtitle:SetJustifyH("MIDDLE")
          buttonsubtitle:SetJustifyV("TOP")
          buttonsubtitle:SetText(("|A:Gamepad_%s_64:24:24|a"):format(GamePadButtonShp[button]))
          
