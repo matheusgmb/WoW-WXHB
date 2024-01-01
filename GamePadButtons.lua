@@ -41,6 +41,11 @@ local ModifierActions = {
          self:SetAttribute("macrotext1", "/sit")
       end
    ]],
+   ["EXTRAACTIONBUTTON1"] = [[ local down = ...
+      if down then
+         self:SetAttribute("macrotext1", "/click ExtraActionButton1")
+      end
+   ]],
    ["ASSISTTARGET"] = [[ local down = ...
       if down then
          self:SetAttribute("macrotext1", "/assist")
