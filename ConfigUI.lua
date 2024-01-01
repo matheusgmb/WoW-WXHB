@@ -523,7 +523,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
             info.func = PresetDropDownDemo_OnClick
             UIDropDownMenu_AddButton(info)
             if preset == i then 
-               UIDropDownMenu_SetText(self, config.Name)
+               UIDropDownMenu_SetText(self, CrossHotbar_DB.Presets[preset].Name)
             end
          end
       end

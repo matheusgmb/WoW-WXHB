@@ -41,6 +41,26 @@ local ModifierActions = {
          self:SetAttribute("macrotext1", "/sit")
       end
    ]],
+   ["MACRO CH_MACRO_1"] = [[ local down = ...
+      if down then
+         self:SetAttribute("macro", "CH_MACRO_1")
+      end
+   ]],
+   ["MACRO CH_MACRO_2"] = [[ local down = ...
+      if down then
+         self:SetAttribute("macro", "CH_MACRO_2")
+      end
+   ]],
+   ["MACRO CH_MACRO_3"] = [[ local down = ...
+      if down then
+         self:SetAttribute("macro", "CH_MACRO_3")
+      end
+   ]],
+   ["MACRO CH_MACRO_4"] = [[ local down = ...
+      if down then
+         self:SetAttribute("macro", "CH_MACRO_4")
+      end
+   ]],
    ["EXTRAACTIONBUTTON1"] = [[ local down = ...
       if down then
          self:SetAttribute("macrotext1", "/click ExtraActionButton1")
