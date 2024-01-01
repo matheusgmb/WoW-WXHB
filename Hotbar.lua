@@ -103,7 +103,7 @@ function HotbarMixin:OnLoad()
    self:AddPageHandler()
    self:AddBindingHandler()
    self:AddVisibilityHandler()
-   self:AddSwapHandler()
+   self:AddModHandler()
    self:AddExpandHandler()
    self:AddNextPageHandler()
    
@@ -208,21 +208,15 @@ function HotbarMixin:AddBindingHandler()
       local currentstate = self:GetAttribute("currentstate")
       local activestate = self:GetAttribute("activestate")
       local expanded = self:GetAttribute("expanded")
-      local swap = self:GetAttribute("swap")
+      local modifier = self:GetAttribute("modifier")
       if currentstate == activestate then
          for i = 1, 12 do
             local b = self:GetFrameRef('ActionButton'..i)
-            local key1 = b:GetAttribute('over_key1')
-            local key2 = b:GetAttribute('over_key2')
-            local key3 = b:GetAttribute('over_key3')
-            --print("Here", key1, key2, b:GetName())
-            if swap == 0 then
-               if key1 then b:SetBindingClick(true, key1, b:GetName(), "LeftButton") end
-            else
-               if key2 then b:SetBindingClick(true, key2, b:GetName(), "LeftButton") end
-            end
-            if expanded ~= 0 then
-               if key3 then b:SetBindingClick(true, key3, b:GetName(), "LeftButton") end
+            if b then 
+               local nbindings = b:GetAttribute('numbindings')
+               if expanded ~= 0 then modifier = nbindings end
+               local key = b:GetAttribute('over_key' .. modifier)
+               if key then b:SetBindingClick(true, key, b:GetName(), "LeftButton") end
             end
          end
       end
@@ -255,9 +249,9 @@ function HotbarMixin:AddVisibilityHandler()
    ]])
 end
 
-function HotbarMixin:AddSwapHandler()
-   self:SetAttribute('_onstate-hotbar-swap', [[
-      self:SetAttribute("swap", newstate)
+function HotbarMixin:AddModHandler()
+   self:SetAttribute('_onstate-hotbar-modifier', [[
+      self:SetAttribute("modifier", 1+newstate)
       self:RunAttribute("SetHotbarBindings")
    ]])
 end
@@ -517,7 +511,7 @@ function HotbarMixin:ApplyConfig()
    self.ExpandedAlpha1 = 0.5 
    self.DesatExpanded2 = 0.5
    self.EnableExpanded = true
-   self:AddSwapHandler()
+   self:AddModHandler()
 
    if config.WXHBType == "HIDE" then
       self.ExpandedAlpha1 = 0.0

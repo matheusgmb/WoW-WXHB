@@ -1,6 +1,8 @@
 local ADDON, addon = ...
 local config = addon.Config
 
+local GamePadModifierList = addon.GamePadModifierList
+
 local ActionList = {
    ["HOTBARBTN1"] = true,
    ["HOTBARBTN2"] = true,
@@ -16,7 +18,6 @@ local ActionList = {
    ["HOTBARBTN12"] = true
 }
 config:ConfigListAdd("HotbarActions", ActionList, "NONE")
-config:ConfigListAdd("HotbarSwapActions", ActionList, "NONE")
 
 CrossHotbarMixin = {
 }
@@ -63,24 +64,34 @@ end
 
 function CrossHotbarMixin:ApplyConfig()
    local bindings = {}
-
+   local nbindings = #GamePadModifierList + 2
    for action,value in pairs(ActionList) do
-      bindings[action] = {"", "", ""}
+      bindings[action] = {}
+      for i = 1,nbindings do
+         table.insert(bindings[action], "")
+      end
    end
-   
+
    for button, attributes in pairs(config.PadActions) do
       if ActionList[attributes.TRIGACTION] then
-         bindings[attributes.TRIGACTION][1] = attributes.BIND
-      end
-      if ActionList[attributes.SWAPTRIGACTION] then
-         bindings[attributes.SWAPTRIGACTION][2] = attributes.BIND
+         for i = 1,nbindings do
+            bindings[attributes.TRIGACTION][i] = attributes.BIND
+         end
       end
    end
-   
-   bindings["HOTBARBTN9"][3] = bindings["HOTBARBTN1"][1]
-   bindings["HOTBARBTN10"][3] = bindings["HOTBARBTN2"][1]
-   bindings["HOTBARBTN11"][3] = bindings["HOTBARBTN3"][1]
-   bindings["HOTBARBTN12"][3] = bindings["HOTBARBTN4"][1]
+
+   for i,modifier in ipairs(GamePadModifierList) do
+      for button, attributes in pairs(config.PadActions) do
+         if ActionList[ attributes[modifier .. "TRIGACTION"] ] then
+            bindings[ attributes[modifier .. "TRIGACTION"] ][1+i] = attributes.BIND
+         end
+      end
+   end
+
+   bindings["HOTBARBTN9"][nbindings] = bindings["HOTBARBTN1"][1]
+   bindings["HOTBARBTN10"][nbindings] = bindings["HOTBARBTN2"][1]
+   bindings["HOTBARBTN11"][nbindings] = bindings["HOTBARBTN3"][1]
+   bindings["HOTBARBTN12"][nbindings] = bindings["HOTBARBTN4"][1]
    
    self:OverrideKeyBindings(LHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", bindings)
    self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix, bindings)
@@ -100,7 +111,7 @@ end
 function CrossHotbarMixin:OnLoad()
    self:SetScale(0.90)
    self:AddStateHandler()
-   self:AddSwapHandler()
+   self:AddModifierHandler()
    self:AddExpandHandler()
    self:AddNextPageHandler()
    self:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -147,11 +158,11 @@ function CrossHotbarMixin:AddStateHandler()
   ]])
 end
 
-function CrossHotbarMixin:AddSwapHandler()
-   self:SetAttribute('_onstate-swap', [[
+function CrossHotbarMixin:AddModifierHandler()
+   self:SetAttribute('_onstate-modifier', [[
       for i=1,8 do
          local hotbar = self:GetFrameRef('Hotbar'..i)
-         hotbar:SetAttribute("state-hotbar-swap", newstate)
+         hotbar:SetAttribute("state-hotbar-modifier", newstate)
       end
    ]])
 end
@@ -189,15 +200,12 @@ function CrossHotbarMixin:OverrideKeyBindings(ActBar, ActionPrefix, BtnPrefix, C
                local index = button:GetID();
                local ActionName = string.gsub(button:GetName(), BtnPrefix, ActionPrefix)
                --local key1, key2 = GetBindingKey(ActionName)
-               local key1, key2, key3 = unpack(ConfigBindings["HOTBARBTN"..index])
-               
-               button:SetAttribute('over_key1', key1)
-               button:SetAttribute('over_key2', key2)
-               button:SetAttribute('over_key3', key3)
-
+               for i, key in ipairs(ConfigBindings["HOTBARBTN"..index]) do               
+                  button:SetAttribute('over_key'..i, key)
+               end
+               button:SetAttribute("numbindings", #ConfigBindings["HOTBARBTN"..index])
                button.HotKey:SetText(RANGE_INDICATOR);
                button.HotKey:Show();
-               --idx = idx + 1
             end
          end
       end

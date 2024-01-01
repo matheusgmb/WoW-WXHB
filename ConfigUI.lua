@@ -3,40 +3,57 @@ local ADDON, addon = ...
 local config = addon.Config
 local preset = CrossHotbar_DB.ActivePreset
 
-local GamePadButtonList = {
-   "FACER",
-   "FACEU",
-   "FACED",
-   "FACEL",
-   "DPADR",
-   "DPADU",
-   "DPADD",
-   "DPADL",
-   "STCKL",
-   "STCKR",
-   "SPADL",
-   "SPADR",
-   "TRIGL",
-   "TRIGR",
-   "PPADL",
-   "PPADR"
-}
+local GamePadButtonList = addon.GamePadButtonList
 
-local GamePadSwapButtonList = {
-   "FACER",
-   "FACEU",
-   "FACED",
-   "FACEL",
-   "DPADR",
-   "DPADU",
-   "DPADD",
-   "DPADL"
+local GamePadBindingList = {
+"PAD1",
+"PAD2",
+"PAD3",
+"PAD4",
+"PAD5",
+"PAD6",
+"PADDRIGHT",
+"PADDUP",
+"PADDDOWN",
+"PADDLEFT",
+"PADLSTICK",
+"PADRSTICK",
+"PADLSHOULDER",
+"PADRSHOULDER",
+"PADLTRIGGER",
+"PADRTRIGGER",
+"PADFOWARD",
+"PADBACK",
+"PADSYSTEM",
+"PADSOCIAL",
+"PADPADDLE1",
+"PADPADDLE2",
+"PADPADDLE3",
+"PADPADDLE4",
+"1", 
+"2", 
+"3", 
+"4" ,
+"5", 
+"6", 
+"7", 
+"8", 
+"9", 
+"0", 
+"-", 
+"=", 
+"[", 
+"]", 
+"\\",
+";",
+"'",
+",",
+".",
+"/",
+"SHIFT",
+"CTRL",
+"ALT"
 }
-
-local GamePadBindingList = {}
-for i,button in ipairs(GamePadButtonList) do
-   table.insert(GamePadBindingList, config.PadActions[button].BIND)
-end
 
    
 local GamePadButtonShp = {
@@ -96,44 +113,6 @@ local GamePadHotbarMap = {
    PPADR={"NONE"}
 }
 
-local GamePadSwapActionMap = {
-   FACER=addon.GamePadSwapActions,
-   FACEU=addon.GamePadSwapActions,
-   FACED=addon.GamePadSwapActions,
-   FACEL=addon.GamePadSwapActions,
-   DPADR=addon.GamePadSwapActions,
-   DPADU=addon.GamePadSwapActions,
-   DPADD=addon.GamePadSwapActions,
-   DPADL=addon.GamePadSwapActions,
-   STCKL={"NONE"},
-   STCKR={"NONE"},
-   SPADL={"NONE"},
-   SPADR={"NONE"},
-   TRIGL={"NONE"},
-   TRIGR={"NONE"},
-   PPADL={"NONE"},
-   PPADR={"NONE"}
-}
-
-local GamePadSwapHotbarMap = {
-   FACER=addon.HotbarSwapActions,
-   FACEU=addon.HotbarSwapActions,
-   FACED=addon.HotbarSwapActions,
-   FACEL=addon.HotbarSwapActions,
-   DPADR=addon.HotbarSwapActions,
-   DPADU=addon.HotbarSwapActions,
-   DPADD=addon.HotbarSwapActions,
-   DPADL=addon.HotbarSwapActions,
-   STCKL={"NONE"},
-   STCKR={"NONE"},
-   SPADL={"NONE"},
-   SPADR={"NONE"},
-   TRIGL={"NONE"},
-   TRIGR={"NONE"},
-   PPADL={"NONE"},
-   PPADR={"NONE"}
-}
-
 StaticPopupDialogs["CROSSHOTBAR_ENABLEGAMEPAD"] = {
    text = [[This config requires GamePad mode enabled.
 CVar GamePadEnable is 0.
@@ -153,21 +132,6 @@ Click "Enable" to enable or use the Console command:
 local Locale = {
    LeftModifierToolTip = "Configures left modifier (CTRL) button binding. This modifier enables the left side of the Cross Hotbar",
    RightModifierToolTip = "Configures right modifier (SHIFT) button binding. This modifier enables the right side of the Cross Hotbar",
-   SwapTypeToolTip=[[Sets the unsage of the swap modifier.
-
-"disable":
-       Swap button behaviour is unchanged.
-
-"DPad to Face":
-       DPad buttons will be map to the face buttons when held.
-
-"Expanded to Face":
-       Action buttons [9-12] will be map to the Face buttons when held.
-
-"DPad on Face only":
-       Action buttons [9-12] are bound to the DPad.
-       When held the DPad is mapped to the Face buttons with actions [5-8].
-]]
 }
 
 local function BindingDropDownDemo_OnClick(self, arg1, arg2, checked)
@@ -260,11 +224,6 @@ function ConfigUI:Refresh()
    if not ConfigUI.InterfaceFrame:IsVisible() then return end
    
    config:ProcessConfig(config)
-
-   GamePadBindingList = {}
-   for i,button in ipairs(GamePadButtonList) do
-      table.insert(GamePadBindingList, config.PadActions[button].BIND)
-   end
    
    for i,callback in ipairs(ConfigUI.RefreshCallbacks) do
       callback()
@@ -311,7 +270,7 @@ function ConfigUI:CreateFrame()
       anchor = ConfigUI:CreateApply(scrollChild, anchor)
       anchor = ConfigUI:CreateFeatures(scrollChild, anchor)
       anchor = ConfigUI:CreatePadBindingActions(scrollChild, anchor)
-      anchor = ConfigUI:CreateSwapActions(scrollChild, anchor)
+      --anchor = ConfigUI:CreateModifierActions(scrollChild, anchor)
       --anchor = ConfigUI:CreateTriggers(scrollChild, anchor)
       --anchor = ConfigUI:CreateBindings(scrollChild, anchor)
 
@@ -472,57 +431,15 @@ end
 function ConfigUI:CreateFeatures(configFrame, anchorFrame)
 
    --[[
-      Swap button bindings
+      Expanded button settings
    --]]    
 
    local ddaatypes = {"DPad + Action / DPad + Action", "DPad + DPad / Action + Action"}   
    local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/3
-   local swapsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   swapsubtitle:SetHeight(self.TextHeight)
-   swapsubtitle:SetWidth(DropDownWidth)
-   swapsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
-   swapsubtitle:SetNonSpaceWrap(true)
-   swapsubtitle:SetJustifyH("MIDDLE")
-   swapsubtitle:SetJustifyV("TOP")
-   swapsubtitle:SetText("Swap Type")
-   
-   local swapdropdown = CreateFrame("Frame", ADDON .. "SwapDropDownMenu", configFrame, "UIDropDownMenuTemplate")
-   swapdropdown:SetPoint("TOPLEFT", swapsubtitle, "BOTTOMLEFT", 0, 0)
-   
-   UIDropDownMenu_SetWidth(swapdropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(swapdropdown, "Type")
-
-   local function SwapDropDownDemo_OnClick(self, arg1, arg2, checked)
-      config.SwapType = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
-   end
-   
-   UIDropDownMenu_Initialize(swapdropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
-      if (level or 1) == 1 then
-         for i,swaptype in ipairs(addon.GamePadSwapModifiers) do
-            info.text, info.checked = swaptype, (config.SwapType == swaptype)
-            info.menuList, info.hasArrow = i, false
-            info.arg1 = swaptype
-            info.arg2 = self
-            info.func = SwapDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
-            if config.SwapType == swaptype then 
-               UIDropDownMenu_SetText(self, swaptype)
-            end
-         end
-      end
-   end)
-   
-   --[[
-      Expanded button settings
-   --]]    
-
    local expdsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    expdsubtitle:SetHeight(self.TextHeight)
    expdsubtitle:SetWidth(DropDownWidth)
-   expdsubtitle:SetPoint("TOPLEFT", swapsubtitle, "TOPRIGHT", 0, 0)
+   expdsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    expdsubtitle:SetNonSpaceWrap(true)
    expdsubtitle:SetJustifyH("MIDDLE")
    expdsubtitle:SetJustifyV("TOP")
@@ -599,15 +516,12 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
       end
    end)
 
-   ConfigUI:AddToolTip(swapdropdown, Locale.SwapTypeToolTip, false)
-   
    table.insert(self.RefreshCallbacks, function()
-                   UIDropDownMenu_SetText(swapdropdown, config.SwapType)
                    UIDropDownMenu_SetText(expddropdown, config.WXHBType)
                    UIDropDownMenu_SetText(ddaadropdown, config.DDAAType)
    end)
    
-   return swapdropdown
+   return expddropdown
 end
 
 --[[
@@ -767,7 +681,7 @@ end
    Pad swap actions.
 --]]
 
-function ConfigUI:CreateSwapActions(configFrame, anchorFrame)
+function ConfigUI:CreateModifierActions(configFrame, anchorFrame)
    local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset - self.SymbolWidth - self.Inset)/3
    
    local buttonsuntitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")

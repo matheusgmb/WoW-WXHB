@@ -24,7 +24,8 @@
       <Attribute name="triggerstate" type="number" value="4"/>
       <Attribute name="shoulderstate" type="number" value="4"/>
       <Attribute name="paddlestate" type="number" value="4"/>
-      <Attribute name="swap" type="number" value="0"/>
+      <Attribute name="modifier" type="number" value="0"/>
+      <Attribute name="numbindings" type="number" value="0"/>
       <Attribute name="expanded" type="number" value="0"/>
       <Attribute name="pageindex" type="number" value="1"/>
       <Attribute name="pageprefix" type="string" value=""/>

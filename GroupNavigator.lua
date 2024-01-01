@@ -1,6 +1,9 @@
 local ADDON, addon = ...
 local config = addon.Config
 
+local GamePadButtonList = addon.GamePadButtonList
+local GamePadModifierList = addon.GamePadModifierList
+
 local ActionList = {
    ["UNITNAVUP"] = true,
    ["UNITNAVDOWN"] = true,
@@ -9,7 +12,7 @@ local ActionList = {
    ["CLEARTARGETING"] = true
 }
 config:ConfigListAdd("GamePadActions", ActionList, "NONE")
-config:ConfigListAdd("GamePadSwapActions", ActionList, "NONE")
+config:ConfigListAdd("GamePadModifierActions", ActionList, "NONE")
 
 local GroupNavigatorMixin = {
    SoftTargetFrame = CrossHotbarAddon_GroupNavigator_SoftTarget,
@@ -60,69 +63,74 @@ function GroupNavigatorMixin:OnEvent(event, ...)
 end
 
 function GroupNavigatorMixin:AddStateHandlers()
-   self:SetAttribute("UNITNAVUP", "")
-   self:SetAttribute("UNITNAVDOWN", "")
-   self:SetAttribute("UNITNAVLEFT", "")
-   self:SetAttribute("UNITNAVRIGHT", "")
-   self:SetAttribute("CLEARTARGETING", "")
-   self:SetAttribute("SWAPUNITNAVUP", "")
-   self:SetAttribute("SWAPUNITNAVDOWN", "")
-   self:SetAttribute("SWAPUNITNAVLEFT", "")
-   self:SetAttribute("SWAPUNITNAVRIGHT", "")
-   self:SetAttribute("SWAPCLEARTARGETING", "")
-
-   local SetActionBindings = [[
-      self:ClearBindings()
-      local binding = self:GetAttribute("UNITNAVUP")
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button4") end
-      binding = self:GetAttribute("UNITNAVDOWN")                  
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button5") end
-      binding = self:GetAttribute("UNITNAVLEFT")                  
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "LeftButton") end
-      binding = self:GetAttribute("UNITNAVRIGHT")
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "RightButton") end
-      binding = self:GetAttribute("CLEARTARGETING")                  
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "MiddleButton") end
-   ]]
+   self:SetAttribute("modstate", 0)
+   self:SetAttribute("modname", "")
    
-   local SetSwapActionBindings = [[
-      local binding = self:GetAttribute("SWAPUNITNAVUP")
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button4") end
-      binding = self:GetAttribute("SWAPUNITNAVDOWN")                  
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button5") end
-      binding = self:GetAttribute("SWAPUNITNAVLEFT")                  
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "LeftButton") end
-      binding = self:GetAttribute("SWAPUNITNAVRIGHT")
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "RightButton") end
-      binding = self:GetAttribute("SWAPCLEARTARGETING")
-      if binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "MiddleButton") end
-   ]]
+   self:SetAttribute("SetActionBindings",  [[
+      local prefix = ...
+      local binding = self:GetAttribute(prefix .. "UNITNAVUP")
+      if binding and binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button4") end
+      binding = self:GetAttribute(prefix .. "UNITNAVDOWN")                  
+      if binding and binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button5") end
+      binding = self:GetAttribute(prefix .. "UNITNAVLEFT")                  
+      if binding and binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "LeftButton") end
+      binding = self:GetAttribute(prefix .. "UNITNAVRIGHT")
+      if binding and binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "RightButton") end
+      binding = self:GetAttribute(prefix .. "CLEARTARGETING")                  
+      if binding and binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "MiddleButton") end
+   ]])
 
-   self:SetAttribute("SetActionBindings",
-                     SetActionBindings)
-   self:SetAttribute("SetSwapActionBindings",
-                     SetSwapActionBindings)
-   
-   self:SetAttribute("_onstate-swap", [[
-      self:SetAttribute("swap", newstate)
-      local trigger = self:GetAttribute("trigger")
-      if trigger == 4 then 
-         if newstate == 1 then
-            self:RunAttribute("SetSwapActionBindings")
+   self:SetAttribute("_onstate-trigger", [[
+      local modstate = self:GetAttribute("modstate")
+      if newstate ~= 4 then
+         if modstate == 0 then
+            self:SetAttribute("modstate", 1)
+         end
+      else
+         if modstate == 1 then
+            self:SetAttribute("modstate", 0)
+         end
+         local modname = self:GetAttribute("modname")
+         self:RunAttribute("SetActionBindings", modname)
+      end
+   ]])
+
+   self:SetAttribute("_onstate-shoulder", [[
+      local modstate = self:GetAttribute("modstate")
+      if modstate == 0 or modstate == 2 then
+         if newstate == 6 or newstate == 3 or newstate == 2 then
+            self:SetAttribute("modstate", 2)
+            self:SetAttribute("modname", "SPADL")
+            self:RunAttribute("SetActionBindings", "SPADL")
+         elseif newstate == 7 or newstate == 5 or newstate == 1 then
+            self:SetAttribute("modstate", 2)
+            self:SetAttribute("modname", "SPADR")
+            self:RunAttribute("SetActionBindings", "SPADL")
          else
-            self:RunAttribute("SetActionBindings")
+            self:ClearBindings()
+            self:SetAttribute("modstate", 0)
+            self:SetAttribute("modname", "")
+            self:RunAttribute("SetActionBindings", "")
          end
       end
    ]])
    
-   self:SetAttribute("_onstate-trigger", [[
-      self:SetAttribute("trigger", newstate)
-      local swap = self:GetAttribute("swap")
-      if newstate == 4 then 
-         if swap == 1 then
-            self:RunAttribute("SetSwapActionBindings")
+   self:SetAttribute("_onstate-paddle", [[
+      local modstate = self:GetAttribute("modstate")
+      if modstate == 0 or modstate == 3 then
+         if newstate == 6 or newstate == 3 or newstate == 2 then
+            self:SetAttribute("modstate", 3)
+            self:SetAttribute("modname", "PPADL")
+            self:RunAttribute("SetActionBindings", "PPADL")
+         elseif newstate == 7 or newstate == 5 or newstate == 1 then
+            self:SetAttribute("modstate", 3)
+            self:SetAttribute("modname", "SPADR")
+            self:RunAttribute("SetActionBindings", "PPADL")
          else
-            self:RunAttribute("SetActionBindings")
+            self:ClearBindings()
+            self:SetAttribute("modstate", 0)
+            self:SetAttribute("modname", "")
+            self:RunAttribute("SetActionBindings", "")
          end
       end
    ]])
@@ -131,6 +139,9 @@ end
 function GroupNavigatorMixin:ClearConfig()
    for action in pairs(ActionList) do
       self:SetAttribute(action, "")
+      for i,modifier in ipairs(GamePadModifierList) do
+         self:SetAttribute(modifier .. action, "")
+      end
    end
 end
 
@@ -141,11 +152,14 @@ function GroupNavigatorMixin:ApplyConfig()
       if ActionList[ attributes.ACTION ] then
          self:SetAttribute(attributes.ACTION, attributes.BIND)
       end
-      if ActionList[ attributes.SWAPACTION ] then
-         self:SetAttribute("Swap"..attributes.SWAPACTION, attributes.BIND)
+      
+      for i,modifier in ipairs(GamePadModifierList) do
+         if ActionList[ attributes[modifier .. "ACTION"] ] then
+            self:SetAttribute(modifier .. attributes[modifier .. "ACTION"], attributes.BIND)
+         end
       end
    end
-   self:Execute([[ self:RunAttribute("SetActionBindings") ]])
+   self:Execute([[ self:ClearBindings(); self:RunAttribute("SetActionBindings", "") ]])
 end
 
 function GroupNavigatorMixin:updateRoster() 
@@ -529,8 +543,6 @@ local CreateGroupNavigator = function(parent)
    GroupNavigator:SetAttribute("group_change", "true")
    GroupNavigator:SetAttribute("group_units", "[player party1 party2 party3 party4]")
    GroupNavigator:SetAttribute("macrotext3", "/cleartarget\n/stopspelltarget\n")
-   GroupNavigator:SetAttribute("trigger", 4)
-   GroupNavigator:SetAttribute("swap", 0)
 
    GroupNavigator:AddStateHandlers()
 
