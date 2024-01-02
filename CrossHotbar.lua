@@ -23,43 +23,18 @@ CrossHotbarMixin = {
 }
 
 function CrossHotbarMixin:SetupCrosshotbar()
-   self.LHotbar = { LHotbar1, LHotbar2, LHotbar3 }
-   self.RHotbar = { RHotbar1, RHotbar2, RHotbar3 }
-   self.MHotbar = { LRHotbar1, RLHotbar1 }
+   self.LHotbar = { WXHBLHotbar1, WXHBLHotbar2, WXHBLHotbar3 }
+   self.RHotbar = { WXHBRHotbar1, WXHBRHotbar2, WXHBRHotbar3 }
+   self.MHotbar = { WXHBLRHotbar1, WXHBRLHotbar1 }
    
-   SecureHandlerSetFrameRef(self, 'Hotbar1', LHotbar1)
-   SecureHandlerSetFrameRef(self, 'Hotbar2', LHotbar2)
-   SecureHandlerSetFrameRef(self, 'Hotbar3', LHotbar3)
-   SecureHandlerSetFrameRef(self, 'Hotbar4', RHotbar1)
-   SecureHandlerSetFrameRef(self, 'Hotbar5', RHotbar2)
-   SecureHandlerSetFrameRef(self, 'Hotbar6', RHotbar3)
-   SecureHandlerSetFrameRef(self, 'Hotbar7', LRHotbar1)
-   SecureHandlerSetFrameRef(self, 'Hotbar8', RLHotbar1)
-   
-   if GetCVar('GamePadEnable') == "1" then
-      print("Setting GamePad CVars")
-      SetCVar('GamePadEnable', 1);
-      SetCVar('GamePadEmulateShift', 'NONE');
-      SetCVar('GamePadEmulateCtrl', 'NONE');
-      SetCVar('GamePadEmulateAlt', 'NONE');
-      SetCVar('GamePadCursorLeftClick', 'PAD6');
-      SetCVar('GamePadCursorRightClick', 'PADBACK');
-      SetCVar('GamePadCameraYawSpeed', 3);
-      SetCVar('GamePadCameraPitchSpeed', 3);
-      SetCVar('GamePadSingleActiveID', 1)
-      --[[
-         for _, i in ipairs(C_GamePad.GetAllDeviceIDs()) do
-   
-   local device = C_GamePad.GetDeviceRawState(i)
-   if(device) then
-      print(i .. " " .. table.concat(device[1]))
-   end
-   print(device)
-         end
-      --]]
-   end
-   
-   print("CrossHotbar Setup")
+   SecureHandlerSetFrameRef(self, 'Hotbar1', WXHBLHotbar1)
+   SecureHandlerSetFrameRef(self, 'Hotbar2', WXHBLHotbar2)
+   SecureHandlerSetFrameRef(self, 'Hotbar3', WXHBLHotbar3)
+   SecureHandlerSetFrameRef(self, 'Hotbar4', WXHBRHotbar1)
+   SecureHandlerSetFrameRef(self, 'Hotbar5', WXHBRHotbar2)
+   SecureHandlerSetFrameRef(self, 'Hotbar6', WXHBRHotbar3)
+   SecureHandlerSetFrameRef(self, 'Hotbar7', WXHBLRHotbar1)
+   SecureHandlerSetFrameRef(self, 'Hotbar8', WXHBRLHotbar1)
 end
 
 function CrossHotbarMixin:ApplyConfig()
@@ -93,10 +68,10 @@ function CrossHotbarMixin:ApplyConfig()
    bindings["HOTBARBTN11"][nbindings] = bindings["HOTBARBTN3"][1]
    bindings["HOTBARBTN12"][nbindings] = bindings["HOTBARBTN4"][1]
    
-   self:OverrideKeyBindings(LHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", bindings)
-   self:OverrideKeyBindings(RHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", RHotbar1.BtnPrefix, bindings)
-   self:OverrideKeyBindings(LRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", LRHotbar1.BtnPrefix, bindings)
-   self:OverrideKeyBindings(RLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", RLHotbar1.BtnPrefix, bindings)
+   self:OverrideKeyBindings(WXHBLHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", bindings)
+   self:OverrideKeyBindings(WXHBRHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", WXHBRHotbar1.BtnPrefix, bindings)
+   self:OverrideKeyBindings(WXHBLRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", WXHBLRHotbar1.BtnPrefix, bindings)
+   self:OverrideKeyBindings(WXHBRLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", WXHBRLHotbar1.BtnPrefix, bindings)
 
    local hotbars = { self:GetChildren() }
    for k,hotbar in pairs(hotbars) do
@@ -110,8 +85,9 @@ end
 
 function CrossHotbarMixin:OnLoad()
    self:SetScale(0.90)
-   self:AddStateHandler()
-   self:AddModifierHandler()
+   self:AddTriggerHandler()
+   self:AddShoulderHandler()
+   self:AddPaddleHandler()
    self:AddExpandHandler()
    self:AddNextPageHandler()
    self:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -133,7 +109,7 @@ function CrossHotbarMixin:OnEvent(event, ...)
    end
 end
 
-function CrossHotbarMixin:AddStateHandler()
+function CrossHotbarMixin:AddTriggerHandler()
    self:SetAttribute('_onstate-trigger', [[
       self:SetAttribute("triggerstate", newstate)
 
@@ -158,23 +134,49 @@ function CrossHotbarMixin:AddStateHandler()
   ]])
 end
 
-function CrossHotbarMixin:AddModifierHandler()
-   self:SetAttribute('_onstate-modifier', [[
+function CrossHotbarMixin:AddShoulderHandler()
+   self:SetAttribute('_onstate-shoulder', [[
+      local index = 0
+      if newstate == 6 or newstate == 3 or newstate == 2 then
+         index = 1
+      end
+      if newstate == 7 or newstate == 5 or newstate == 1 then
+         index = 2
+      end
       for i=1,8 do
          local hotbar = self:GetFrameRef('Hotbar'..i)
-         hotbar:SetAttribute("state-hotbar-modifier", newstate)
+         hotbar:SetAttribute("state-hotbar-modifier", index)
+      end
+   ]])
+end
+
+function CrossHotbarMixin:AddPaddleHandler()
+   self:SetAttribute('_onstate-paddle', [[
+      local index = 0
+      if newstate == 6 or newstate == 3 or newstate == 2 then
+         index = 3
+      end
+      if newstate == 7 or newstate == 5 or newstate == 1 then
+         index = 4
+      end
+      for i=1,8 do
+         local hotbar = self:GetFrameRef('Hotbar'..i)
+         hotbar:SetAttribute("state-hotbar-modifier", index)
       end
    ]])
 end
 
 function CrossHotbarMixin:AddExpandHandler()
    self:SetAttribute('_onstate-expanded', [[
-      local hotbarstate = self:GetAttribute("triggerstate")
-      if hotbarstate == 4 then               
-         self:SetAttribute("expanded", newstate)
-         for i=1,8 do
-            local hotbar = self:GetFrameRef('Hotbar'..i)
-            hotbar:SetAttribute("state-hotbar-expanded", newstate)
+      local expanded = self:GetAttribute("expanded")
+      if expanded == 0 then
+         local hotbarstate = self:GetAttribute("triggerstate")
+         if hotbarstate == 4 then               
+            self:SetAttribute("expanded", newstate)
+            for i=1,8 do
+               local hotbar = self:GetFrameRef('Hotbar'..i)
+               hotbar:SetAttribute("state-hotbar-expanded", newstate)
+            end
          end
       end
   ]])

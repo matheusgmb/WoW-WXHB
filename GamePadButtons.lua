@@ -28,6 +28,12 @@ local ActionList = {
    ["TARGETPREVIOUSFRIEND"] = true,
    ["TARGETNEARESTENEMY"] = true,
    ["TARGETPREVIOUSENEMY"] = true,
+   ["TARGETLASTTARGET"] = true,
+   ["TARGETSELF"] = true,
+   ["TARGETPARTYMEMBER1"] = true,
+   ["TARGETPARTYMEMBER2"] = true,
+   ["TARGETPARTYMEMBER3"] = true,
+   ["TARGETPARTYMEMBER4"] = true,
    ["MACRO CH_MACRO_1"] = true,
    ["MACRO CH_MACRO_2"] = true,
    ["MACRO CH_MACRO_3"] = true,
@@ -76,6 +82,11 @@ local ModifierActions = {
          self:SetAttribute("macrotext1", "/targetlastenemy")
       end
    ]],
+   ["TARGETLASTTARGET"] = [[local down = ...
+      if down then
+         self:SetAttribute("macrotext1", "/targetlasttarget")
+      end
+   ]],
    ["TARGETNEARESTENEMY"] = [[local down = ...
       if down then
          self:SetAttribute("macrotext1", "/targetenemy")
@@ -84,6 +95,31 @@ local ModifierActions = {
    ["TARGETPREVIOUSENEMY"] = [[local down = ...
       if down then
          self:SetAttribute("macrotext1", "/targetenemy 1")
+      end
+   ]],
+   ["TARGETSELF"] = [[local down = ...
+      if down then
+         self:SetAttribute("macrotext1", "/target player")
+      end
+   ]],
+   ["TARGETPARTYMEMBER1"] = [[local down = ...
+      if down then
+         self:SetAttribute("macrotext1", "/target party1")
+      end
+   ]],
+   ["TARGETPARTYMEMBER2"] = [[local down = ...
+      if down then
+         self:SetAttribute("macrotext1", "/target party2")
+      end
+   ]],
+   ["TARGETPARTYMEMBER3"] = [[local down = ...
+      if down then
+         self:SetAttribute("macrotext1", "/target party3")
+      end
+   ]],
+   ["TARGETPARTYMEMBER4"] = [[local down = ...
+      if down then
+         self:SetAttribute("macrotext1", "/target party4")
       end
    ]],
    ["SHEATH"] = [[local down = ...
@@ -157,6 +193,34 @@ local ModifierActions = {
 }
 config:ConfigListAdd("GamePadModifierActions", ModifierActions, "NONE")
 
+local GamePadButtonsMixin = {
+   LeftTriggerButton = nil,
+   RightTriggerButton = nil,
+   LeftShoulderButton = nil,
+   RightShoulderButton = nil,
+   LeftPaddleButton = nil,
+   RightPaddleButton = nil
+}
+
+function GamePadButtonsMixin:ToggleSheath()
+   ToggleSheath()
+end
+
+function GamePadButtonsMixin:ZoomIn(down)
+   if down then
+      MoveViewInStart(1.0, 0, true);
+   else
+      CameraZoomIn(1.0)
+   end
+end
+
+function GamePadButtonsMixin:ZoomOut(down)
+   if down then
+      MoveViewOutStart(1.0, 0, true);
+   else
+      CameraZoomOut(1.0)
+   end
+end
 
 local SetButtonPairState = [[
    local button, down, pairname  = ...
@@ -165,9 +229,8 @@ local SetButtonPairState = [[
    if button == "LeftButton" then type = 2 end
    if button == "RightButton" then type = 3 end
 
-   local Crosshotbar = self:GetFrameRef('Crosshotbar')
    local GamePadButtons = self:GetFrameRef('GamePadButtons')
-   local GroupNavigator = self:GetFrameRef('GroupNavigator')
+
    if GamePadButtons ~= nil and type ~= 0 then
       local state = GamePadButtons:GetAttribute(pairname.."state")
 
@@ -197,8 +260,6 @@ local SetButtonPairState = [[
       if found then
          state = a - b + 4
          GamePadButtons:SetAttribute("state-"..pairname, state)
-         if GroupNavigator ~= nil then GroupNavigator:SetAttribute("state-"..pairname, state) end
-         if Crosshotbar ~= nil then Crosshotbar:SetAttribute("state-"..pairname, state) end
       else
          print("Error " .. state .. " " .. a .. " " .. b .. " " .. type)
       end
@@ -208,72 +269,16 @@ local SetButtonPairState = [[
 local SetButtonExpanded = [[
    local button = ...
 
-   local type = 0
-   if button == "LeftButton" then type = 2 end
-   if button == "RightButton" then type = 3 end
-
-   local Crosshotbar = self:GetFrameRef('Crosshotbar')
-
-   if Crosshotbar ~= nill and type ~= 0 then
-      local expanded = Crosshotbar:GetAttribute("expanded")
-      if expanded == 0 then
-         if type == 2 then
-            Crosshotbar:SetAttribute("state-expanded", 1)
-         else
-            Crosshotbar:SetAttribute("state-expanded", 2)
-         end
+   local GamePadButtons = self:GetFrameRef('GamePadButtons')
+   if GamePadButtons ~= nill then
+      if button == "LeftButton" then
+         GamePadButtons:SetAttribute("state-expanded", 1)
+      end
+      if button == "RightButton" then
+         GamePadButtons:SetAttribute("state-expanded", 2)
       end
    end
 ]]
-
-local SetButtonModified = [[
-   local modifier, newstate = ...
-
-   local index = modifier
-   if newstate == 6 or newstate == 3 or newstate == 2 then
-      index = index + 1
-   end
-   if newstate == 7 or newstate == 5 or newstate == 1 then
-      index = index + 2
-   end
-   if newstate == 4 then
-      index = 0
-   end
-
-   local Crosshotbar = self:GetFrameRef('Crosshotbar')
-   if Crosshotbar ~= nil then
-      Crosshotbar:SetAttribute("state-modifier", index)
-   end
-]]
-
-local GamePadButtonsMixin = {
-   LeftTriggerButton = nil,
-   RightTriggerButton = nil,
-   LeftShoulderButton = nil,
-   RightShoulderButton = nil,
-   LeftPaddleButton = nil,
-   RightPaddleButton = nil
-}
-
-function GamePadButtonsMixin:ToggleSheath()
-   ToggleSheath()
-end
-
-function GamePadButtonsMixin:ZoomIn(down)
-   if down then
-      MoveViewInStart(1.0, 0, true);
-   else
-      CameraZoomIn(1.0)
-   end
-end
-
-function GamePadButtonsMixin:ZoomOut(down)
-   if down then
-      MoveViewOutStart(1.0, 0, true);
-   else
-      CameraZoomOut(1.0)
-   end
-end
 
 function GamePadButtonsMixin:CreatePairButton(ButtonName)
    local Button = CreateFrame("Button", ADDON .. ButtonName .. "ButtonFrame",
@@ -377,13 +382,13 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
          local binding = self:GetAttribute(modname .. "TRIGBINDING")
          if binding ~= nil and binding ~= "" then
             local action = self:GetAttribute(modname .. "TRIGACTION")
-            self:SetAttribute("ACTION", action) 
+            self:SetAttribute("ACTIVE", action) 
             self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
          else 
             local binding = self:GetAttribute("TRIGBINDING")
             if binding ~= nil and binding ~= "" then
                local action = self:GetAttribute("TRIGACTION")
-               self:SetAttribute("ACTION", action) 
+               self:SetAttribute("ACTIVE", action) 
                self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
             end
          end
@@ -396,7 +401,7 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
             local binding = self:GetAttribute(modname .. "BINDING")
             if binding ~= nil and binding ~= "" then
                local action = self:GetAttribute(modname .. "ACTION")
-               self:SetAttribute("ACTION", action) 
+               self:SetAttribute("ACTIVE", action) 
                self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
             end
          end
@@ -411,7 +416,7 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
             local binding = self:GetAttribute("SPADLBINDING")
             if binding ~= nil and binding ~= "" then
                local action = self:GetAttribute("SPADLACTION")
-               self:SetAttribute("ACTION", action)
+               self:SetAttribute("ACTIVE", action)
                self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
             end
          elseif newstate == 7 or newstate == 5 or newstate == 1 then
@@ -420,7 +425,7 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
             local binding = self:GetAttribute("SPADRBINDING")
             if binding ~= nil and binding ~= "" then
                local action = self:GetAttribute("SPADRACTION")
-               self:SetAttribute("ACTION", action)
+               self:SetAttribute("ACTIVE", action)
                self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
             end
          else
@@ -429,13 +434,19 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
             if trigstate == 4 then
                self:SetAttribute("modstate", 0)
                self:SetAttribute("modname", "")
+               local binding = self:GetAttribute("BINDING")
+               if binding ~= nil and binding ~= "" then
+                  local action = self:GetAttribute("ACTION")
+                  self:SetAttribute("ACTIVE", action) 
+                  self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
+               end
             else
                self:SetAttribute("modstate", 1)
                self:SetAttribute("modname", "")
                local binding = self:GetAttribute("TRIGBINDING")
                if binding ~= nil and binding ~= "" then
                   local action = self:GetAttribute("TRIGACTION")
-                  self:SetAttribute("ACTION", action) 
+                  self:SetAttribute("ACTIVE", action) 
                   self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
                end
             end
@@ -451,7 +462,7 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
             local binding = self:GetAttribute("PPADLBINDING")
             if binding ~= nil and binding ~= "" then
                local action = self:GetAttribute("PPADLACTION")
-               self:SetAttribute("ACTION", action)
+               self:SetAttribute("ACTIVE", action)
                self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
             end
          elseif  newstate == 7 or newstate == 5 or newstate == 1 then
@@ -460,7 +471,7 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
             local binding = self:GetAttribute("PPADRBINDING")
             if binding ~= nil and binding ~= "" then
                local action = self:GetAttribute("PPADRACTION")
-               self:SetAttribute("ACTION", action)
+               self:SetAttribute("ACTIVE", action)
                self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
             end
          else
@@ -469,13 +480,19 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
             if trigstate == 4 then
                self:SetAttribute("modstate", 0)
                self:SetAttribute("modname", "")
+               local binding = self:GetAttribute("BINDING")
+               if binding ~= nil and binding ~= "" then
+                  local action = self:GetAttribute("ACTION")
+                  self:SetAttribute("ACTIVE", action) 
+                  self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
+               end
             else
                self:SetAttribute("modstate", 1)
                self:SetAttribute("modname", "")
                local binding = self:GetAttribute("TRIGBINDING")
                if binding ~= nil and binding ~= "" then
                   local action = self:GetAttribute("TRIGACTION")
-                  self:SetAttribute("ACTION", action) 
+                  self:SetAttribute("ACTIVE", action) 
                   self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
                end
             end
@@ -483,10 +500,10 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
       end
    ]])
    SecureHandlerWrapScript(self[Name.."Button"], "OnClick", self[Name.."Button"], [[
-      if self:GetAttribute("ACTION")  then
-         local action = self:GetAttribute("ACTION")
+      if self:GetAttribute("ACTIVE")  then
+         local action = self:GetAttribute("ACTIVE")
          --print(action)
-         self:RunAttribute("ACTION", down)
+         self:RunAttribute("ACTIVE", down)
       end
    ]])
 end
@@ -495,13 +512,22 @@ function GamePadButtonsMixin:AddTriggerHandler()
    self:SetAttribute("triggerstate", 4)
    self:SetAttribute("_onstate-trigger", [[
       self:SetAttribute("triggerstate", newstate)
-
       local nbuttons = self:GetAttribute("NumModifierButtons")
       for i = 1,nbuttons do
          local button = self:GetFrameRef('ModifierButton'..i)
          if button ~= nil then
             button:SetAttribute("state-trigger", newstate)
          end
+      end
+      
+      local GroupNavigator = self:GetFrameRef('GroupNavigator')
+      if GroupNavigator ~= nil then
+         GroupNavigator:SetAttribute("state-trigger", newstate)
+      end
+      
+      local Crosshotbar = self:GetFrameRef('Crosshotbar')
+      if Crosshotbar ~= nil then
+         Crosshotbar:SetAttribute("state-trigger", newstate)
       end
    ]])
 end
@@ -510,9 +536,6 @@ function GamePadButtonsMixin:AddShoulderHandler()
    self:SetAttribute("shoulderstate", 4)
    self:SetAttribute("_onstate-shoulder", [[
       self:SetAttribute("shoulderstate", newstate)
-
-      self:RunAttribute("SetButtonModified", 0, newstate)
-
       local nbuttons = self:GetAttribute("NumModifierButtons")
       for i = 1,nbuttons do
          local button = self:GetFrameRef('ModifierButton'..i)
@@ -521,6 +544,15 @@ function GamePadButtonsMixin:AddShoulderHandler()
          end
       end
 
+      local GroupNavigator = self:GetFrameRef('GroupNavigator')
+      if GroupNavigator ~= nil then
+         GroupNavigator:SetAttribute("state-shoulder", newstate)
+      end
+      
+      local Crosshotbar = self:GetFrameRef('Crosshotbar')
+      if Crosshotbar ~= nil then
+         Crosshotbar:SetAttribute("state-shoulder", newstate)
+      end
    ]])
 end
 
@@ -528,15 +560,33 @@ function GamePadButtonsMixin:AddPaddleHandler()
    self:SetAttribute("paddlestate", 4)
    self:SetAttribute("_onstate-paddle", [[
       self:SetAttribute("paddlestate", newstate)
-
-      self:RunAttribute("SetButtonModified", 2, newstate)
-
       local nbuttons = self:GetAttribute("NumModifierButtons")
       for i = 1,nbuttons do
          local button = self:GetFrameRef('ModifierButton'..i)
          if button ~= nil then
             button:SetAttribute("state-paddle", newstate)
          end
+      end
+      
+      local GroupNavigator = self:GetFrameRef('GroupNavigator')
+      if GroupNavigator ~= nil then
+         GroupNavigator:SetAttribute("state-paddle", newstate)
+      end
+      
+      local Crosshotbar = self:GetFrameRef('Crosshotbar')
+      if Crosshotbar ~= nil then
+         Crosshotbar:SetAttribute("state-paddle", newstate)
+      end
+   ]])
+end
+
+function GamePadButtonsMixin:AddExpandedHandler()
+   self:SetAttribute("expandstate", 4)
+   self:SetAttribute("_onstate-expanded", [[
+      self:SetAttribute("expandstate", newstate)
+      local Crosshotbar = self:GetFrameRef('Crosshotbar')
+      if Crosshotbar ~= nil then
+         Crosshotbar:SetAttribute("state-expanded", newstate)
       end
    ]])
 end
@@ -549,6 +599,7 @@ function GamePadButtonsMixin:OnLoad()
    self:AddTriggerHandler()
    self:AddShoulderHandler()
    self:AddPaddleHandler()
+   self:AddExpandedHandler()
    
    self:CreateLeftTriggerButton()
    self:CreateRightTriggerButton()
@@ -578,6 +629,30 @@ function GamePadButtonsMixin:OnEvent(event, ...)
    end
 end
 
+function GamePadButtonsMixin:SetupGamePad()
+   if config.GPCVars then
+      SetCVar('GamePadEnable', config.GPEnable);
+      SetCVar('GamePadEmulateShift', 'NONE');
+      SetCVar('GamePadEmulateCtrl', 'NONE');
+      SetCVar('GamePadEmulateAlt', 'NONE');
+      SetCVar('GamePadCursorLeftClick', 'PAD6');
+      SetCVar('GamePadCursorRightClick', 'PADBACK');
+      SetCVar('GamePadCameraYawSpeed', config.GPYawSpeed);
+      SetCVar('GamePadCameraPitchSpeed', config.GPPitchSpeed);
+      SetCVar('GamePadSingleActiveID', config.GPDeviceID)
+      --[[
+      for _, i in ipairs(C_GamePad.GetAllDeviceIDs()) do
+         
+         local device = C_GamePad.GetDeviceRawState(i)
+         if(device) then
+            print(i .. " " .. table.concat(device[1]))
+         end
+         print(device)
+      end
+      --]]
+   end
+end
+
 function GamePadButtonsMixin:ClearConfig()
    for button, attributes in pairs(config.PadActions) do
       self:SetAttribute(button, "")
@@ -591,6 +666,7 @@ function GamePadButtonsMixin:ClearConfig()
 end
 
 function GamePadButtonsMixin:ApplyConfig()
+   self:SetupGamePad()
    self:ClearConfig()
    for button, attributes in pairs(config.PadActions) do
       if ActionList[attributes.ACTION] then

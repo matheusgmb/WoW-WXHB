@@ -1,8 +1,10 @@
+## Interface: 100200
+
 ## Title: CrossHotbar
-## Notes: Implements a CrossHotbar as an actionbar.
-## Author: ChainStratagem
 ## Version: 1.0
-## SavedVariables: 
+## Notes: Implements a WXHB Crosshotbar as an actionbar.
+## Author: ChainStratagem (phodoe) - https://github.com/ChainStratagem/CrossHotbar
+## SavedVariables: CrossHotbar_DB
 
 Config.lua
 GamePadButtons.lua

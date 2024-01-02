@@ -264,9 +264,9 @@ function ConfigUI:Refresh()
 end
 
 function ConfigUI:Apply()  
-   if GetCVar('GamePadEnable') == "0" then
-      StaticPopup_Show ("CROSSHOTBAR_ENABLEGAMEPAD")
-   end
+--   if GetCVar('GamePadEnable') == "0" then
+--      StaticPopup_Show ("CROSSHOTBAR_ENABLEGAMEPAD")
+--   end
    
    for i,callback in ipairs(ConfigUI.ApplyCallbacks) do
       callback()
@@ -280,7 +280,20 @@ function ConfigUI:CreateFrame()
    self.InterfaceFrame.name = ADDON
    self.InterfaceFrame:Hide()
 
+   self.InterfaceFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+   local function OnEvent(self, event, ...)
+      if event == 'PLAYER_ENTERING_WORLD' then
+         preset = CrossHotbar_DB.ActivePreset         
+         config:StorePreset(config, CrossHotbar_DB.Presets[preset])
+         addon.GamePadButtons:ApplyConfig()
+         addon.GroupNavigator:ApplyConfig()
+         addon.Crosshotbar:ApplyConfig()
+      end
+   end
+   self.InterfaceFrame:HookScript("OnEvent", OnEvent)
+
    self.InterfaceFrame:SetScript("OnShow", function(InterfaceFrame)
+
       local scrollFrame = CreateFrame("ScrollFrame", nil, self.InterfaceFrame, "UIPanelScrollFrameTemplate")
       scrollFrame:SetPoint("TOPLEFT", 3, -4)
       scrollFrame:SetPoint("BOTTOMRIGHT", -27, 4)
@@ -314,6 +327,12 @@ function ConfigUI:CreateFrame()
    end)
 
    InterfaceOptions_AddCategory(self.InterfaceFrame)
+
+   SLASH_WXHBCROSSHOTBAR1, SLASH_WXHBCROSSHOTBAR2 = '/chb', '/wxhb';
+   local function slashcmd(msg, editBox)
+      Settings.OpenToCategory(ADDON)
+   end
+   SlashCmdList["WXHBCROSSHOTBAR"] = slashcmd;
 end
 
 
