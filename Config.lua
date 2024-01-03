@@ -33,13 +33,25 @@ CrossHotbar_DB = {
          Mutable = false,
          Name = "Gamepad_Preset",
          Version = "v1.0.0",
-         WXHBType = "HIDE",
-         DDAAType = "DADA",
-         GPDeviceID = 1,
-         GPCVars = true,
-         GPEnable = 1,
-         GPYawSpeed = 3,
-         GPPitchSpeed = 3,
+         Hotbar = {
+            WXHBType = "HIDE",
+            DDAAType = "DADA",
+            LPagePrefix = "",
+            RPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
+            LRPagePrefix = "",
+            RLPagePrefix = "",
+            LPageIndex = 2,
+            RPageIndex = 1,
+            LRPageIndex = 6,
+            RLPageIndex = 5
+         },
+         GamePad = {
+            GPDeviceID = 1,
+            GPCVars = true,
+            GPEnable = 1,
+            GPYawSpeed = 3,
+            GPPitchSpeed = 3
+         },
          PadActions = {
             FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGEONE",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVRIGHT",        PPADLTRIGACTION="HOTBARBTN5",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
             FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGETWO",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVUP",           PPADLTRIGACTION="HOTBARBTN6",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
@@ -63,13 +75,25 @@ CrossHotbar_DB = {
          Mutable = false,
          Name = "Keyboard_Preset",
          Version = "v1.0.0",
-         WXHBType = "HIDE",
-         DDAAType = "DADA",
-         GPDeviceID = 1,
-         GPCVars = true,
-         GPEnable = 1,
-         GPYawSpeed = 3,
-         GPPitchSpeed = 3,
+         Hotbar = {
+            WXHBType = "HIDE",
+            DDAAType = "DADA",
+            LPagePrefix = "",
+            RPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
+            LRPagePrefix = "",
+            RLPagePrefix = "",
+            LPageIndex = 2,
+            RPageIndex = 1,
+            LRPageIndex = 6,
+            RLPageIndex = 5
+         },
+         GamePad = {
+            GPDeviceID = 1,
+            GPCVars = true,
+            GPEnable = 1,
+            GPYawSpeed = 3,
+            GPPitchSpeed = 3
+         },
          PadActions = {
             FACER = {BIND="1", ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGEONE",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVRIGHT",        PPADLTRIGACTION="HOTBARBTN5",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
             FACEU = {BIND="2", ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGETWO",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVUP",           PPADLTRIGACTION="HOTBARBTN6",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"}, 
@@ -93,13 +117,25 @@ CrossHotbar_DB = {
          Mutable = false,
          Name = "SC_Preset",
          Version = "v1.0.0",
-         WXHBType = "SHOW",
-         DDAAType = "DDAA",
-         GPDeviceID = 1,
-         GPCVars = true,
-         GPEnable = 1,
-         GPYawSpeed = 3,
-         GPPitchSpeed = 3,
+         Hotbar = {
+            WXHBType = "SHOW",
+            DDAAType = "DDAA",
+            LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
+            RPagePrefix = "",
+            LRPagePrefix = "",
+            RLPagePrefix = "",
+            LPageIndex = 2,
+            RPageIndex = 1,
+            LRPageIndex = 6,
+            RLPageIndex = 5
+         },
+         GamePad = {
+            GPDeviceID = 1,
+            GPCVars = true,
+            GPEnable = 1,
+            GPYawSpeed = 3,
+            GPPitchSpeed = 3
+         },
          PadActions = {
             FACER = {BIND="1",  ACTION="NONE",             TRIGACTION="HOTBARBTN1",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",        SPADRTRIGACTION="NONE",         PPADLACTION="NONE",               PPADLTRIGACTION="HOTBARBTN5",          PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
             FACEU = {BIND="2",  ACTION="NONE",             TRIGACTION="HOTBARBTN2",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",        SPADRTRIGACTION="NONE",         PPADLACTION="NONE",               PPADLTRIGACTION="HOTBARBTN6",          PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
@@ -123,13 +159,25 @@ CrossHotbar_DB = {
          Mutable = true,
          Name = "Custom",
          Version = "v1.0.0",
-         WXHBType = "SHOW",
-         DDAAType = "DDAA",
-         GPDeviceID = 1,
-         GPCVars = true,
-         GPEnable = 1,
-         GPYawSpeed = 3,
-         GPPitchSpeed = 3,
+         Hotbar = {
+            WXHBType = "SHOW",
+            DDAAType = "DDAA",
+            LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
+            RPagePrefix = "",
+            LRPagePrefix = "",
+            RLPagePrefix = "",
+            LPageIndex = 2,
+            RPageIndex = 1,
+            LRPageIndex = 6,
+            RLPageIndex = 5
+         },
+         GamePad = {
+            GPDeviceID = 1,
+            GPCVars = true,
+            GPEnable = 1,
+            GPYawSpeed = 3,
+            GPPitchSpeed = 3
+         },
          PadActions = {
             FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGEONE",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVRIGHT",        PPADLTRIGACTION="HOTBARBTN5",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
             FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGETWO",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVUP",           PPADLTRIGACTION="HOTBARBTN6",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
@@ -156,13 +204,25 @@ addon.Config = {
    Mutable = true,
    Name = "Custom",
    Version = "v1.0.0",
-   WXHBType = "HIDE",
-   DDAAType = "DDAA",
-   GPDeviceID = 1,
-   GPCVars = true,
-   GPEnable = 1,
-   GPYawSpeed = 3,
-   GPPitchSpeed = 3,
+   Hotbar = {
+      WXHBType = "HIDE",
+      DDAAType = "DDAA",
+      LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
+      RPagePrefix = "",
+      LRPagePrefix = "",
+      RLPagePrefix = "",
+      LPageIndex = 2,
+      RPageIndex = 1,
+      LRPageIndex = 6,
+      RLPageIndex = 5
+   },
+   GamePad = {
+      GPDeviceID = 1,
+      GPCVars = true,
+      GPEnable = 1,
+      GPYawSpeed = 3,
+      GPPitchSpeed = 3,
+   },
    PadActions = {
       FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGEONE",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVRIGHT",        PPADLTRIGACTION="HOTBARBTN5",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
       FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGETWO",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVUP",           PPADLTRIGACTION="HOTBARBTN6",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
@@ -205,13 +265,17 @@ function addon.Config:StorePreset(to, from)
          to.Name = from.Name
       end
       to.Version = from.Version
-      to.WXHBType = from.WXHBType
-      to.DDAAType = from.DDAAType
-      to.GPDeviceID = from.GPDeviceID
-      to.GPCVars = from.GPCVars
-      to.GPEnable = from.GPEnable
-      to.GPYawSpeed = from.GPYawSpeed
-      to.GPPitchSpeed = from.GPPitchSpeed
+      
+      to.Hotbar = {}
+      for key, value in pairs(from.Hotbar) do
+         to.Hotbar[key] = value 
+      end
+      
+      to.GamePad = {}
+      for key, value in pairs(from.GamePad) do
+         to.GamePad[key] = value 
+      end
+      
       to.PadActions = {}
       for button, attributes in pairs(from.PadActions) do
          for key, value in pairs(attributes) do

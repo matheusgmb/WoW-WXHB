@@ -168,7 +168,6 @@ local ConfigUI = {
    EditBoxHeight = 30,
    EditBoxSpacing = 30,
    InterfaceFrame = nil,
-   ApplyCallbacks = {},
    RefreshCallbacks = {}
 }
 
@@ -250,10 +249,10 @@ function ConfigUI:AddToolTip(frame, text, wrap)
 end
 
 function ConfigUI:Refresh()
-   if not ConfigUI.InterfaceFrame:IsVisible() then return end
+   --if not ConfigUI.InterfaceFrame:IsVisible() then return end
    
    config:ProcessConfig(config)
-   
+
    for i,callback in ipairs(ConfigUI.RefreshCallbacks) do
       callback()
    end
@@ -261,18 +260,6 @@ function ConfigUI:Refresh()
    addon.GamePadButtons:ApplyConfig()
    addon.GroupNavigator:ApplyConfig()
    addon.Crosshotbar:ApplyConfig()
-end
-
-function ConfigUI:Apply()  
---   if GetCVar('GamePadEnable') == "0" then
---      StaticPopup_Show ("CROSSHOTBAR_ENABLEGAMEPAD")
---   end
-   
-   for i,callback in ipairs(ConfigUI.ApplyCallbacks) do
-      callback()
-   end
-   
-   ConfigUI:Refresh()
 end
 
 function ConfigUI:CreateFrame()
@@ -293,24 +280,75 @@ function ConfigUI:CreateFrame()
    self.InterfaceFrame:HookScript("OnEvent", OnEvent)
 
    self.InterfaceFrame:SetScript("OnShow", function(InterfaceFrame)
+      local title = InterfaceFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
+      title:SetText("CrossHotbar")
 
-      local scrollFrame = CreateFrame("ScrollFrame", nil, self.InterfaceFrame, "UIPanelScrollFrameTemplate")
+      local authortitle = InterfaceFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+      authortitle:SetPoint("TOPLEFT", title, "TOPLEFT", 0, -2 * self.ConfigSpacing)
+      authortitle:SetText("Author")
+      
+      local author = InterfaceFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+      author:SetPoint("TOPLEFT", authortitle, "TOPLEFT", self.Inset, -self.TextHeight)
+      author:SetWidth(InterfaceFrame:GetWidth() - 4 * self.Inset)
+      author:SetJustifyH("LEFT")
+      author:SetText("ChainStratagem (phodoe)")
+      author:SetTextColor(1,1,1,1)
+      
+      local descripttitle = InterfaceFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+      descripttitle:SetPoint("TOPLEFT", author, "TOPLEFT", -self.Inset, -self.ConfigSpacing)
+      descripttitle:SetText("Description")
+      
+      local descript = InterfaceFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+      descript:SetPoint("TOPLEFT", descripttitle, "TOPLEFT", self.Inset, -self.TextHeight)
+      descript:SetWidth(InterfaceFrame:GetWidth() - 4 * self.Inset)
+      descript:SetJustifyH("LEFT")
+      descript:SetText([[Addon to reconfigure the WoW Actionbars into the Crosshotbar found in FFXIV. This addon reuses the existing Actionsbars placing the action buttons into container frames with logic to mimic the Crosshotbar behavior. The Crosshotbar is primarily focused on providing controller support for selecting actions. ]])
+      descript:SetTextColor(1,1,1,1)
+      
+      InterfaceFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      ConfigUI:Refresh()
+   end)
+
+   InterfaceOptions_AddCategory(self.InterfaceFrame)
+
+   local PresetFrame = CreateFrame("Frame", ADDON .. "Presets", self.InterfaceFrame)
+   PresetFrame.name = "Presets"
+   PresetFrame.parent = self.InterfaceFrame.name
+   PresetFrame:Hide()
+   
+   PresetFrame:SetScript("OnShow", function(PresetFrame)
+      local title = PresetFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
+      title:SetText("Presets")
+      local anchor = title
+      anchor = ConfigUI:CreatePresets(PresetFrame, anchor)
+      PresetFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      ConfigUI:Refresh()
+   end)
+   
+   InterfaceOptions_AddCategory(PresetFrame)
+   
+   local ActionFrame = CreateFrame("Frame", ADDON .. "Actions", self.InterfaceFrame)
+   ActionFrame.name = "Actions"
+   ActionFrame.parent = self.InterfaceFrame.name
+   ActionFrame:Hide()
+
+   ActionFrame:SetScript("OnShow", function(ActionFrame)
+      local scrollFrame = CreateFrame("ScrollFrame", nil, ActionFrame, "UIPanelScrollFrameTemplate")
       scrollFrame:SetPoint("TOPLEFT", 3, -4)
       scrollFrame:SetPoint("BOTTOMRIGHT", -27, 4)
       
       local scrollChild = CreateFrame("Frame")
       scrollFrame:SetScrollChild(scrollChild)
-      scrollChild:SetWidth(self.InterfaceFrame:GetWidth()-self.Inset)
-      scrollChild:SetHeight(1) 
+      scrollChild:SetWidth(ActionFrame:GetWidth()-self.Inset)
+      scrollChild:SetHeight(1)
       
       local title = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
       title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
-      title:SetText("CrossHotbar")
-
+      title:SetText("Bindings and Actions")
+      
       local anchor = title
-      anchor = ConfigUI:CreatePresets(scrollChild, anchor)
-      anchor = ConfigUI:CreateFeatures(scrollChild, anchor)
-      anchor = ConfigUI:CreateApply(scrollChild, anchor)
       anchor = ConfigUI:CreatePadBindings(scrollChild, anchor)
       
       anchor, tab1, tab2, tab3, tab4, tab5 =
@@ -322,11 +360,49 @@ function ConfigUI:CreateFrame()
       ConfigUI:CreatePadActions(tab4, tab4, "PPADL", GamePadModifierActionMap, GamePadHotbarMap)
       ConfigUI:CreatePadActions(tab5, tab5, "PPADR", GamePadModifierActionMap, GamePadHotbarMap)
       
-      self.InterfaceFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      ActionFrame:SetScript("OnShow", ConfigUI.Refresh) 
       ConfigUI:Refresh()
    end)
+   
+   InterfaceOptions_AddCategory(ActionFrame)
+   
+   local HotbarFrame = CreateFrame("Frame", ADDON .. "Hotbars", self.InterfaceFrame)
+   HotbarFrame.name = "Hotbars"
+   HotbarFrame.parent = self.InterfaceFrame.name
+   HotbarFrame:Hide()
 
-   InterfaceOptions_AddCategory(self.InterfaceFrame)
+   HotbarFrame:SetScript("OnShow", function(HotbarFrame)
+      local title = HotbarFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
+      title:SetText("Hotbar Settings")
+      
+      local anchor = title
+  
+      anchor = ConfigUI:CreateHotbarFeatures(HotbarFrame, anchor)
+      
+      HotbarFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      ConfigUI:Refresh()
+   end)
+   
+   InterfaceOptions_AddCategory(HotbarFrame)
+
+   local GamePadFrame = CreateFrame("Frame", ADDON .. "GamePad", self.InterfaceFrame)
+   GamePadFrame.name = "GamePad"
+   GamePadFrame.parent = self.InterfaceFrame.name
+   GamePadFrame:Hide()
+
+   GamePadFrame:SetScript("OnShow", function(GamePadFrame)
+      local title = GamePadFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
+      title:SetText("GamePad Settings")
+      
+      local anchor = title
+      
+      GamePadFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      ConfigUI:Refresh()
+   end)      
+
+   --InterfaceOptions_AddCategory(GamePadFrame)
 
    SLASH_WXHBCROSSHOTBAR1, SLASH_WXHBCROSSHOTBAR2 = '/chb', '/wxhb';
    local function slashcmd(msg, editBox)
@@ -506,7 +582,7 @@ end
 --]]
 
 function ConfigUI:CreatePresets(configFrame, anchorFrame)
-   local DropDownWidth = configFrame:GetWidth()/3 - 2*self.Inset
+   local DropDownWidth = configFrame:GetWidth()/2 - 2*self.Inset
    local presetsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    presetsubtitle:SetHeight(self.TextHeight)
    presetsubtitle:SetWidth(DropDownWidth)
@@ -521,10 +597,12 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    
    UIDropDownMenu_SetWidth(PresetsFrame, DropDownWidth-self.DropDownSpacing)
    UIDropDownMenu_SetText(PresetsFrame, "Presets")
+   UIDropDownMenu_JustifyText(PresetsFrame, "LEFT")
    
    local function PresetDropDownDemo_OnClick(self, arg1, arg2, checked)
       if preset ~= arg1 then
          preset = arg1
+         UIDropDownMenu_SetText(arg2, self:GetText())
          ConfigUI:Refresh()
       end
    end
@@ -581,8 +659,8 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    end)
    
    local presetfileeditbox = CreateFrame("EditBox", ADDON .. "PresetFileEditBox", configFrame, "InputBoxTemplate")
-   presetfileeditbox:SetPoint("LEFT", presetdeletebutton, "RIGHT", 40, 0)
-   presetfileeditbox:SetWidth(100)
+   presetfileeditbox:SetPoint("TOPLEFT", PresetsFrame, "BOTTOMLEFT", 24, -self.ConfigSpacing)
+   presetfileeditbox:SetWidth(DropDownWidth-self.DropDownSpacing)
    presetfileeditbox:SetHeight(self.EditBoxHeight)
    presetfileeditbox:SetMovable(false)
    presetfileeditbox:SetAutoFocus(false)
@@ -590,7 +668,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetfileeditbox:SetText(config.Name)
    
    local presetsavebutton = CreateFrame("Button", ADDON .. "PresetSave", configFrame, "UIPanelButtonTemplate")
-   presetsavebutton:SetPoint("LEFT", presetfileeditbox, "RIGHT", 10, 0)
+   presetsavebutton:SetPoint("LEFT", presetfileeditbox, "RIGHT", 24, 0)
    presetsavebutton:SetHeight(self.ButtonHeight)
    presetsavebutton:SetWidth(self.ButtonWidth)
    presetsavebutton:SetText("Save")
@@ -629,32 +707,27 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
 end
 
 --[[
-   Apply button.
---]]
-
-function ConfigUI:CreateApply(configFrame, anchorFrame)
-   local applybutton = CreateFrame("Button", ADDON .. "ApplyButton", configFrame, "UIPanelButtonTemplate")
-   applybutton:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
-   applybutton:SetHeight(self.ButtonHeight)
-   applybutton:SetWidth(self.SymbolWidth + 100 + (configFrame:GetWidth() - self.SymbolWidth - 4*self.Inset)/3 - self.DropDownSpacing - self.Inset)
-   applybutton:SetText("Apply")
-   
-   applybutton:SetScript("OnClick", ConfigUI.Apply)
-   return applybutton
-end
-
---[[
    Features
 --]]  
 
-function ConfigUI:CreateFeatures(configFrame, anchorFrame)
+function ConfigUI:CreateHotbarFeatures(configFrame, anchorFrame)
 
    --[[
       Expanded button settings
    --]]    
 
-   local ddaatypes = {"DPad + Action / DPad + Action", "DPad + DPad / Action + Action"}   
-   local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/4
+   local wxhbtypestr = {
+      ["HIDE"] = "Hide extra actions when not active",
+      ["FADE"] = "Fade extra actions when not active",
+      ["SHOW"] = "Show extra actions when not active"
+   }
+
+   local ddaatypestr = {
+      ["DADA"] = "DPad + Action / DPad + Action",
+      ["DDAA"] = "DPad + DPad / Action + Action"
+   }
+   
+   local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/2
    local expdsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    expdsubtitle:SetHeight(self.TextHeight)
    expdsubtitle:SetWidth(DropDownWidth)
@@ -669,10 +742,12 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
    
    UIDropDownMenu_SetWidth(expddropdown, DropDownWidth-self.DropDownSpacing)
    UIDropDownMenu_SetText(expddropdown, "Type")
+   UIDropDownMenu_JustifyText(expddropdown, "LEFT")
 
    local function ExpdDropDownDemo_OnClick(self, arg1, arg2, checked)
-      config.WXHBType = arg1
+      config.Hotbar.WXHBType = arg1
       UIDropDownMenu_SetText(arg2, self:GetText())
+      ConfigUI:Refresh()
    end
    
    UIDropDownMenu_Initialize(expddropdown, function(self, level, menuList)     
@@ -680,14 +755,14 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
       UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i,wxhbtype in ipairs(addon.HotbarWXHBTypes) do
-            info.text, info.checked = wxhbtype, (config.WXHBType == wxhbtype)
+            info.text, info.checked = wxhbtypestr[wxhbtype], (config.Hotbar.WXHBType == wxhbtype)
             info.menuList, info.hasArrow = i, false
             info.arg1 = wxhbtype
             info.arg2 = self
             info.func = ExpdDropDownDemo_OnClick
             UIDropDownMenu_AddButton(info)
-            if config.WXHBType == wxhbtype then 
-               UIDropDownMenu_SetText(self, wxhbtype)
+            if config.Hotbar.WXHBType == wxhbtype then 
+               UIDropDownMenu_SetText(self, wxhbtypestr[wxhbtype])
             end
          end
       end
@@ -711,10 +786,12 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
    
    UIDropDownMenu_SetWidth(ddaadropdown, DropDownWidth-self.DropDownSpacing)
    UIDropDownMenu_SetText(ddaadropdown, "Type")
+   UIDropDownMenu_JustifyText(ddaadropdown, "LEFT")
 
    local function DdaaDropDownDemo_OnClick(self, arg1, arg2, checked)
-      config.DDAAType = arg1
+      config.Hotbar.DDAAType = arg1
       UIDropDownMenu_SetText(arg2, self:GetText())
+      ConfigUI:Refresh()
    end
    
    UIDropDownMenu_Initialize(ddaadropdown, function(self, level, menuList)     
@@ -722,25 +799,205 @@ function ConfigUI:CreateFeatures(configFrame, anchorFrame)
       UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i,ddaatype in ipairs(addon.HotbarDDAATypes) do
-            info.text, info.checked = ddaatype, (config.DDAAType == ddaatype)
+            info.text, info.checked = ddaatypestr[ddaatype], (config.Hotbar.DDAAType == ddaatype)
             info.menuList, info.hasArrow = i, false
             info.arg1 = ddaatype
             info.arg2 = self
             info.func = DdaaDropDownDemo_OnClick
             UIDropDownMenu_AddButton(info)
-            if config.DDAAType == ddaatype then 
-               UIDropDownMenu_SetText(self, ddaatype)
+            if config.Hotbar.DDAAType == ddaatype then 
+               UIDropDownMenu_SetText(self, ddaatypestr[ddaatype])
             end
          end
       end
    end)
 
-   table.insert(self.RefreshCallbacks, function()
-                   UIDropDownMenu_SetText(expddropdown, config.WXHBType)
-                   UIDropDownMenu_SetText(ddaadropdown, config.DDAAType)
+   --[[
+       LHotbar page index
+   --]]    
+
+   local lpageidxsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   lpageidxsubtitle:SetHeight(self.TextHeight)
+   lpageidxsubtitle:SetWidth(DropDownWidth)
+   lpageidxsubtitle:SetPoint("TOPLEFT", expddropdown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   lpageidxsubtitle:SetNonSpaceWrap(true)
+   lpageidxsubtitle:SetJustifyH("MIDDLE")
+   lpageidxsubtitle:SetJustifyV("TOP")
+   lpageidxsubtitle:SetText("Left Hotbar ActionPage")
+
+   local lpageidxdropdown = CreateFrame("Frame", ADDON .. "LPAGEIDXDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   lpageidxdropdown:SetPoint("TOPLEFT", lpageidxsubtitle, "BOTTOMLEFT", 0, 0)
+   
+   UIDropDownMenu_SetWidth(lpageidxdropdown, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(lpageidxdropdown, "Type")
+   UIDropDownMenu_JustifyText(lpageidxdropdown, "LEFT")
+
+   local function LpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
+      config.Hotbar.LPageIndex = arg1
+      UIDropDownMenu_SetText(arg2, self:GetText())
+      ConfigUI:Refresh()
+   end
+   
+   UIDropDownMenu_Initialize(lpageidxdropdown, function(self, level, menuList)     
+      local info = UIDropDownMenu_CreateInfo()
+      UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i = 1,10 do
+            info.text, info.checked = "ActionPage "..i, (config.Hotbar.LPageIndex == i)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = i
+            info.arg2 = self
+            info.func = LpageidxDropDownDemo_OnClick
+            UIDropDownMenu_AddButton(info)
+            if config.Hotbar.LPageIndex == i then 
+               UIDropDownMenu_SetText(self, info.text)
+            end
+         end
+      end
+   end)
+
+   --[[
+       RHotbar page index
+   --]]    
+
+   local rpageidxsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   rpageidxsubtitle:SetHeight(self.TextHeight)
+   rpageidxsubtitle:SetWidth(DropDownWidth)
+   rpageidxsubtitle:SetPoint("TOPLEFT", lpageidxsubtitle, "TOPRIGHT", 0, 0)
+   rpageidxsubtitle:SetNonSpaceWrap(true)
+   rpageidxsubtitle:SetJustifyH("MIDDLE")
+   rpageidxsubtitle:SetJustifyV("TOP")
+   rpageidxsubtitle:SetText("Right Hotbar ActionPage")
+
+   local rpageidxdropdown = CreateFrame("Frame", ADDON .. "RPAGEIDXDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   rpageidxdropdown:SetPoint("TOPLEFT", rpageidxsubtitle, "BOTTOMLEFT", 0, 0)
+   
+   UIDropDownMenu_SetWidth(rpageidxdropdown, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(rpageidxdropdown, "Type")
+   UIDropDownMenu_JustifyText(rpageidxdropdown, "LEFT")
+
+   local function RpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
+      config.Hotbar.RPageIndex = arg1
+      UIDropDownMenu_SetText(arg2, self:GetText())
+      ConfigUI:Refresh()
+   end
+   
+   UIDropDownMenu_Initialize(rpageidxdropdown, function(self, level, menuList)     
+      local info = UIDropDownMenu_CreateInfo()
+      UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i = 1,10 do
+            info.text, info.checked = "ActionPage "..i, (config.Hotbar.RPageIndex == i)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = i
+            info.arg2 = self
+            info.func = RpageidxDropDownDemo_OnClick
+            UIDropDownMenu_AddButton(info)
+            if config.Hotbar.RPageIndex == i then 
+               UIDropDownMenu_SetText(self, info.text)
+            end
+         end
+      end
    end)
    
-   return expddropdown
+   --[[
+       LRHotbar page index
+   --]]    
+
+   local lrpageidxsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   lrpageidxsubtitle:SetHeight(self.TextHeight)
+   lrpageidxsubtitle:SetWidth(DropDownWidth)
+   lrpageidxsubtitle:SetPoint("TOPLEFT", lpageidxdropdown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   lrpageidxsubtitle:SetNonSpaceWrap(true)
+   lrpageidxsubtitle:SetJustifyH("MIDDLE")
+   lrpageidxsubtitle:SetJustifyV("TOP")
+   lrpageidxsubtitle:SetText("Left Right Hotbar ActionPage")
+
+   local lrpageidxdropdown = CreateFrame("Frame", ADDON .. "LRPAGEIDXDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   lrpageidxdropdown:SetPoint("TOPLEFT", lrpageidxsubtitle, "BOTTOMLEFT", 0, 0)
+   
+   UIDropDownMenu_SetWidth(lrpageidxdropdown, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(lrpageidxdropdown, "Type")
+   UIDropDownMenu_JustifyText(lrpageidxdropdown, "LEFT")
+
+   local function LrpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
+      config.Hotbar.LRPageIndex = arg1
+      UIDropDownMenu_SetText(arg2, self:GetText())
+      ConfigUI:Refresh()
+   end
+   
+   UIDropDownMenu_Initialize(lrpageidxdropdown, function(self, level, menuList)     
+      local info = UIDropDownMenu_CreateInfo()
+      UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i = 1,10 do
+            info.text, info.checked = "ActionPage "..i, (config.Hotbar.LRPageIndex == i)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = i
+            info.arg2 = self
+            info.func = LrpageidxDropDownDemo_OnClick
+            UIDropDownMenu_AddButton(info)
+            if config.Hotbar.LRPageIndex == i then 
+               UIDropDownMenu_SetText(self, info.text)
+            end
+         end
+      end
+   end)
+
+   --[[
+       RLHotbar page index
+   --]]    
+
+   local rlpageidxsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   rlpageidxsubtitle:SetHeight(self.TextHeight)
+   rlpageidxsubtitle:SetWidth(DropDownWidth)
+   rlpageidxsubtitle:SetPoint("TOPLEFT", lrpageidxsubtitle, "TOPRIGHT", 0, 0)
+   rlpageidxsubtitle:SetNonSpaceWrap(true)
+   rlpageidxsubtitle:SetJustifyH("MIDDLE")
+   rlpageidxsubtitle:SetJustifyV("TOP")
+   rlpageidxsubtitle:SetText("Right Left Hotbar ActionPage")
+
+   local rlpageidxdropdown = CreateFrame("Frame", ADDON .. "RLPAGEIDXDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   rlpageidxdropdown:SetPoint("TOPLEFT", rlpageidxsubtitle, "BOTTOMLEFT", 0, 0)
+   
+   UIDropDownMenu_SetWidth(rlpageidxdropdown, DropDownWidth-self.DropDownSpacing)
+   UIDropDownMenu_SetText(rlpageidxdropdown, "Type")
+   UIDropDownMenu_JustifyText(rlpageidxdropdown, "LEFT")
+
+   local function RlpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
+      config.Hotbar.RLPageIndex = arg1
+      UIDropDownMenu_SetText(arg2, self:GetText())
+      ConfigUI:Refresh()
+   end
+   
+   UIDropDownMenu_Initialize(rlpageidxdropdown, function(self, level, menuList)     
+      local info = UIDropDownMenu_CreateInfo()
+      UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i = 1,10 do
+            info.text, info.checked = "ActionPage "..i, (config.Hotbar.RLPageIndex == i)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = i
+            info.arg2 = self
+            info.func = RlpageidxDropDownDemo_OnClick
+            UIDropDownMenu_AddButton(info)
+            if config.Hotbar.RLPageIndex == i then 
+               UIDropDownMenu_SetText(self, info.text)
+            end
+         end
+      end
+   end)
+   
+   table.insert(self.RefreshCallbacks, function()
+                   UIDropDownMenu_SetText(expddropdown, wxhbtypestr[config.Hotbar.WXHBType])
+                   UIDropDownMenu_SetText(ddaadropdown, ddaatypestr[config.Hotbar.DDAAType])
+                   UIDropDownMenu_SetText(lpageidxdropdown, "ActionPage " .. config.Hotbar.LPageIndex)
+                   UIDropDownMenu_SetText(rpageidxdropdown, "ActionPage " .. config.Hotbar.RPageIndex)
+                   UIDropDownMenu_SetText(lrpageidxdropdown, "ActionPage " .. config.Hotbar.LRPageIndex)
+                   UIDropDownMenu_SetText(rlpageidxdropdown, "ActionPage " .. config.Hotbar.RLPageIndex)
+   end)
+   
+   return lrpageidxdropdown
 end
 
 --[[
@@ -755,7 +1012,7 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
    bindingframe:SetHeight(#GamePadButtonList * 32 + 2*self.TextHeight + self.ConfigSpacing)
    bindingframe:SetWidth(self.SymbolWidth + 100 + DropDownWidth - self.DropDownSpacing - self.Inset)
    bindingframe:SetBackdropColor(0, 0, 1, .5)
-   bindingframe:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, 0)
+   bindingframe:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing -anchorFrame:GetHeight())
 
    bindingframe:SetBackdrop({
         bgFile="Interface/DialogFrame/UI-DialogBox-Background",

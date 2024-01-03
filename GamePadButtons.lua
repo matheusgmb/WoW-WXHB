@@ -630,16 +630,16 @@ function GamePadButtonsMixin:OnEvent(event, ...)
 end
 
 function GamePadButtonsMixin:SetupGamePad()
-   if config.GPCVars then
-      SetCVar('GamePadEnable', config.GPEnable);
+   if config.GamePad.GPCVars then
+      SetCVar('GamePadEnable', config.GamePad.GPEnable);
       SetCVar('GamePadEmulateShift', 'NONE');
       SetCVar('GamePadEmulateCtrl', 'NONE');
       SetCVar('GamePadEmulateAlt', 'NONE');
       SetCVar('GamePadCursorLeftClick', 'PAD6');
       SetCVar('GamePadCursorRightClick', 'PADBACK');
-      SetCVar('GamePadCameraYawSpeed', config.GPYawSpeed);
-      SetCVar('GamePadCameraPitchSpeed', config.GPPitchSpeed);
-      SetCVar('GamePadSingleActiveID', config.GPDeviceID)
+      SetCVar('GamePadCameraYawSpeed', config.GamePad.GPYawSpeed);
+      SetCVar('GamePadCameraPitchSpeed', config.GamePad.GPPitchSpeed);
+      SetCVar('GamePadSingleActiveID', config.GamePad.GPDeviceID)
       --[[
       for _, i in ipairs(C_GamePad.GetAllDeviceIDs()) do
          

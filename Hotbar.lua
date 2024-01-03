@@ -511,22 +511,29 @@ function HotbarMixin:ApplyConfig()
    self.ExpandedAlpha1 = 0.5 
    self.DesatExpanded2 = 0.5
    self.EnableExpanded = true
+
+   local pageprefix = config.Hotbar[string.gsub(self.Type, 'Hotbar', 'PagePrefix')]
+   local pageindex = config.Hotbar[string.gsub(self.Type, 'Hotbar', 'PageIndex')]
+   self:SetAttribute('pageprefix', pageprefix)
+   self:SetAttribute('pageindex', pageindex)
+   RegisterStateDriver(self, 'page', pageprefix .. pageindex)
+   
    self:AddModHandler()
 
-   if config.WXHBType == "HIDE" then
+   if config.Hotbar.WXHBType == "HIDE" then
       self.ExpandedAlpha1 = 0.0
    end
 
-   if config.WXHBType == "FADE" then
+   if config.Hotbar.WXHBType == "FADE" then
       self.ExpandedAlpha1 = 0.5
    end
 
-   if config.WXHBType == "SHOW" then
+   if config.Hotbar.WXHBType == "SHOW" then
       self.ExpandedAlpha1 = 1.0
       self.ExpandedAlpha2 = 0.5
    end
    
-   self:SetHotbarLayout(config.DDAAType)
+   self:SetHotbarLayout(config.Hotbar.DDAAType)
    local expanded = self:GetAttribute("expanded")
    self:SetExpandIconsActive(expanded, expanded)
 end
