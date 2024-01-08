@@ -32,8 +32,17 @@ local ModifierActions = {
          self:SetAttribute("macrotext1", "/sit")
       end
    ]],
+   ["LOOT"] = [[ local down = ...
+      if down then
+         self:SetAttribute("macrotext1", "/loot")
+      end
+   ]],
    ["GAMEPADMOUSE"] = [[ local down = ...
       if down then
+        local GamePadButtons = self:GetFrameRef('GamePadButtons')
+        if GamePadButtons then
+           GamePadButtons:CallMethod("PlaySound", 100)
+        end
         local GamePadButtons = self:GetFrameRef('GamePadButtons')
         if GamePadButtons then
            GamePadButtons:CallMethod("ToggleMouseMode", true)
@@ -175,11 +184,14 @@ local ModifierActions = {
       local GamePadButtons = self:GetFrameRef('GamePadButtons')
       if GamePadButtons then
          GamePadButtons:CallMethod("ToggleCameraLook", down)
-         
       end
    ]],
    ["NEXTPAGE"] = [[local down = ...
       if down then
+         local GamePadButtons = self:GetFrameRef('GamePadButtons')
+         if GamePadButtons then
+            GamePadButtons:CallMethod("PlaySound", 1115)
+         end
          local Crosshotbar = self:GetFrameRef('Crosshotbar')
          local offset = (Crosshotbar:GetAttribute("pageoffset") + 2)%10
          Crosshotbar:SetAttribute("state-nextpage", offset)
@@ -188,6 +200,10 @@ local ModifierActions = {
    ]],
    ["PREVPAGE"] = [[local down = ...
       if down then
+         local GamePadButtons = self:GetFrameRef('GamePadButtons')
+         if GamePadButtons then
+            GamePadButtons:CallMethod("PlaySound", 1115)
+         end
          local Crosshotbar = self:GetFrameRef('Crosshotbar')
          local offset = abs(Crosshotbar:GetAttribute("pageoffset") - 2)%10
          Crosshotbar:SetAttribute("state-nextpage", offset)
@@ -196,6 +212,10 @@ local ModifierActions = {
    ]],
    ["PAGEONE"] = [[local down = ...
       if down then
+         local GamePadButtons = self:GetFrameRef('GamePadButtons')
+         if GamePadButtons then
+            GamePadButtons:CallMethod("PlaySound", 1115)
+         end
          local Crosshotbar = self:GetFrameRef('Crosshotbar')
          local offset = 2
          Crosshotbar:SetAttribute("state-nextpage", offset)
@@ -204,6 +224,10 @@ local ModifierActions = {
    ]],
    ["PAGETWO"] = [[local down = ...
       if down then
+         local GamePadButtons = self:GetFrameRef('GamePadButtons')
+         if GamePadButtons then
+            GamePadButtons:CallMethod("PlaySound", 1115)
+         end
          local Crosshotbar = self:GetFrameRef('Crosshotbar')
          local offset = 0
          Crosshotbar:SetAttribute("state-nextpage", offset)
@@ -212,6 +236,10 @@ local ModifierActions = {
    ]],
    ["PAGETHREE"] = [[local down = ...
       if down then
+         local GamePadButtons = self:GetFrameRef('GamePadButtons')
+         if GamePadButtons then
+            GamePadButtons:CallMethod("PlaySound", 1115)
+         end
          local Crosshotbar = self:GetFrameRef('Crosshotbar')
          local offset = 4
          Crosshotbar:SetAttribute("state-nextpage", offset)
@@ -220,6 +248,10 @@ local ModifierActions = {
    ]],
    ["PAGEFOUR"] = [[local down = ...
          if down then
+         local GamePadButtons = self:GetFrameRef('GamePadButtons')
+         if GamePadButtons then
+            GamePadButtons:CallMethod("PlaySound", 1115)
+         end
             local Crosshotbar = self:GetFrameRef('Crosshotbar')
             local offset = 6
             Crosshotbar:SetAttribute("state-nextpage", offset)
@@ -272,6 +304,10 @@ end
 
 function GamePadButtonsMixin.SetGamePadCursorControl(enable)
    GamePadCursorEnabled = enable
+end
+
+function GamePadButtonsMixin:PlaySound(soundid)
+   PlaySound(soundid)
 end
 
 function GamePadButtonsMixin:ToggleSheath()
@@ -861,19 +897,32 @@ function GamePadButtonsMixin:SetupGamePad()
    self.GamePadRightClick = GetCVar('GamePadCursorRightClick')
    self.GamePadAutoDisableSticks = GetCVar('GamePadCursorAutoDisableSticks')
    self.GamePadAutoDisableJump = GetCVar('GamePadCursorAutoDisableJump')
-      
+   
    if self.GamePadEnabled then
       if config.GamePad.GPAutoCursor == 0 then
          self.GamePadAutoEnable = false
-         SetCVar('GamePadCursorAutoEnable', 0)
-         SetCVar('GamePadCursorAutoDisableSticks', 0)
-         SetCVar('GamePadCursorAutoDisableJump', 0)
-         SetGamePadCursorControl(false)
       else
          self.GamePadAutoEnable = true
       end
+      if self.GamePadMouseMode then
+         SetCVar('GamePadCursorAutoEnable', 0)
+         SetCVar('GamePadCursorAutoDisableSticks', 0)
+         SetCVar('GamePadCursorAutoDisableJump', 0)
+         SetGamePadCursorControl(true)
+      else
+         if self.GamePadAutoEnable then
+            SetCVar('GamePadCursorAutoEnable', 1)
+         else
+            SetCVar('GamePadCursorAutoEnable', 0)
+         end
+         SetCVar('GamePadCursorAutoDisableSticks',
+                 self.GamePadAutoDisableSticks)
+         
+         SetCVar('GamePadCursorAutoDisableJump',
+                 self.GamePadAutoDisableJump)
+         SetGamePadCursorControl(false)
+      end
    end
-   
 end
 
 function GamePadButtonsMixin:ClearConfig()

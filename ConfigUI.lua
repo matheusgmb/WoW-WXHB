@@ -362,11 +362,15 @@ Features:
 
          Reconfigurable modifier buttons to override default action settings.
 
+         Target traversal with trigger shoulder pad combinations.
+
          Unit raid and party navigation actions for dpad party traversal.
 
          Cursor and camera look support through bindable actions.
 
          Actions to execute user macros named CH_MACRO_[1-4]
+
+         Drag bar activated by clicking on the hotbar seperator line.
 
 Settings:
 
@@ -386,7 +390,7 @@ Settings:
 
    InterfaceOptions_AddCategory(self.InterfaceFrame)
 
-   local PresetFrame = CreateFrame("Frame", ADDON .. "Presets", self.InterfaceFrame)
+   local PresetFrame = CreateFrame("Frame", ADDON .. "PresetsSettings", self.InterfaceFrame)
    PresetFrame.name = "Presets"
    PresetFrame.parent = self.InterfaceFrame.name
    PresetFrame:Hide()
@@ -403,7 +407,7 @@ Settings:
    
    InterfaceOptions_AddCategory(PresetFrame)
    
-   local ActionFrame = CreateFrame("Frame", ADDON .. "Actions", self.InterfaceFrame)
+   local ActionFrame = CreateFrame("Frame", ADDON .. "ActionsSettings", self.InterfaceFrame)
    ActionFrame.name = "Actions"
    ActionFrame.parent = self.InterfaceFrame.name
    ActionFrame:Hide()
@@ -457,7 +461,7 @@ Settings:
    
    InterfaceOptions_AddCategory(ActionFrame)
    
-   local HotbarFrame = CreateFrame("Frame", ADDON .. "Hotbars", self.InterfaceFrame)
+   local HotbarFrame = CreateFrame("Frame", ADDON .. "HotbarsSettings", self.InterfaceFrame)
    HotbarFrame.name = "Hotbars"
    HotbarFrame.parent = self.InterfaceFrame.name
    HotbarFrame:Hide()
@@ -486,7 +490,7 @@ Settings:
    
    InterfaceOptions_AddCategory(HotbarFrame)
    
-   local GamePadFrame = CreateFrame("Frame", ADDON .. "GamePad", self.InterfaceFrame)
+   local GamePadFrame = CreateFrame("Frame", ADDON .. "GamePadSettings", self.InterfaceFrame)
    GamePadFrame.name = "GamePad"
    GamePadFrame.parent = self.InterfaceFrame.name
    GamePadFrame:Hide()
@@ -515,7 +519,7 @@ end
 
 function ConfigUI:CreateTabFrame(configFrame, anchorFrame)
    local DropDownWidth = (configFrame:GetWidth() - self.SymbolWidth - 4*self.Inset)/3
-   local tabframe = CreateFrame("Frame", ADDON .. "TabFrame", configFrame, "BackdropTemplate")
+   local tabframe = CreateFrame("Frame", ADDON .. "ActionTabFrame", configFrame, "BackdropTemplate")
    tabframe:EnableMouse(true)
    tabframe:SetHeight(anchorFrame:GetHeight())
    tabframe:SetWidth(2*DropDownWidth)
@@ -703,7 +707,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetsubtitle:SetJustifyV("TOP")
    presetsubtitle:SetText("Presets")
    
-   local PresetsFrame = CreateFrame("Frame", ADDON .. "PresetDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local PresetsFrame = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    PresetsFrame:SetPoint("TOPLEFT", presetsubtitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(PresetsFrame, DropDownWidth-self.DropDownSpacing)
@@ -737,7 +741,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
       end
    end)
    
-   local presetloadbutton = CreateFrame("Button", ADDON .. "PresetLoad", configFrame, "UIPanelButtonTemplate")
+   local presetloadbutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
    presetloadbutton:SetPoint("TOPLEFT", PresetsFrame, "TOPRIGHT", 0, 0)
    presetloadbutton:SetHeight(self.ButtonHeight)
    presetloadbutton:SetWidth(self.ButtonWidth)
@@ -748,7 +752,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
       ConfigUI:Refresh()
    end)
    
-   local presetdeletebutton = CreateFrame("Button", ADDON .. "PresetDelete", configFrame, "UIPanelButtonTemplate")
+   local presetdeletebutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
    presetdeletebutton:SetPoint("TOPLEFT", presetloadbutton, "TOPRIGHT", 0, 0)
    presetdeletebutton:SetHeight(self.ButtonHeight)
    presetdeletebutton:SetWidth(self.ButtonWidth)
@@ -778,7 +782,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    filesubtitle:SetJustifyV("TOP")
    filesubtitle:SetText("Name")
    
-   local presetfileeditbox = CreateFrame("EditBox", ADDON .. "PresetFileEditBox", configFrame, "InputBoxTemplate")
+   local presetfileeditbox = CreateFrame("EditBox", nil, configFrame, "InputBoxTemplate")
    presetfileeditbox:SetPoint("TOPLEFT", filesubtitle, "BOTTOMLEFT", 24, 0)
    presetfileeditbox:SetWidth(DropDownWidth-self.DropDownSpacing)
    presetfileeditbox:SetHeight(self.EditBoxHeight)
@@ -787,7 +791,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetfileeditbox:EnableMouse(true)
    presetfileeditbox:SetText(config.Name)
    
-   local presetsavebutton = CreateFrame("Button", ADDON .. "PresetSave", configFrame, "UIPanelButtonTemplate")
+   local presetsavebutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
    presetsavebutton:SetPoint("LEFT", presetfileeditbox, "RIGHT", 24, 0)
    presetsavebutton:SetHeight(self.ButtonHeight)
    presetsavebutton:SetWidth(self.ButtonWidth)
@@ -846,7 +850,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    scrollFrame:SetSize(backdropframe:GetWidth()-40, backdropframe:GetHeight()-20)
    scrollFrame:SetPoint("TOPLEFT", backdropframe, "TOPLEFT", 10, -10)
 
-   local descriptfileeditbox = CreateFrame("EditBox", ADDON .. "DescriptionFileEditBox", scrollFrame)
+   local descriptfileeditbox = CreateFrame("EditBox", nil, scrollFrame)
    descriptfileeditbox:SetMultiLine(true)
    descriptfileeditbox:SetMovable(false)
    descriptfileeditbox:SetAutoFocus(false)
@@ -875,7 +879,7 @@ end
 function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
    local DropDownWidth = (configFrame:GetWidth() - self.SymbolWidth - 4*self.Inset)/3
 
-   local bindingframe = CreateFrame("Frame", ADDON .. "BindingFrame", configFrame, "BackdropTemplate")
+   local bindingframe = CreateFrame("Frame", nil, configFrame, "BackdropTemplate")
    bindingframe:EnableMouse(true)
    bindingframe:SetHeight(#GamePadButtonList * 32 + 2*self.TextHeight + self.ConfigSpacing)
    bindingframe:SetWidth(self.SymbolWidth + 100 + DropDownWidth - self.DropDownSpacing - self.Inset)
@@ -925,7 +929,7 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
          buttonsubtitle:SetJustifyV("TOP")
          buttonsubtitle:SetText(("|A:Gamepad_%s_64:24:24|a"):format(GamePadButtonShp[button]))
          
-         local bindingframe = CreateFrame("Frame", ADDON .. button.."BindingDropDownMenu", bindingframe, "UIDropDownMenuTemplate")
+         local bindingframe = CreateFrame("Frame", nil, bindingframe, "UIDropDownMenuTemplate")
          bindingframe:SetPoint("TOPLEFT", bindinganchor, "BOTTOMLEFT", 0, 0)
          
          UIDropDownMenu_SetWidth(bindingframe, DropDownWidth-self.DropDownSpacing)
@@ -994,7 +998,7 @@ function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, 
    for i,button in ipairs(GamePadButtonList) do
       if config.PadActions[button] then
          local attributes = config.PadActions[button]
-         local actionframe = CreateFrame("Frame", ADDON .. button .. "ActionDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+         local actionframe = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
          actionframe:SetPoint("TOPLEFT", actionanchor, "BOTTOMLEFT", 0, 0)
          
          UIDropDownMenu_SetWidth(actionframe, DropDownWidth-self.DropDownSpacing)
@@ -1022,7 +1026,7 @@ function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, 
             end
          end)
 
-         local hotbaractionframe = CreateFrame("Frame", ADDON .. button .. "HotbarActionDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+         local hotbaractionframe = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
          hotbaractionframe:SetPoint("TOPLEFT", hotbaranchor, "BOTTOMLEFT", 0, 0)
          
          UIDropDownMenu_SetWidth(hotbaractionframe, DropDownWidth-self.DropDownSpacing)
@@ -1107,7 +1111,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    expdsubtitle:SetJustifyV("TOP")
    expdsubtitle:SetText("Expanded Type")
 
-   local expddropdown = CreateFrame("Frame", ADDON .. "ExpandedDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local expddropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    expddropdown:SetPoint("TOPLEFT", expdsubtitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(expddropdown, DropDownWidth-self.DropDownSpacing)
@@ -1153,7 +1157,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    ddaasubtitle:SetJustifyV("TOP")
    ddaasubtitle:SetText("Hotbar Layout")
 
-   local ddaadropdown = CreateFrame("Frame", ADDON .. "DDAADropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local ddaadropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    ddaadropdown:SetPoint("TOPLEFT", ddaasubtitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(ddaadropdown, DropDownWidth-self.DropDownSpacing)
@@ -1208,7 +1212,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lpageidxsubtitle:SetJustifyV("TOP")
    lpageidxsubtitle:SetText("Left Hotbar ActionPage")
 
-   local lpageidxdropdown = CreateFrame("Frame", ADDON .. "LPAGEIDXDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local lpageidxdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    lpageidxdropdown:SetPoint("TOPLEFT", lpageidxsubtitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(lpageidxdropdown, DropDownWidth-self.DropDownSpacing)
@@ -1254,7 +1258,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rpageidxsubtitle:SetJustifyV("TOP")
    rpageidxsubtitle:SetText("Right Hotbar ActionPage")
 
-   local rpageidxdropdown = CreateFrame("Frame", ADDON .. "RPAGEIDXDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local rpageidxdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    rpageidxdropdown:SetPoint("TOPLEFT", rpageidxsubtitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(rpageidxdropdown, DropDownWidth-self.DropDownSpacing)
@@ -1300,7 +1304,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lrpageidxsubtitle:SetJustifyV("TOP")
    lrpageidxsubtitle:SetText("Left Right Hotbar ActionPage")
 
-   local lrpageidxdropdown = CreateFrame("Frame", ADDON .. "LRPAGEIDXDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local lrpageidxdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    lrpageidxdropdown:SetPoint("TOPLEFT", lrpageidxsubtitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(lrpageidxdropdown, DropDownWidth-self.DropDownSpacing)
@@ -1346,7 +1350,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rlpageidxsubtitle:SetJustifyV("TOP")
    rlpageidxsubtitle:SetText("Right Left Hotbar ActionPage")
 
-   local rlpageidxdropdown = CreateFrame("Frame", ADDON .. "RLPAGEIDXDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local rlpageidxdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    rlpageidxdropdown:SetPoint("TOPLEFT", rlpageidxsubtitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(rlpageidxdropdown, DropDownWidth-self.DropDownSpacing)
@@ -1401,7 +1405,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lpagepresubtitle:SetJustifyV("TOP")
    lpagepresubtitle:SetText("Left hotbar page prefix")
    
-   local lhotbareditbox = CreateFrame("EditBox", ADDON .. "LHotbarEditBoxFrame", configFrame, "InputBoxTemplate")
+   local lhotbareditbox = CreateFrame("EditBox", nil, configFrame, "InputBoxTemplate")
    lhotbareditbox:SetPoint("TOPLEFT", lpagepresubtitle, "BOTTOMLEFT", 0, 0)
    lhotbareditbox:SetWidth(2*DropDownWidth-self.DropDownSpacing)
    lhotbareditbox:SetHeight(self.EditBoxHeight)
@@ -1429,7 +1433,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rpagepresubtitle:SetJustifyV("TOP")
    rpagepresubtitle:SetText("Right hotbar page prefix")
    
-   local rhotbareditbox = CreateFrame("EditBox", ADDON .. "RHotbarEditBoxFrame", configFrame, "InputBoxTemplate")
+   local rhotbareditbox = CreateFrame("EditBox", nil, configFrame, "InputBoxTemplate")
    rhotbareditbox:SetPoint("TOPLEFT", rpagepresubtitle, "BOTTOMLEFT", 0, 0)
    rhotbareditbox:SetWidth(2*DropDownWidth-self.DropDownSpacing)
    rhotbareditbox:SetHeight(self.EditBoxHeight)
@@ -1457,7 +1461,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lrpagepresubtitle:SetJustifyV("TOP")
    lrpagepresubtitle:SetText("Left Right hotbar page prefix")
    
-   local lrhotbareditbox = CreateFrame("EditBox", ADDON .. "LHotbarEditBoxFrame", configFrame, "InputBoxTemplate")
+   local lrhotbareditbox = CreateFrame("EditBox", nil, configFrame, "InputBoxTemplate")
    lrhotbareditbox:SetPoint("TOPLEFT", lrpagepresubtitle, "BOTTOMLEFT", 0, 0)
    lrhotbareditbox:SetWidth(2*DropDownWidth-self.DropDownSpacing)
    lrhotbareditbox:SetHeight(self.EditBoxHeight)
@@ -1485,7 +1489,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rlpagepresubtitle:SetJustifyV("TOP")
    rlpagepresubtitle:SetText("Right Left hotbar page prefix")
    
-   local rlhotbareditbox = CreateFrame("EditBox", ADDON .. "RHotbarEditBoxFrame", configFrame, "InputBoxTemplate")
+   local rlhotbareditbox = CreateFrame("EditBox", nil, configFrame, "InputBoxTemplate")
    rlhotbareditbox:SetPoint("TOPLEFT", rlpagepresubtitle, "BOTTOMLEFT", 0, 0)
    rlhotbareditbox:SetWidth(2*DropDownWidth-self.DropDownSpacing)
    rlhotbareditbox:SetHeight(self.EditBoxHeight)
@@ -1545,7 +1549,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    gamepadenablesubtitle:SetJustifyV("TOP")
    gamepadenablesubtitle:SetText("GamePadEnable")
    
-   local gamepadenablebutton = CreateFrame("Button", ADDON .. "GamepadEnable", configFrame, "UIPanelButtonTemplate")
+   local gamepadenablebutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
    gamepadenablebutton:SetPoint("TOPLEFT", gamepadenablesubtitle, "BOTTOMLEFT", 0, 0)
    gamepadenablebutton:SetHeight(self.ButtonHeight)
    gamepadenablebutton:SetWidth(OptionWidth)
@@ -1580,7 +1584,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    cvarenablesubtitle:SetJustifyV("TOP")
    cvarenablesubtitle:SetText("CVars Enable")
    
-   local cvarenablebutton = CreateFrame("Button", ADDON .. "CvarEnable", configFrame, "UIPanelButtonTemplate")
+   local cvarenablebutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
    cvarenablebutton:SetPoint("TOPLEFT", cvarenablesubtitle, "BOTTOMLEFT", 0, 0)
    cvarenablebutton:SetHeight(self.ButtonHeight)
    cvarenablebutton:SetWidth(OptionWidth)
@@ -1611,7 +1615,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    gamepadlooksubtitle:SetJustifyV("TOP")
    gamepadlooksubtitle:SetText("GamePadLook")
    
-   local gamepadlookbutton = CreateFrame("Button", ADDON .. "GamePadLook", configFrame, "UIPanelButtonTemplate")
+   local gamepadlookbutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
    gamepadlookbutton:SetPoint("TOPLEFT", gamepadlooksubtitle, "BOTTOMLEFT", 0, 0)
    gamepadlookbutton:SetHeight(self.ButtonHeight)
    gamepadlookbutton:SetWidth(OptionWidth)
@@ -1642,7 +1646,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    mouselooksubtitle:SetJustifyV("TOP")
    mouselooksubtitle:SetText("MouseLook")
    
-   local mouselookbutton = CreateFrame("Button", ADDON .. "MouseLook", configFrame, "UIPanelButtonTemplate")
+   local mouselookbutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
    mouselookbutton:SetPoint("TOPLEFT", mouselooksubtitle, "BOTTOMLEFT", 0, 0)
    mouselookbutton:SetHeight(self.ButtonHeight)
    mouselookbutton:SetWidth(OptionWidth)
@@ -1695,7 +1699,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    devicetitle:SetJustifyV("TOP")
    devicetitle:SetText("Device")
 
-   local devicedropdown = CreateFrame("Frame", ADDON .. "DeviceDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local devicedropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    devicedropdown:SetPoint("TOPLEFT", devicetitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(devicedropdown, DropDownWidth-self.DropDownSpacing)
@@ -1749,7 +1753,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    leftclicktitle:SetJustifyV("TOP")
    leftclicktitle:SetText("Left Click")
 
-   local leftclickdropdown = CreateFrame("Frame", ADDON .. "LeftClickDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local leftclickdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    leftclickdropdown:SetPoint("TOPLEFT", leftclicktitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(leftclickdropdown, DropDownWidth-self.DropDownSpacing)
@@ -1797,7 +1801,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    rightclicktitle:SetJustifyV("TOP")
    rightclicktitle:SetText("Right Click")
 
-   local rightclickdropdown = CreateFrame("Frame", ADDON .. "RightClickDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+   local rightclickdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
    rightclickdropdown:SetPoint("TOPLEFT", rightclicktitle, "BOTTOMLEFT", 0, 0)
    
    UIDropDownMenu_SetWidth(rightclickdropdown, DropDownWidth-self.DropDownSpacing)
@@ -1844,7 +1848,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    yawspeedsubtitle:SetJustifyV("TOP")
    yawspeedsubtitle:SetText("Camera yaw speed")
    
-   local yaweditbox = CreateFrame("EditBox", ADDON .. "YawEditBoxFrame", configFrame, "InputBoxTemplate")
+   local yaweditbox = CreateFrame("EditBox", nil, configFrame, "InputBoxTemplate")
    yaweditbox:SetPoint("TOPLEFT", yawspeedsubtitle, "BOTTOMLEFT", 0, 0)
    yaweditbox:SetWidth(DropDownWidth-2*self.Inset)
    yaweditbox:SetHeight(self.EditBoxHeight)
@@ -1870,7 +1874,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    pitchspeedsubtitle:SetJustifyV("TOP")
    pitchspeedsubtitle:SetText("Camera pitch speed")
    
-   local pitcheditbox = CreateFrame("EditBox", ADDON .. "PitchEditBoxFrame", configFrame, "InputBoxTemplate")
+   local pitcheditbox = CreateFrame("EditBox", nil, configFrame, "InputBoxTemplate")
    pitcheditbox:SetPoint("TOPLEFT", pitchspeedsubtitle, "BOTTOMLEFT", 0, 0)
    pitcheditbox:SetWidth(DropDownWidth-2*self.Inset)
    pitcheditbox:SetHeight(self.EditBoxHeight)
@@ -1896,7 +1900,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    overlapmousespeedsubtitle:SetJustifyV("TOP")
    overlapmousespeedsubtitle:SetText("Overlap Mouse (ms)")
    
-   local overlapmouseeditbox = CreateFrame("EditBox", ADDON .. "OverlapMouseEditBoxFrame", configFrame, "InputBoxTemplate")
+   local overlapmouseeditbox = CreateFrame("EditBox", nil, configFrame, "InputBoxTemplate")
    overlapmouseeditbox:SetPoint("TOPLEFT", overlapmousespeedsubtitle, "BOTTOMLEFT", 0, 0)
    overlapmouseeditbox:SetWidth(DropDownWidth-2*self.Inset)
    overlapmouseeditbox:SetHeight(self.EditBoxHeight)
