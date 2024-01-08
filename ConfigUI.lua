@@ -22,7 +22,7 @@ local GamePadBindingList = {
 "PADRSHOULDER",
 "PADLTRIGGER",
 "PADRTRIGGER",
-"PADFOWARD",
+"PADFORWARD",
 "PADBACK",
 "PADSYSTEM",
 "PADSOCIAL",
@@ -45,14 +45,12 @@ local GamePadBindingList = {
 "[", 
 "]", 
 "\\",
-";",
 "'",
 ",",
 ".",
+"'",
 "/",
-"SHIFT",
-"CTRL",
-"ALT"
+"`"
 }
 
    
@@ -72,7 +70,12 @@ local GamePadButtonShp = {
    TRIGL="Shp_LTrigger",
    TRIGR="Shp_RTrigger",
    PPADL="Gen_Paddle1",
-   PPADR="Gen_Paddle2"
+   PPADR="Gen_Paddle2",
+   TPADL="Shp_TouchpadL",
+   TPADR="Shp_TouchpadR",
+   SOCIA="Shp_Share",
+   OPTIO="Shp_Menu",
+   SYSTM="Shp_System"
 }
 
 local GamePadActionMap = {
@@ -91,7 +94,12 @@ local GamePadActionMap = {
    TRIGL=addon.GamePadModifiers,
    TRIGR=addon.GamePadModifiers,
    PPADL=addon.GamePadModifiers,
-   PPADR=addon.GamePadModifiers
+   PPADR=addon.GamePadModifiers,
+   TPADL=addon.GamePadActions,
+   TPADR=addon.GamePadActions,
+   SOCIA=addon.GamePadActions,
+   OPTIO=addon.GamePadActions,
+   SYSTM=addon.GamePadActions
 }
 
 local GamePadModifierActionMap = {
@@ -107,10 +115,15 @@ local GamePadModifierActionMap = {
    STCKR=addon.GamePadModifierActions,
    SPADL=addon.GamePadModifierActions,
    SPADR=addon.GamePadModifierActions,
-   TRIGL={"NONE"},
-   TRIGR={"NONE"},
+   TRIGL=addon.GamePadModifierActions,
+   TRIGR=addon.GamePadModifierActions,
    PPADL=addon.GamePadModifierActions,
-   PPADR=addon.GamePadModifierActions
+   PPADR=addon.GamePadModifierActions,
+   TPADL=addon.GamePadModifierActions,
+   TPADR=addon.GamePadModifierActions,
+   SOCIA=addon.GamePadModifierActions,
+   OPTIO=addon.GamePadModifierActions,
+   SYSTM=addon.GamePadModifierActions,
 }
 
 local GamePadHotbarMap = {
@@ -126,10 +139,15 @@ local GamePadHotbarMap = {
    STCKR=addon.GamePadModifierActions,
    SPADL=addon.GamePadModifierActions,
    SPADR=addon.GamePadModifierActions,
-   TRIGL={"NONE"},
-   TRIGR={"NONE"},
+   TRIGL=addon.GamePadModifierActions,
+   TRIGR=addon.GamePadModifierActions,
    PPADL=addon.GamePadModifierActions,
-   PPADR=addon.GamePadModifierActions
+   PPADR=addon.GamePadModifierActions,
+   TPADL=addon.GamePadModifierActions,
+   TPADR=addon.GamePadModifierActions,
+   SOCIA=addon.GamePadModifierActions,
+   OPTIO=addon.GamePadModifierActions,
+   SYSTM=addon.GamePadModifierActions,
 }
 
 StaticPopupDialogs["CROSSHOTBAR_ENABLEGAMEPAD"] = {
@@ -236,6 +254,19 @@ local function FilterDropDownText(name)
    end
 end
 
+local function ActionsAvailable(button, prefix, ActionType)
+   if prefix .. ActionType ~= "ACTION" then
+      if prefix == button then
+         return false
+      end
+      if config.PadActions[button]["ACTION"] == "LEFTHOTBAR" or
+         config.PadActions[button]["ACTION"] == "RIGHTHOTBAR" then
+         return false
+      end
+   end
+   return true
+end
+
 function ConfigUI:AddToolTip(frame, text, wrap)
    frame:SetScript("OnEnter", function(self)
      GameTooltip:SetOwner(self, "ANCHOR_TOP")
@@ -250,7 +281,7 @@ end
 
 function ConfigUI:Refresh()
    --if not ConfigUI.InterfaceFrame:IsVisible() then return end
-   
+
    config:ProcessConfig(config)
 
    for i,callback in ipairs(ConfigUI.RefreshCallbacks) do
@@ -280,7 +311,7 @@ function ConfigUI:CreateFrame()
    self.InterfaceFrame:HookScript("OnEvent", OnEvent)
 
    self.InterfaceFrame:SetScript("OnShow", function(InterfaceFrame)
-      local title = InterfaceFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      local title = InterfaceFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightHuge")
       title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
       title:SetText("CrossHotbar")
 
@@ -318,7 +349,7 @@ function ConfigUI:CreateFrame()
    PresetFrame:Hide()
    
    PresetFrame:SetScript("OnShow", function(PresetFrame)
-      local title = PresetFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      local title = PresetFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightHuge")
       title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
       title:SetText("Presets")
       local anchor = title
@@ -344,9 +375,9 @@ function ConfigUI:CreateFrame()
       scrollChild:SetWidth(ActionFrame:GetWidth()-self.Inset)
       scrollChild:SetHeight(1)
       
-      local title = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      local title = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightHuge")
       title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
-      title:SetText("Bindings and Actions")
+      title:SetText("Actions Settings")
       
       local anchor = title
       anchor = ConfigUI:CreatePadBindings(scrollChild, anchor)
@@ -359,6 +390,23 @@ function ConfigUI:CreateFrame()
       ConfigUI:CreatePadActions(tab3, tab3, "SPADR", GamePadModifierActionMap, GamePadHotbarMap)
       ConfigUI:CreatePadActions(tab4, tab4, "PPADL", GamePadModifierActionMap, GamePadHotbarMap)
       ConfigUI:CreatePadActions(tab5, tab5, "PPADR", GamePadModifierActionMap, GamePadHotbarMap)
+
+      table.insert(self.RefreshCallbacks, function()
+         local spadlactive = false
+         local spadractive = false
+         local ppadlactive = false
+         local ppadractive = false
+         for i,button in ipairs(GamePadButtonList) do
+            if config.PadActions[button].ACTION == "LEFTSHOULDER" then spadlactive = true end
+            if config.PadActions[button].ACTION == "RIGHTSHOULDER" then spadractive = true end
+            if config.PadActions[button].ACTION == "LEFTPADDLE" then ppadlactive = true end
+            if config.PadActions[button].ACTION == "RIGHTPADDLE" then ppadractive = true end
+         end
+         PanelTemplates_SetTabEnabled(anchor, 2, spadlactive)
+         PanelTemplates_SetTabEnabled(anchor, 3, spadractive)
+         PanelTemplates_SetTabEnabled(anchor, 4, ppadlactive)
+         PanelTemplates_SetTabEnabled(anchor, 5, ppadractive)
+      end)
       
       ActionFrame:SetScript("OnShow", ConfigUI.Refresh) 
       ConfigUI:Refresh()
@@ -372,37 +420,47 @@ function ConfigUI:CreateFrame()
    HotbarFrame:Hide()
 
    HotbarFrame:SetScript("OnShow", function(HotbarFrame)
-      local title = HotbarFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      local scrollFrame = CreateFrame("ScrollFrame", nil, HotbarFrame, "UIPanelScrollFrameTemplate")
+      scrollFrame:SetPoint("TOPLEFT", 3, -4)
+      scrollFrame:SetPoint("BOTTOMRIGHT", -27, 4)
+      
+      local scrollChild = CreateFrame("Frame")
+      scrollFrame:SetScrollChild(scrollChild)
+      scrollChild:SetWidth(HotbarFrame:GetWidth()-self.Inset)
+      scrollChild:SetHeight(1)
+      
+      local title = scrollChild:CreateFontString(nil, "ARTWORK", "GameFontHighlightHuge")
       title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
       title:SetText("Hotbar Settings")
       
       local anchor = title
   
-      anchor = ConfigUI:CreateHotbarFeatures(HotbarFrame, anchor)
+      anchor = ConfigUI:CreateHotbarSettings(scrollChild, anchor)
       
       HotbarFrame:SetScript("OnShow", ConfigUI.Refresh) 
       ConfigUI:Refresh()
    end)
    
    InterfaceOptions_AddCategory(HotbarFrame)
-
+   
    local GamePadFrame = CreateFrame("Frame", ADDON .. "GamePad", self.InterfaceFrame)
    GamePadFrame.name = "GamePad"
    GamePadFrame.parent = self.InterfaceFrame.name
    GamePadFrame:Hide()
 
    GamePadFrame:SetScript("OnShow", function(GamePadFrame)
-      local title = GamePadFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+      local title = GamePadFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightHuge")
       title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
       title:SetText("GamePad Settings")
       
       local anchor = title
+      anchor = ConfigUI:CreateGamePadSettings(scrollChild, anchor)
       
       GamePadFrame:SetScript("OnShow", ConfigUI.Refresh) 
       ConfigUI:Refresh()
    end)      
 
-   --InterfaceOptions_AddCategory(GamePadFrame)
+   InterfaceOptions_AddCategory(GamePadFrame)
 
    SLASH_WXHBCROSSHOTBAR1, SLASH_WXHBCROSSHOTBAR2 = '/chb', '/wxhb';
    local function slashcmd(msg, editBox)
@@ -485,7 +543,7 @@ function ConfigUI:CreateTabFrame(configFrame, anchorFrame)
    tab2button:SetPoint("TOPLEFT", tab1button, "TOPRIGHT", 0, 0)
    tab2button:SetHeight(self.TabHeight)
    tab2button:SetWidth(self.TabWidth)
-   tab2button:SetText("SPADR")
+   tab2button:SetText("SPADL")
    tab2button:SetID(2)
    
    tab2button:SetScript("OnClick", function(self)
@@ -505,7 +563,7 @@ function ConfigUI:CreateTabFrame(configFrame, anchorFrame)
    tab3button:SetPoint("TOPLEFT", tab2button, "TOPRIGHT", 0, 0)
    tab3button:SetHeight(self.TabHeight)
    tab3button:SetWidth(self.TabWidth)
-   tab3button:SetText("SPADL")
+   tab3button:SetText("SPADR")
    tab3button:SetID(3)
    
    tab3button:SetScript("OnClick", function(self)
@@ -657,9 +715,18 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
       config:StorePreset(config, CrossHotbar_DB.Presets[preset])
       ConfigUI:Refresh()
    end)
+
+   local filesubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   filesubtitle:SetHeight(self.TextHeight)
+   filesubtitle:SetWidth(DropDownWidth)
+   filesubtitle:SetPoint("TOPLEFT", PresetsFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   filesubtitle:SetNonSpaceWrap(true)
+   filesubtitle:SetJustifyH("Middle")
+   filesubtitle:SetJustifyV("TOP")
+   filesubtitle:SetText("Name")
    
    local presetfileeditbox = CreateFrame("EditBox", ADDON .. "PresetFileEditBox", configFrame, "InputBoxTemplate")
-   presetfileeditbox:SetPoint("TOPLEFT", PresetsFrame, "BOTTOMLEFT", 24, -self.ConfigSpacing)
+   presetfileeditbox:SetPoint("TOPLEFT", filesubtitle, "BOTTOMLEFT", 24, 0)
    presetfileeditbox:SetWidth(DropDownWidth-self.DropDownSpacing)
    presetfileeditbox:SetHeight(self.EditBoxHeight)
    presetfileeditbox:SetMovable(false)
@@ -697,20 +764,258 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
       ConfigUI:Refresh()
    end)
 
+   local descripttitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   descripttitle:SetPoint("TOPLEFT", presetfileeditbox, "BOTTOMLEFT", 0, -4*self.ConfigSpacing)
+   descripttitle:SetWidth(2*DropDownWidth-self.DropDownSpacing)
+   descripttitle:SetNonSpaceWrap(true)
+   descripttitle:SetJustifyH("Middle")
+   descripttitle:SetJustifyV("TOP")
+   descripttitle:SetText("Description")
+
+
+   
+   local backdropframe = CreateFrame("Frame", nil, configFrame, "BackdropTemplate")
+   
+   backdropframe:SetBackdrop({
+        bgFile="Interface/DialogFrame/UI-DialogBox-Background",
+        edgeFile="Interface/DialogFrame/UI-DialogBox-Border",
+	tile = false,
+	tileEdge = false,
+	tileSize = 0,
+	edgeSize = 8,
+	insets = { left = 0, right = 0, top = 0, bottom = 0 }
+   })
+   
+   backdropframe:SetPoint("TOPLEFT", descripttitle, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   backdropframe:SetSize(2*DropDownWidth-self.DropDownSpacing, 200)
+   
+   local scrollFrame = CreateFrame("ScrollFrame", nil, backdropframe, "UIPanelScrollFrameTemplate, BackdropTemplate")
+   scrollFrame:SetSize(backdropframe:GetWidth()-40, backdropframe:GetHeight()-20)
+   scrollFrame:SetPoint("TOPLEFT", backdropframe, "TOPLEFT", 10, -10)
+
+   local descriptfileeditbox = CreateFrame("EditBox", ADDON .. "DescriptionFileEditBox", scrollFrame)
+   descriptfileeditbox:SetMultiLine(true)
+   descriptfileeditbox:SetMovable(false)
+   descriptfileeditbox:SetAutoFocus(false)
+   descriptfileeditbox:EnableMouse(true)
+   descriptfileeditbox:SetFontObject(ChatFontNormal)
+   descriptfileeditbox:SetSize(backdropframe:GetWidth()-40,
+                               backdropframe:GetHeight()-20)
+   descriptfileeditbox:SetText(config.Description)
+
+   scrollFrame:SetScrollChild(descriptfileeditbox)
+   
    table.insert(self.RefreshCallbacks, function()
                    presetdeletebutton:SetEnabled(CrossHotbar_DB.Presets[preset].Mutable)
                    presetfileeditbox:SetText(config.Name)
                    UIDropDownMenu_SetText(PresetsFrame, CrossHotbar_DB.Presets[preset].Name)
+                   descriptfileeditbox:SetText(config.Description)
    end)
    
    return PresetsFrame
 end
 
 --[[
-   Features
+   Pad bindings.
+--]]
+
+function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
+   local DropDownWidth = (configFrame:GetWidth() - self.SymbolWidth - 4*self.Inset)/3
+
+   local bindingframe = CreateFrame("Frame", ADDON .. "BindingFrame", configFrame, "BackdropTemplate")
+   bindingframe:EnableMouse(true)
+   bindingframe:SetHeight(#GamePadButtonList * 32 + 2*self.TextHeight + self.ConfigSpacing)
+   bindingframe:SetWidth(self.SymbolWidth + 100 + DropDownWidth - self.DropDownSpacing - self.Inset)
+   bindingframe:SetBackdropColor(0, 0, 1, .5)
+   bindingframe:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing -anchorFrame:GetHeight())
+
+   bindingframe:SetBackdrop({
+        bgFile="Interface/DialogFrame/UI-DialogBox-Background",
+        edgeFile="Interface/DialogFrame/UI-DialogBox-Border",
+	tile = false,
+	tileEdge = false,
+	tileSize = 0,
+	edgeSize = 16,
+	insets = { left = 0, right = 0, top = 0, bottom = 0 }
+   })
+
+   local buttonsubtitle = bindingframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   buttonsubtitle:SetHeight(self.TextHeight)
+   buttonsubtitle:SetWidth(self.SymbolWidth+self.Inset)
+   buttonsubtitle:SetPoint("TOPLEFT", bindingframe, "TOPLEFT", self.Inset, -self.ConfigSpacing)
+   buttonsubtitle:SetNonSpaceWrap(true)
+   buttonsubtitle:SetJustifyH("MIDDLE")
+   buttonsubtitle:SetJustifyV("TOP")
+   buttonsubtitle:SetText("Button")
+   
+   local bindingsubtitle = bindingframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   bindingsubtitle:SetHeight(self.TextHeight)
+   bindingsubtitle:SetWidth(DropDownWidth)
+   bindingsubtitle:SetPoint("TOPLEFT", buttonsubtitle, "TOPRIGHT", 0, 0)
+   bindingsubtitle:SetNonSpaceWrap(true)
+   bindingsubtitle:SetJustifyH("MIDDLE")
+   bindingsubtitle:SetJustifyV("TOP")
+   bindingsubtitle:SetText("Binding")
+
+   local buttoninset = self.Inset
+   local buttonanchor = buttonsubtitle
+   local bindinganchor = bindingsubtitle
+   for i,button in ipairs(GamePadButtonList) do
+      if config.PadActions[button] then
+         local attributes = config.PadActions[button]
+         local buttonsubtitle = bindingframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+         buttonsubtitle:SetHeight(32)
+         buttonsubtitle:SetWidth(self.SymbolWidth+100)
+         buttonsubtitle:SetPoint("TOPLEFT", buttonanchor, "BOTTOMLEFT", buttoninset, 0)
+         buttonsubtitle:SetNonSpaceWrap(true)
+         buttonsubtitle:SetJustifyH("MIDDLE")
+         buttonsubtitle:SetJustifyV("TOP")
+         buttonsubtitle:SetText(("|A:Gamepad_%s_64:24:24|a"):format(GamePadButtonShp[button]))
+         
+         local bindingframe = CreateFrame("Frame", ADDON .. button.."BindingDropDownMenu", bindingframe, "UIDropDownMenuTemplate")
+         bindingframe:SetPoint("TOPLEFT", bindinganchor, "BOTTOMLEFT", 0, 0)
+         
+         UIDropDownMenu_SetWidth(bindingframe, DropDownWidth-self.DropDownSpacing)
+         UIDropDownMenu_SetText(bindingframe, "NONE")
+         UIDropDownMenu_JustifyText(bindingframe, "LEFT")
+         UIDropDownMenu_Initialize(bindingframe, function(self, level, menuList)     
+            local info = UIDropDownMenu_CreateInfo()
+            UIDropDownMenu_SetText(self, "")
+            if (level or 1) == 1 then
+               local a = config.PadActions
+               for _,binding in ipairs(GamePadBindingList) do
+                  info.text, info.checked = binding, (a[button].BIND == binding)
+                  info.menuList, info.hasArrow = i, false
+                  info.arg1, info.arg2 = button, ConfigUI
+                  info.func = BindingDropDownDemo_OnClick
+                  UIDropDownMenu_AddButton(info)
+                  if (a[button].BIND == binding) then 
+                     UIDropDownMenu_SetText(self, binding)
+                  end
+               end
+            end
+         end)
+         
+         table.insert(self.RefreshCallbacks, function()
+                         UIDropDownMenu_SetText(bindingframe, config.PadActions[button].BIND)
+         end)
+         
+         buttoninset = 0
+         buttonanchor = buttonsubtitle
+         bindinganchor = bindingframe
+      end
+   end
+   
+   return bindingframe
+end
+
+--[[
+   Pad actions.
+--]]
+
+function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, HotbarMap)
+   local DropDownWidth = (configFrame:GetWidth() - self.Inset)/2
+   
+   local actionsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   actionsubtitle:SetHeight(self.TextHeight)
+   actionsubtitle:SetWidth(DropDownWidth)
+   actionsubtitle:SetPoint("TOPLEFT", anchorFrame, "TOPLEFT", self.Inset, -self.ConfigSpacing)
+   actionsubtitle:SetNonSpaceWrap(true)
+   actionsubtitle:SetJustifyH("MIDDLE")
+   actionsubtitle:SetJustifyV("TOP")
+   actionsubtitle:SetText("Action")
+
+   local hotbarsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   hotbarsubtitle:SetHeight(self.TextHeight)
+   hotbarsubtitle:SetWidth(DropDownWidth)
+   hotbarsubtitle:SetPoint("TOPLEFT", actionsubtitle, "TOPRIGHT", 0, 0)
+   hotbarsubtitle:SetNonSpaceWrap(true)
+   hotbarsubtitle:SetJustifyH("MIDDLE")
+   hotbarsubtitle:SetJustifyV("TOP")
+   hotbarsubtitle:SetText("Hotbar Action")
+
+   local actionanchor = actionsubtitle
+   local hotbaranchor = hotbarsubtitle
+   for i,button in ipairs(GamePadButtonList) do
+      if config.PadActions[button] then
+         local attributes = config.PadActions[button]
+         local actionframe = CreateFrame("Frame", ADDON .. button .. "ActionDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+         actionframe:SetPoint("TOPLEFT", actionanchor, "BOTTOMLEFT", 0, 0)
+         
+         UIDropDownMenu_SetWidth(actionframe, DropDownWidth-self.DropDownSpacing)
+         UIDropDownMenu_SetText(actionframe, "NONE")
+         UIDropDownMenu_JustifyText(actionframe, "LEFT")
+         UIDropDownMenu_Initialize(actionframe, function(self, level, menuList)     
+            local info = UIDropDownMenu_CreateInfo()
+            UIDropDownMenu_SetText(self, "")
+            if (level or 1) == 1 then
+               local a = config.PadActions
+               local actions = {"NONE"}
+               if ActionsAvailable(button, prefix, "ACTION") then
+                  actions = ActionMap[button]
+               end
+               for _,action in ipairs(actions) do
+                  info.text, info.checked = action, (a[button][prefix .. "ACTION"] == action)
+                  info.menuList, info.hasArrow = i, false
+                  info.arg1, info.arg2 = button, prefix .. "ACTION"
+                  info.func = ActionDropDownDemo_OnClick
+                  UIDropDownMenu_AddButton(info)
+                  if (a[button][prefix .. "ACTION"] == action) then 
+                     UIDropDownMenu_SetText(self, FilterDropDownText(action))
+                  end
+               end
+            end
+         end)
+
+         local hotbaractionframe = CreateFrame("Frame", ADDON .. button .. "HotbarActionDropDownMenu", configFrame, "UIDropDownMenuTemplate")
+         hotbaractionframe:SetPoint("TOPLEFT", hotbaranchor, "BOTTOMLEFT", 0, 0)
+         
+         UIDropDownMenu_SetWidth(hotbaractionframe, DropDownWidth-self.DropDownSpacing)
+         UIDropDownMenu_SetText(hotbaractionframe, "NONE")
+         UIDropDownMenu_JustifyText(hotbaractionframe, "LEFT")
+         UIDropDownMenu_Initialize(hotbaractionframe, function(self, level, menuList)     
+            local info = UIDropDownMenu_CreateInfo()
+            UIDropDownMenu_SetText(self, "")
+            if (level or 1) == 1 then
+               local a = config.PadActions
+               local actions = {"NONE"}
+               if ActionsAvailable(button, prefix, "TRIGACTION") then
+                  actions = HotbarMap[button]
+               end
+               for _,action in ipairs(actions) do
+                  info.text, info.checked = action, (a[button][prefix .. "TRIGACTION"] == action)
+                  info.menuList, info.hasArrow = i, false
+                  info.arg1, info.arg2 = button, prefix .. "TRIGACTION"
+                  info.func = HotbarBtnDropDownDemo_OnClick
+                  UIDropDownMenu_AddButton(info)
+                  if (a[button][prefix .. "TRIGACTION"] == action) then 
+                     UIDropDownMenu_SetText(self, FilterDropDownText(action))
+                  end
+               end
+            end
+         end)
+         
+         ConfigUI:AddToolTip(actionframe, Locale.LeftModifierToolTip, true)
+         ConfigUI:AddToolTip(hotbaractionframe, Locale.RightModifierToolTip, true)
+         
+         table.insert(self.RefreshCallbacks, function()
+                         UIDropDownMenu_SetText(actionframe, FilterDropDownText(config.PadActions[button][prefix .. "ACTION"]))
+                         UIDropDownMenu_SetText(hotbaractionframe, FilterDropDownText(config.PadActions[button][prefix .. "TRIGACTION"]))
+         end)
+         
+         actionanchor = actionframe
+         hotbaranchor = hotbaractionframe
+      end
+   end
+   
+   return buttonanchor
+end
+
+--[[
+   Hotbar settings.
 --]]  
 
-function ConfigUI:CreateHotbarFeatures(configFrame, anchorFrame)
+function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
 
    --[[
       Expanded button settings
@@ -728,10 +1033,20 @@ function ConfigUI:CreateHotbarFeatures(configFrame, anchorFrame)
    }
    
    local DropDownWidth = (configFrame:GetWidth() - 2*self.Inset)/2
+
+   local featuresubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
+   featuresubtitle:SetHeight(self.TextHeight)
+   featuresubtitle:SetWidth(DropDownWidth)
+   featuresubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   featuresubtitle:SetNonSpaceWrap(true)
+   featuresubtitle:SetJustifyH("Left")
+   featuresubtitle:SetJustifyV("TOP")
+   featuresubtitle:SetText("Features")
+   
    local expdsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    expdsubtitle:SetHeight(self.TextHeight)
    expdsubtitle:SetWidth(DropDownWidth)
-   expdsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   expdsubtitle:SetPoint("TOPLEFT", featuresubtitle, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    expdsubtitle:SetNonSpaceWrap(true)
    expdsubtitle:SetJustifyH("MIDDLE")
    expdsubtitle:SetJustifyV("TOP")
@@ -812,6 +1127,15 @@ function ConfigUI:CreateHotbarFeatures(configFrame, anchorFrame)
       end
    end)
 
+   local actionpagesubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
+   actionpagesubtitle:SetHeight(self.TextHeight)
+   actionpagesubtitle:SetWidth(DropDownWidth)
+   actionpagesubtitle:SetPoint("TOPLEFT", expddropdown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   actionpagesubtitle:SetNonSpaceWrap(true)
+   actionpagesubtitle:SetJustifyH("Left")
+   actionpagesubtitle:SetJustifyV("TOP")
+   actionpagesubtitle:SetText("ActionPage")
+
    --[[
        LHotbar page index
    --]]    
@@ -819,7 +1143,7 @@ function ConfigUI:CreateHotbarFeatures(configFrame, anchorFrame)
    local lpageidxsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    lpageidxsubtitle:SetHeight(self.TextHeight)
    lpageidxsubtitle:SetWidth(DropDownWidth)
-   lpageidxsubtitle:SetPoint("TOPLEFT", expddropdown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   lpageidxsubtitle:SetPoint("TOPLEFT", actionpagesubtitle, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    lpageidxsubtitle:SetNonSpaceWrap(true)
    lpageidxsubtitle:SetJustifyH("MIDDLE")
    lpageidxsubtitle:SetJustifyV("TOP")
@@ -987,6 +1311,119 @@ function ConfigUI:CreateHotbarFeatures(configFrame, anchorFrame)
          end
       end
    end)
+
+   local conditionalsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
+   conditionalsubtitle:SetHeight(self.TextHeight)
+   conditionalsubtitle:SetWidth(DropDownWidth)
+   conditionalsubtitle:SetPoint("TOPLEFT", lrpageidxdropdown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   conditionalsubtitle:SetNonSpaceWrap(true)
+   conditionalsubtitle:SetJustifyH("Left")
+   conditionalsubtitle:SetJustifyV("TOP")
+   conditionalsubtitle:SetText("Conditional")
+   
+   --[[
+       LHotbar page prefix
+   --]]    
+
+   local lpagepreubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   lpagepreubtitle:SetHeight(self.TextHeight)
+   lpagepreubtitle:SetWidth(DropDownWidth)
+   lpagepreubtitle:SetPoint("TOPLEFT", conditionalsubtitle, "BOTTOMLEFT", self.Inset, -self.ConfigSpacing)
+   lpagepreubtitle:SetNonSpaceWrap(true)
+   lpagepreubtitle:SetJustifyH("LEFT")
+   lpagepreubtitle:SetJustifyV("TOP")
+   lpagepreubtitle:SetText("Left hotbar page prefix")
+   
+   local lhotbareditbox = CreateFrame("EditBox", ADDON .. "LHotbarEditBoxFrame", configFrame, "InputBoxTemplate")
+   lhotbareditbox:SetPoint("TOPLEFT", lpagepreubtitle, "BOTTOMLEFT", 0, 0)
+   lhotbareditbox:SetWidth(2*DropDownWidth-self.DropDownSpacing)
+   lhotbareditbox:SetHeight(self.EditBoxHeight)
+   lhotbareditbox:SetMovable(false)
+   lhotbareditbox:SetAutoFocus(false)
+   lhotbareditbox:EnableMouse(true)
+   lhotbareditbox:SetText(config.Hotbar.LPagePrefix)
+   lhotbareditbox:SetScript("OnEditFocusLost", function(self)
+      config.Hotbar.LPagePrefix = self:GetText()
+      ConfigUI:Refresh()
+   end)
+   
+   --[[
+       RHotbar page prefix
+   --]]    
+
+   local rpagepreubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   rpagepreubtitle:SetHeight(self.TextHeight)
+   rpagepreubtitle:SetWidth(DropDownWidth)
+   rpagepreubtitle:SetPoint("TOPLEFT", lhotbareditbox, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   rpagepreubtitle:SetNonSpaceWrap(true)
+   rpagepreubtitle:SetJustifyH("LEFT")
+   rpagepreubtitle:SetJustifyV("TOP")
+   rpagepreubtitle:SetText("Right hotbar page prefix")
+   
+   local rhotbareditbox = CreateFrame("EditBox", ADDON .. "RHotbarEditBoxFrame", configFrame, "InputBoxTemplate")
+   rhotbareditbox:SetPoint("TOPLEFT", rpagepreubtitle, "BOTTOMLEFT", 0, 0)
+   rhotbareditbox:SetWidth(2*DropDownWidth-self.DropDownSpacing)
+   rhotbareditbox:SetHeight(self.EditBoxHeight)
+   rhotbareditbox:SetMovable(false)
+   rhotbareditbox:SetAutoFocus(false)
+   rhotbareditbox:EnableMouse(true)
+   rhotbareditbox:SetText(config.Hotbar.RPagePrefix)
+   rhotbareditbox:SetScript("OnEditFocusLost", function(self)
+      config.Hotbar.RPagePrefix = self:GetText()
+      ConfigUI:Refresh()
+   end)
+   
+   --[[
+       LRHotbar page prefix
+   --]]    
+
+   local lrpagepreubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   lrpagepreubtitle:SetHeight(self.TextHeight)
+   lrpagepreubtitle:SetWidth(DropDownWidth)
+   lrpagepreubtitle:SetPoint("TOPLEFT", rhotbareditbox, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   lrpagepreubtitle:SetNonSpaceWrap(true)
+   lrpagepreubtitle:SetJustifyH("LEFT")
+   lrpagepreubtitle:SetJustifyV("TOP")
+   lrpagepreubtitle:SetText("Left Right hotbar page prefix")
+   
+   local lrhotbareditbox = CreateFrame("EditBox", ADDON .. "LHotbarEditBoxFrame", configFrame, "InputBoxTemplate")
+   lrhotbareditbox:SetPoint("TOPLEFT", lrpagepreubtitle, "BOTTOMLEFT", 0, 0)
+   lrhotbareditbox:SetWidth(2*DropDownWidth-self.DropDownSpacing)
+   lrhotbareditbox:SetHeight(self.EditBoxHeight)
+   lrhotbareditbox:SetMovable(false)
+   lrhotbareditbox:SetAutoFocus(false)
+   lrhotbareditbox:EnableMouse(true)
+   lrhotbareditbox:SetText(config.Hotbar.LRPagePrefix)
+   lrhotbareditbox:SetScript("OnEditFocusLost", function(self)
+      config.Hotbar.LRPagePrefix = self:GetText()
+      ConfigUI:Refresh()
+   end)
+   
+   --[[
+       RLHotbar page prefix
+   --]]    
+
+   local rlpagepreubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   rlpagepreubtitle:SetHeight(self.TextHeight)
+   rlpagepreubtitle:SetWidth(DropDownWidth)
+   rlpagepreubtitle:SetPoint("TOPLEFT", lrhotbareditbox, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   rlpagepreubtitle:SetNonSpaceWrap(true)
+   rlpagepreubtitle:SetJustifyH("LEFT")
+   rlpagepreubtitle:SetJustifyV("TOP")
+   rlpagepreubtitle:SetText("Right Left hotbar page prefix")
+   
+   local rlhotbareditbox = CreateFrame("EditBox", ADDON .. "RHotbarEditBoxFrame", configFrame, "InputBoxTemplate")
+   rlhotbareditbox:SetPoint("TOPLEFT", rlpagepreubtitle, "BOTTOMLEFT", 0, 0)
+   rlhotbareditbox:SetWidth(2*DropDownWidth-self.DropDownSpacing)
+   rlhotbareditbox:SetHeight(self.EditBoxHeight)
+   rlhotbareditbox:SetMovable(false)
+   rlhotbareditbox:SetAutoFocus(false)
+   rlhotbareditbox:EnableMouse(true)
+   rlhotbareditbox:SetText(config.Hotbar.RPagePrefix)
+   rlhotbareditbox:SetScript("OnEditFocusLost", function(self)
+      config.Hotbar.RLPagePrefix = self:GetText()
+      ConfigUI:Refresh()
+   end)
    
    table.insert(self.RefreshCallbacks, function()
                    UIDropDownMenu_SetText(expddropdown, wxhbtypestr[config.Hotbar.WXHBType])
@@ -995,197 +1432,26 @@ function ConfigUI:CreateHotbarFeatures(configFrame, anchorFrame)
                    UIDropDownMenu_SetText(rpageidxdropdown, "ActionPage " .. config.Hotbar.RPageIndex)
                    UIDropDownMenu_SetText(lrpageidxdropdown, "ActionPage " .. config.Hotbar.LRPageIndex)
                    UIDropDownMenu_SetText(rlpageidxdropdown, "ActionPage " .. config.Hotbar.RLPageIndex)
+                   lhotbareditbox:SetText(config.Hotbar.LPagePrefix)
+                   rhotbareditbox:SetText(config.Hotbar.RPagePrefix)
+                   lrhotbareditbox:SetText(config.Hotbar.LRPagePrefix)
+                   rlhotbareditbox:SetText(config.Hotbar.RLPagePrefix)
    end)
    
-   return lrpageidxdropdown
+   return rlhotbareditbox
 end
+
 
 --[[
-   Pad bindings.
---]]
+   GamePad settings.
+--]]  
 
-function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
-   local DropDownWidth = (configFrame:GetWidth() - self.SymbolWidth - 4*self.Inset)/3
-
-   local bindingframe = CreateFrame("Frame", ADDON .. "BindingFrame", configFrame, "BackdropTemplate")
-   bindingframe:EnableMouse(true)
-   bindingframe:SetHeight(#GamePadButtonList * 32 + 2*self.TextHeight + self.ConfigSpacing)
-   bindingframe:SetWidth(self.SymbolWidth + 100 + DropDownWidth - self.DropDownSpacing - self.Inset)
-   bindingframe:SetBackdropColor(0, 0, 1, .5)
-   bindingframe:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing -anchorFrame:GetHeight())
-
-   bindingframe:SetBackdrop({
-        bgFile="Interface/DialogFrame/UI-DialogBox-Background",
-        edgeFile="Interface/DialogFrame/UI-DialogBox-Border",
-	tile = false,
-	tileEdge = false,
-	tileSize = 0,
-	edgeSize = 16,
-	insets = { left = 0, right = 0, top = 0, bottom = 0 }
-   })
-
-   local buttonsubtitle = bindingframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   buttonsubtitle:SetHeight(self.TextHeight)
-   buttonsubtitle:SetWidth(self.SymbolWidth+self.Inset)
-   buttonsubtitle:SetPoint("TOPLEFT", bindingframe, "TOPLEFT", self.Inset, -self.ConfigSpacing)
-   buttonsubtitle:SetNonSpaceWrap(true)
-   buttonsubtitle:SetJustifyH("MIDDLE")
-   buttonsubtitle:SetJustifyV("TOP")
-   buttonsubtitle:SetText("Button")
+function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    
-   local bindingsubtitle = bindingframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   bindingsubtitle:SetHeight(self.TextHeight)
-   bindingsubtitle:SetWidth(DropDownWidth)
-   bindingsubtitle:SetPoint("TOPLEFT", buttonsubtitle, "TOPRIGHT", 0, 0)
-   bindingsubtitle:SetNonSpaceWrap(true)
-   bindingsubtitle:SetJustifyH("MIDDLE")
-   bindingsubtitle:SetJustifyV("TOP")
-   bindingsubtitle:SetText("Binding")
-
-   local buttoninset = self.Inset
-   local buttonanchor = buttonsubtitle
-   local bindinganchor = bindingsubtitle
-   for i,button in ipairs(GamePadButtonList) do
-      if config.PadActions[button] then
-         local attributes = config.PadActions[button]
-         local buttonsubtitle = bindingframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-         buttonsubtitle:SetHeight(32)
-         buttonsubtitle:SetWidth(self.SymbolWidth+100)
-         buttonsubtitle:SetPoint("TOPLEFT", buttonanchor, "BOTTOMLEFT", buttoninset, 0)
-         buttonsubtitle:SetNonSpaceWrap(true)
-         buttonsubtitle:SetJustifyH("MIDDLE")
-         buttonsubtitle:SetJustifyV("TOP")
-         buttonsubtitle:SetText(("|A:Gamepad_%s_64:24:24|a"):format(GamePadButtonShp[button]))
-         
-         local bindingframe = CreateFrame("Frame", ADDON .. button.."BindingDropDownMenu", bindingframe, "UIDropDownMenuTemplate")
-         bindingframe:SetPoint("TOPLEFT", bindinganchor, "BOTTOMLEFT", 0, 0)
-         
-         UIDropDownMenu_SetWidth(bindingframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(bindingframe, "NONE")
-         UIDropDownMenu_JustifyText(bindingframe, "LEFT")
-         UIDropDownMenu_Initialize(bindingframe, function(self, level, menuList)     
-            local info = UIDropDownMenu_CreateInfo()
-            UIDropDownMenu_SetText(self, "")
-            if (level or 1) == 1 then
-               local a = config.PadActions
-               for _,binding in ipairs(GamePadBindingList) do
-                  info.text, info.checked = binding, (a[button].BIND == binding)
-                  info.menuList, info.hasArrow = i, false
-                  info.arg1, info.arg2 = button, ConfigUI
-                  info.func = BindingDropDownDemo_OnClick
-                  UIDropDownMenu_AddButton(info)
-                  if (a[button].BIND == binding) then 
-                     UIDropDownMenu_SetText(self, binding)
-                  end
-               end
-            end
-         end)
-         
-         table.insert(self.RefreshCallbacks, function()
-                         UIDropDownMenu_SetText(bindingframe, config.PadActions[button].BIND)
-         end)
-         
-         buttoninset = 0
-         buttonanchor = buttonsubtitle
-         bindinganchor = bindingframe
-      end
-   end
+   table.insert(self.RefreshCallbacks, function()
+   end)
    
-   return bindingframe
+   return nil
 end
-
---[[
-   Pad bindings and actions.
---]]
-
-function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, HotbarMap)
-   local DropDownWidth = (configFrame:GetWidth() - self.Inset)/2
    
-   local actionsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   actionsubtitle:SetHeight(self.TextHeight)
-   actionsubtitle:SetWidth(DropDownWidth)
-   actionsubtitle:SetPoint("TOPLEFT", anchorFrame, "TOPLEFT", self.Inset, -self.ConfigSpacing)
-   actionsubtitle:SetNonSpaceWrap(true)
-   actionsubtitle:SetJustifyH("MIDDLE")
-   actionsubtitle:SetJustifyV("TOP")
-   actionsubtitle:SetText("Action")
-
-   local hotbarsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-   hotbarsubtitle:SetHeight(self.TextHeight)
-   hotbarsubtitle:SetWidth(DropDownWidth)
-   hotbarsubtitle:SetPoint("TOPLEFT", actionsubtitle, "TOPRIGHT", 0, 0)
-   hotbarsubtitle:SetNonSpaceWrap(true)
-   hotbarsubtitle:SetJustifyH("MIDDLE")
-   hotbarsubtitle:SetJustifyV("TOP")
-   hotbarsubtitle:SetText("Hotbar Action")
-
-   local actionanchor = actionsubtitle
-   local hotbaranchor = hotbarsubtitle
-   for i,button in ipairs(GamePadButtonList) do
-      if config.PadActions[button] then
-         local attributes = config.PadActions[button]
-         local actionframe = CreateFrame("Frame", ADDON .. button .. "ActionDropDownMenu", configFrame, "UIDropDownMenuTemplate")
-         actionframe:SetPoint("TOPLEFT", actionanchor, "BOTTOMLEFT", 0, 0)
-         
-         UIDropDownMenu_SetWidth(actionframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(actionframe, "NONE")
-         UIDropDownMenu_JustifyText(actionframe, "LEFT")
-         UIDropDownMenu_Initialize(actionframe, function(self, level, menuList)     
-            local info = UIDropDownMenu_CreateInfo()
-            UIDropDownMenu_SetText(self, "")
-            if (level or 1) == 1 then
-               local a = config.PadActions
-               for _,action in ipairs(ActionMap[button]) do
-                  info.text, info.checked = action, (a[button][prefix .. "ACTION"] == action)
-                  info.menuList, info.hasArrow = i, false
-                  info.arg1, info.arg2 = button, prefix .. "ACTION"
-                  info.func = ActionDropDownDemo_OnClick
-                  UIDropDownMenu_AddButton(info)
-                  if (a[button][prefix .. "ACTION"] == action) then 
-                     UIDropDownMenu_SetText(self, FilterDropDownText(action))
-                  end
-               end
-            end
-         end)
-
-         local hotbaractionframe = CreateFrame("Frame", ADDON .. button .. "HotbarActionDropDownMenu", configFrame, "UIDropDownMenuTemplate")
-         hotbaractionframe:SetPoint("TOPLEFT", hotbaranchor, "BOTTOMLEFT", 0, 0)
-         
-         UIDropDownMenu_SetWidth(hotbaractionframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(hotbaractionframe, "NONE")
-         UIDropDownMenu_JustifyText(hotbaractionframe, "LEFT")
-         UIDropDownMenu_Initialize(hotbaractionframe, function(self, level, menuList)     
-            local info = UIDropDownMenu_CreateInfo()
-            UIDropDownMenu_SetText(self, "")
-            if (level or 1) == 1 then
-               local a = config.PadActions
-               for _,action in ipairs(HotbarMap[button]) do
-                  info.text, info.checked = action, (a[button][prefix .. "TRIGACTION"] == action)
-                  info.menuList, info.hasArrow = i, false
-                  info.arg1, info.arg2 = button, prefix .. "TRIGACTION"
-                  info.func = HotbarBtnDropDownDemo_OnClick
-                  UIDropDownMenu_AddButton(info)
-                  if (a[button][prefix .. "TRIGACTION"] == action) then 
-                     UIDropDownMenu_SetText(self, FilterDropDownText(action))
-                  end
-               end
-            end
-         end)
-         
-         ConfigUI:AddToolTip(actionframe, Locale.LeftModifierToolTip, true)
-         ConfigUI:AddToolTip(hotbaractionframe, Locale.RightModifierToolTip, true)
-         
-         table.insert(self.RefreshCallbacks, function()
-                         UIDropDownMenu_SetText(actionframe, FilterDropDownText(config.PadActions[button][prefix .. "ACTION"]))
-                         UIDropDownMenu_SetText(hotbaractionframe, FilterDropDownText(config.PadActions[button][prefix .. "TRIGACTION"]))
-         end)
-         
-         actionanchor = actionframe
-         hotbaranchor = hotbaractionframe
-      end
-   end
-   
-   return buttonanchor
-end
-
 ConfigUI:CreateFrame()

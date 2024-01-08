@@ -122,7 +122,7 @@ function HotbarMixin:OnLoad()
    self:RegisterEvent("PLAYER_ENTERING_WORLD");
    self:RegisterEvent("UPDATE_BINDINGS");
    self:RegisterEvent("GAME_PAD_ACTIVE_CHANGED");
-   
+   --[[
    self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player");
    self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player");
    self:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player");
@@ -134,6 +134,7 @@ function HotbarMixin:OnLoad()
    self:RegisterUnitEvent("UNIT_SPELLCAST_RETICLE_CLEAR", "player");
    self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "player");
    self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "player");
+   --]]
 end
 
 function HotbarMixin.hSetPoint(f, ...)
@@ -352,7 +353,7 @@ function HotbarMixin:StopTargettingReticleAnim()
       local buttons = { container:GetChildren() }
       for j,button in ipairs(buttons) do
          if button ~= nil and button:GetName() ~= nil then
-            if string.find(button:GetName(), "Button") then -- self.BtnPrefix 
+            if string.find(button:GetName(), "Button") then -- self.BtnPrefix
                button.TargetReticleAnimFrame:Hide()
             end
          end

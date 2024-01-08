@@ -4,7 +4,7 @@
 ## Version: 1.0
 ## Notes: Implements a WXHB Crosshotbar as an actionbar.
 ## Author: ChainStratagem (phodoe) - https://github.com/ChainStratagem/CrossHotbar
-## SavedVariables: CrossHotbar_DB
+## SavedVariables: 
 
 Config.lua
 GamePadButtons.lua
