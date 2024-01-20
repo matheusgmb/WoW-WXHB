@@ -1,6 +1,6 @@
 local ADDON, addon = ...
 local config = addon.Config
-
+local LibActBtn = LibStub("LibActionButton-1.0")
 local WXHBList = {
    ["HIDE"] = true,
    ["FADE"] = true,
@@ -20,7 +20,7 @@ local ButtonLayout = {
       LHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
          BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-         GrpPos = {{4.90, 0.0}, {1.1, 0.0}, {-2.25, 2.5}},
+         GrpPos = {{4.90, 0.0}, {1.1, 0.0}, {-0.25, 2.5}},
          GrpOff = {{-12.0, 0.0}, {10.0, 0.0}, {0.0, 0.0}},
          SclOff = {{-0.5, 0.5}, {1.5, 0.5}, {-0.5, 0.5}}
       },
@@ -41,7 +41,7 @@ local ButtonLayout = {
       LRHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
          BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, { -2.25, 2.5}},
+         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, { -0.25, 2.5}},
          GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {0.0, 0.0}},
          SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
       }
@@ -51,28 +51,28 @@ local ButtonLayout = {
       LHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
          BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-         GrpPos = {{8.05, 0.0}, {1.70, 0.0}, {-2.25, 2.5}},
+         GrpPos = {{8.05, 0.0}, {1.70, 0.0}, {-0.25, 2.5}},
          GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {0.0, 0.0}},
          SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
       },
       RHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
          BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-         GrpPos = {{11.30, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
+         GrpPos = {{11.30, 0.0}, {4.90, 0.0}, {12.90, 2.5}},
          GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
          SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
       },
       RLHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
          BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
+         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, {12.90, 2.5}},
          GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
          SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
       },
       LRHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
          BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, { -2.25, 2.5}},
+         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, { -0.25, 2.5}},
          GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {0.0, 0.0}},
          SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-0.5, 0.5}}
       }
@@ -98,10 +98,10 @@ end
 function HotbarMixin:OnLoad()
    self.AnchorButtons = {}
    self.Highlights = {}
-   self.ActionBar = _G[self.BarName]
    self:AddActionBar()
+   self:AddBindingFunc()
+   self:AddPlacemantFunc()
    self:AddPageHandler()
-   self:AddBindingHandler()
    self:AddVisibilityHandler()
    self:AddModHandler()
    self:AddExpandHandler()
@@ -116,61 +116,186 @@ function HotbarMixin:OnLoad()
    
    self.Locked = true
    self.Point = {self:GetPoint(1)}
-   self.ActionBar.hotbar = self
-   hooksecurefunc(self.ActionBar, "SetPoint", self.hSetPoint)
 
-   self:RegisterEvent("PLAYER_ENTERING_WORLD");
-   self:RegisterEvent("UPDATE_BINDINGS");
-   self:RegisterEvent("GAME_PAD_ACTIVE_CHANGED");
-   --[[
-   self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_RETICLE_TARGET", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_RETICLE_CLEAR", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "player");
-   self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "player");
-   --]]
+   self:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
 
-function HotbarMixin.hSetPoint(f, ...)
-   --   print(f.hotbar:GetName(), f.hotbar.Point, f.hotbar.Locked) 
-   if f.hotbar and f.hotbar.Point ~= nil then
-      if f.hotbar.Locked == false then 
-         f.hotbar.Point = {f:GetPoint(1)}
+function HotbarMixin:SetPointActionBar(actionbor, ...)
+   local point, relativeFrame, relativePoint, ofsx, ofsy = ...
+   if self and self.Point ~= nil then
+      if self.Locked == false then 
+         self.Point = {self.ActionBar:GetPoint(1)}
       else
-         local p = f.hotbar.Point
-         f.hotbar.Point = nil
-         f:ClearAllPoints()
-         
-         f:SetPoint(unpack(p))
-         f.hotbar.Point = p
+         local p = self.Point
+         self.Point = nil
+         if not InCombatLockdown() then 
+           self.ActionBar:ClearAllPoints()          
+           self.ActionBar:SetPoint(unpack(p))
+         end
+         self.Point = p
          p = nil
       end
-      
    end
 end
 
 function HotbarMixin:AddActionBar()
-   local containers = { self.ActionBar:GetChildren() }
-   for i,container in ipairs(containers) do
-      SecureHandlerSetFrameRef(self, 'Container'..i, container)
-      local buttons = { container:GetChildren() }
-      for j,button in ipairs(buttons) do
-         if button ~= nil and button:GetName() ~= nil then
-            local index = button:GetID();
-            if string.find(button:GetName(), "Button") then -- self.BtnPrefix 
-               SecureHandlerSetFrameRef(self, 'ActionButton'..index, button)
+   if 1 == 1 then
+      self.ActionBar = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
+      self.ActionBar:SetAttribute("_onstate-page", [[
+         self:SetAttribute('actionpage', newstate)
+         self:SetAttribute("state", newstate)
+         control:ChildUpdate("state", newstate)
+      ]])
+
+      self.ActionBar:SetAttribute('actionpage', 1)
+      self.ActionBar:SetAttribute("state-page", "1")
+      self.ActionBar:SetID(0)
+      self.BtnPrefix = self:GetName() .. "Button"
+      self.Buttons = {}
+
+      local customExitButton = {
+         func = function(button)
+            VehicleExit()
+         end,
+         texture = "Interface\\Vehicles\\UI-Vehicles-Button-Exit-Up",
+         tooltip = LEAVE_VEHICLE,
+      }
+      
+      for i = 1,12 do
+         self.Buttons[i] = LibActBtn:CreateButton(i, self.BtnPrefix .. i, self.ActionBar)
+         self.Buttons[i]:SetID(i)
+         local offset = 0
+         local offsetid = (i + offset - 1) % 12 + 1
+         for k = 1,18 do
+            self.Buttons[i]:SetState(k, "action", (k - 1) * 12 + offsetid)
+         end
+         self.Buttons[i]:SetState(0, "action", offsetid)
+         if i == 12 then
+            self.Buttons[i]:SetState(16, "custom", customExitButton)
+            self.Buttons[i]:SetState(17, "custom", customExitButton)
+            self.Buttons[i]:SetState(18, "custom", customExitButton)
+         end
+      end
+
+      if _G[self.BarName].EndCaps then
+         _G[self.BarName].EndCaps.LeftEndCap:SetShown(false)
+         _G[self.BarName].EndCaps.RightEndCap:SetShown(false)
+      end
+      if _G[self.BarName].BorderArt then
+         _G[self.BarName].BorderArt:SetTexture(nil)
+      end
+      if _G[self.BarName].Background then
+         _G[self.BarName].Background:SetShown(false)
+      end
+      if _G[self.BarName].ActionBarPageNumber then
+         _G[self.BarName].ActionBarPageNumber:SetShown(false)
+         _G[self.BarName].ActionBarPageNumber.Text:SetShown(false)
+      end
+      
+      if _G[self.BarName].system then
+         _G[self.BarName]["isShownExternal"] = nil
+	local c = 42
+	repeat
+           if _G[self.BarName][c]  == nil then
+              _G[self.BarName][c]  = nil
+           end
+           c = c + 1
+	until issecurevariable(_G[self.BarName], "isShownExternal")
+      end
+      if _G[self.BarName].HideBase then
+         _G[self.BarName]:HideBase()
+      else
+         _G[self.BarName]:Hide()
+      end
+      
+      _G[self.BarName]:UnregisterEvent("PLAYER_REGEN_ENABLED")
+      _G[self.BarName]:UnregisterEvent("PLAYER_REGEN_DISABLED")
+      _G[self.BarName]:UnregisterEvent("ACTIONBAR_SHOWGRID")
+      _G[self.BarName]:UnregisterEvent("ACTIONBAR_HIDEGRID")
+      
+      local containers = { _G[self.BarName]:GetChildren() }
+      for i,container in ipairs(containers) do
+         local buttons = { container:GetChildren() }
+         for j,button in ipairs(buttons) do
+            button:Hide()
+            button:UnregisterAllEvents()
+            button:SetAttribute("statehidden", true)
+         end
+      end
+   else   
+      self.Buttons = {}
+      self.ActionBar = _G[self.BarName]
+      local containers = { self.ActionBar:GetChildren() }
+      for i,container in ipairs(containers) do
+         local buttons = { container:GetChildren() }
+         for j,button in ipairs(buttons) do
+            if button ~= nil and button:GetName() ~= nil then
+               local index = button:GetID();
+               if string.find(button:GetName(), "Button") then -- self.BtnPrefix
+                  self.Buttons[index] = button
+               end
             end
          end
       end
    end
    
+   for i,button in ipairs(self.Buttons) do
+      local index = self.Buttons[i]:GetID();
+      SecureHandlerSetFrameRef(self, 'ActionButton'..index, button)
+   end
    SecureHandlerSetFrameRef(self, 'ActionBar', self.ActionBar)
+end
+
+function HotbarMixin:AddOverrideKeyBindings(ConfigBindings)
+   for i,button in ipairs(self.Buttons) do
+      local index = button:GetID();
+      for j, key in ipairs(ConfigBindings["HOTBARBTN"..index]) do               
+         button:SetAttribute('over_key'..j, key)
+      end
+      button:SetAttribute("numbindings", #ConfigBindings["HOTBARBTN"..index])
+      button.HotKey:SetText(RANGE_INDICATOR);
+      button.HotKey:Show();
+   end
+end
+
+function HotbarMixin:AddPlacemantFunc()
+   self:SetAttribute('SetHotbarPlacement', [[
+      actionbar = self:GetFrameRef('ActionBar')
+      if actionbar then
+         local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()
+         local apoint, arelativeTo, arelativePoint, axOfs, ayOfs = actionbar:GetPoint()
+         if arelativeTo ~= relativeTo then
+            local left, bottom, w, h = self:GetRect()
+            local s = self:GetScale()
+            actionbar:SetScale(s)
+            actionbar:ClearAllPoints()
+            actionbar:SetPoint("BOTTOMLEFT", relativeTo, relativePoint, xOfs*s-w*0.5, yOfs*s-h*0.5)
+         end
+      end
+   ]])
+end
+
+function HotbarMixin:AddBindingFunc()
+   self:SetAttribute('SetHotbarBindings', [[
+      local currentstate = self:GetAttribute("currentstate")
+      local activestate = self:GetAttribute("activestate")
+      local expanded = self:GetAttribute("expanded")
+      local modifier = self:GetAttribute("modifier")
+      if currentstate == activestate then
+         for i = 1, 12 do
+            local b = self:GetFrameRef('ActionButton'..i)
+            if b then 
+               local nbindings = b:GetAttribute('numbindings')
+               if expanded ~= 0 then modifier = nbindings end
+               local key = b:GetAttribute('over_key' .. modifier)
+               if key then
+                  b:SetBindingClick(true, key, b:GetName(), "LeftButton")
+               end
+            end
+         end
+         self:CallMethod("UpdateHotkeys", modifier)
+      end
+   ]])
 end
 
 function HotbarMixin:AddPageHandler()
@@ -198,29 +323,9 @@ function HotbarMixin:AddPageHandler()
    end
    
    local bar = self:GetFrameRef('ActionBar')
+   bar:SetAttribute('state-page', newstate)
    bar:SetAttribute('actionpage', newstate)
    self:SetAttribute('actionpage', newstate)
-   ]])
-end
-
-
-function HotbarMixin:AddBindingHandler()
-   self:SetAttribute('SetHotbarBindings', [[
-      local currentstate = self:GetAttribute("currentstate")
-      local activestate = self:GetAttribute("activestate")
-      local expanded = self:GetAttribute("expanded")
-      local modifier = self:GetAttribute("modifier")
-      if currentstate == activestate then
-         for i = 1, 12 do
-            local b = self:GetFrameRef('ActionButton'..i)
-            if b then 
-               local nbindings = b:GetAttribute('numbindings')
-               if expanded ~= 0 then modifier = nbindings end
-               local key = b:GetAttribute('over_key' .. modifier)
-               if key then b:SetBindingClick(true, key, b:GetName(), "LeftButton") end
-            end
-         end
-      end
    ]])
 end
 
@@ -232,6 +337,8 @@ function HotbarMixin:AddVisibilityHandler()
       self:SetAttribute("currentstate", newstate)
 
       actionbar = self:GetFrameRef('ActionBar')
+      self:RunAttribute("SetHotbarPlacement")
+
       if newstate == shownstate then
          RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;show")
          self:RunAttribute("SetHotbarBindings")
@@ -279,35 +386,27 @@ function HotbarMixin:SetExpandIconsActive(newstate, enable)
          end
       end
    end
-   
-   local containers = { self.ActionBar:GetChildren() }
-   for i,container in ipairs(containers) do
-      local buttons = { container:GetChildren() }
-      for j,button in ipairs(buttons) do
-         if button ~= nil and button:GetName() ~= nil then
-            if string.find(button:GetName(), "Button") then
-               if  button:GetID() >= 9 then 
-                  if newstate ~= 0 and active then
-                     button:SetAlpha(1.0)
-                     button.icon:SetDesaturated(nil);
-                  else
-                     button:SetAlpha(self.ExpandedAlpha1)
-                     if newstate ~= 0 then
-                        button.icon:SetDesaturated(self.DesatExpanded);
-                     else
-                        button.icon:SetDesaturated(nil);
-                     end
-                  end
-               else
-                  if newstate ~= 0 and active then
-                     button:SetAlpha(self.ExpandedAlpha2)
-                     button.icon:SetDesaturated(self.DesatExpanded);
-                  else
-                     button:SetAlpha(1.0)
-                     button.icon:SetDesaturated(nil);
-                  end
-               end
+
+   for i,button in ipairs(self.Buttons) do
+      if  button:GetID() >= 9 then 
+         if newstate ~= 0 and active then
+            button:SetAlpha(1.0)
+            button.icon:SetDesaturated(nil);
+         else
+            button:SetAlpha(self.ExpandedAlpha1)
+            if newstate ~= 0 then
+               button.icon:SetDesaturated(self.DesatExpanded);
+            else
+               button.icon:SetDesaturated(nil);
             end
+         end
+      else
+         if newstate ~= 0 and active then
+            button:SetAlpha(self.ExpandedAlpha2)
+            button.icon:SetDesaturated(self.DesatExpanded);
+         else
+            button:SetAlpha(1.0)
+            button.icon:SetDesaturated(nil);
          end
       end
    end
@@ -347,21 +446,26 @@ function HotbarMixin:AddNextPageHandler()
    ]])
 end
 
-function HotbarMixin:StopTargettingReticleAnim()
-   local containers = { self.ActionBar:GetChildren() }
-   for i,container in ipairs(containers) do
-      local buttons = { container:GetChildren() }
-      for j,button in ipairs(buttons) do
-         if button ~= nil and button:GetName() ~= nil then
-            if string.find(button:GetName(), "Button") then -- self.BtnPrefix
-               button.TargetReticleAnimFrame:Hide()
-            end
-         end
+function HotbarMixin:UpdateHotbar()
+   
+   if self.ActionBar.ActionBarPageNumber then 
+      self.ActionBar.ActionBarPageNumber:SetShown(false)
+   end
+
+   if self.ActionBar.UpdateEndCaps then
+      self.ActionBar.hideBarArt = true
+      self.ActionBar:UpdateEndCaps(self.ActionBar.hideBarArt)
+      self.ActionBar.BorderArt:SetShown(not self.ActionBar.hideBarArt)
+
+      for i, actionButton in pairs(self.ActionBar.actionButtons) do
+         actionButton:UpdateButtonArt()
+      end
+      
+      if self.ActionBar.UpdateDividers then
+         self.ActionBar:UpdateDividers()
       end
    end
-end
-
-function HotbarMixin:UpdateHotbar()
+   
    local parent_scaling = self:GetParent():GetScale()
    local bar = self[self.Type]
    if bar then
@@ -449,9 +553,8 @@ function HotbarMixin:UpdateHotbar()
       end
       
       local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()  
-      local w, h = self.ActionBar:GetSize()
+      local w, h = self:GetSize()
       local s = self:GetScale()
-      
       self.Locked = false
       self.ActionBar:SetScale(s)
       self.ActionBar:ClearAllPoints()
@@ -472,18 +575,19 @@ function HotbarMixin:UpdateVisibility()
    self:UpdateHotbar();
 end
 
-function HotbarMixin:UpdateHotkeys(type)
-   local containers = { self.ActionBar:GetChildren() }
-   for i,container in ipairs(containers) do
-      local buttons = { container:GetChildren() }
-      for j, button in ipairs(buttons) do            
-         if button ~= nil and button:GetName() ~= nil then      
-            if string.find(button:GetName(), "Button") then --self.BtnPrefix
-               button.HotKey:SetText(RANGE_INDICATOR);
-               button.HotKey:Show();
-            end
+function HotbarMixin:UpdateHotkeys(modifier)
+   for i, button in ipairs(self.Buttons) do
+      if modifier then
+         local key = button:GetAttribute('over_key' .. modifier)
+         if key and key ~= "" then
+            button.HotKey:SetText(('%s'):format(GetBindingText(key, '_ABBR')));
+         else
+            button.HotKey:SetText(RANGE_INDICATOR);
          end
+      else
+         button.HotKey:SetText(RANGE_INDICATOR);
       end
+      button.HotKey:Show();
    end
 end
 
@@ -493,18 +597,6 @@ function HotbarMixin:OnEvent(event, ...)
       for i,highlight in ipairs(self.Highlights) do
          SecureHandlerSetFrameRef(self, 'Highlight'..i, highlight)
       end
-   elseif ( event == "UPDATE_BINDINGS" or
-            event == "GAME_PAD_ACTIVE_CHANGED" ) then
-      self:UpdateHotkeys(self.buttonType);
-   elseif ( event == "UNIT_SPELLCAST_RETICLE_CLEAR" or 
-            event == "UNIT_SPELLCAST_EMPOWER_STOP" or 
-            event == "UNIT_SPELLCAST_CHANNEL_STOP" or 
-            event == "UNIT_SPELLCAST_INTERUPTED" or 
-            event == "UNIT_SPELLCAST_SUCCEEDED" or 
-            event == "UNIT_SPELLCAST_FAILED" or 
-            event == "UNIT_SPELLCAST_SENT" or 
-            event == "UNIT_SPELLCAST_STOP" ) then
-      self:StopTargettingReticleAnim()
    end
 end
 

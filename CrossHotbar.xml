@@ -7,7 +7,6 @@
     <KeyValues>
       <KeyValue key="BarName" value="MainMenuBar" type="string"/>
       <KeyValue key="BtnPrefix" value="ActionButton" type="string"/>
-      <KeyValue key="BtnPrefix" value="ActionButton" type="string"/>
       <KeyValue key="Type" value="LHotbar" type="string"/>
       <KeyValue key="Scaling" value="1.00" type="number"/>
       <KeyValue key="hasHighlights" value="false" type="boolean"/>
@@ -44,41 +43,38 @@
     </Scripts>
   </Frame>
   
-  <Button name="WXHBSeperatorMover" inherits="SecureActionButtonTemplate" parent="UIParent" frameStrata="MEDIUM" hidden="false" enableMouse="true" movable="true">
+  <Button name="WXHBCrossHotbarMover" inherits="SecureActionButtonTemplate" parent="UIParent" frameStrata="MEDIUM" hidden="false" enableMouse="true" movable="true">
     <Size x="16" y="112"/>
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <Scripts>
       <OnLoad>
-        self:SetToplevel(true)
         self:RegisterForDrag("LeftButton");
       </OnLoad>
       <OnDragStart>self:StartMoving();</OnDragStart>
       <OnDragStop>self:StopMovingOrSizing();</OnDragStop>
       <OnMouseDown>
-        self:SetWidth(WXHBCrosshotbar:GetWidth());
-        WXHBSeperatorDrag_Texture:SetWidth(WXHBCrosshotbar:GetWidth());
-        WXHBSeperatorDrag_Texture:Show();
+        WXHBCrossHotbarDrag_Texture:SetWidth(Crosshotbar:GetWidth());
+        WXHBCrossHotbarDrag_Texture:Show();
       </OnMouseDown>
       <OnEnter>
-        WXHBSeperatorMover_Texture:SetWidth(8);
+        WXHBCrossHotbarMover_Texture:SetWidth(8);
       </OnEnter>
       <OnLeave>
-        self:SetWidth(16);
-        WXHBSeperatorMover_Texture:SetWidth(2);
-        WXHBSeperatorDrag_Texture:SetWidth(2);
-        WXHBSeperatorDrag_Texture:Hide();
+        WXHBCrossHotbarMover_Texture:SetWidth(2);
+        WXHBCrossHotbarDrag_Texture:SetWidth(2);
+        WXHBCrossHotbarDrag_Texture:Hide();
       </OnLeave>
     </Scripts>
     <Layers>
-      <Layer level="MEDIUM">
-        <Texture name="WXHBSeperatorMover_Texture" hidden="false">
+      <Layer level="ARTWORK">
+        <Texture name="WXHBCrossHotbarMover_Texture" hidden="false">
           <Size x="2" y="60"/>
           <Color r="1.0" g="1.0" b="0.8" a="1.0"/>
           <Anchors> <Anchor point="CENTER" relativePoint="CENTER" x="0" y="0"/></Anchors>
         </Texture>
       </Layer>
-      <Layer level="BACKGROUND">
-        <Texture name="WXHBSeperatorDrag_Texture" hidden="true">
+      <Layer level="OVERLAY">
+        <Texture name="WXHBCrossHotbarDrag_Texture" hidden="true">
           <Size x="2" y="60"/>
           <Color r="0.5" g="0.8" b="0.8" a="0.5"/>
           <Anchors> <Anchor point="CENTER" relativePoint="CENTER" x="0" y="0"/></Anchors>
@@ -87,7 +83,7 @@
     </Layers>
   </Button>
   
-  <Frame name="WXHBCrosshotbar" inherits="WXHBCrossHotbarTemplate" parent="WXHBSeperatorMover" frameStrata="MEDIUM" hidden="false">
+  <Frame name="Crosshotbar" inherits="WXHBCrosshotbarTemplate" parent="WXHBCrossHotbarMover" frameStrata="MEDIUM" hidden="false">
     <Size x="554" y="120"/>
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <Attributes>
@@ -99,7 +95,7 @@
     </Attributes>
   </Frame>
   
-  <Frame name="WXHBLHotbar1" inherits="WXHBHotbarTemplate" parent="WXHBCrosshotbar" frameStrata="MEDIUM" hidden="false">
+  <Frame name="WXHBLHotbar1" inherits="WXHBHotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <KeyValues>
       <KeyValue key="BarName" value="MainMenuBar" type="string"/>
@@ -116,7 +112,7 @@
     </Attributes>
   </Frame>
   
-  <Frame name="WXHBLHotbar2" inherits="WXHBHotbarTemplate" parent="WXHBCrosshotbar" frameStrata="MEDIUM" hidden="false">
+  <Frame name="WXHBLHotbar2" inherits="WXHBHotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <KeyValues>
       <KeyValue key="BarName" value="MultiBarLeft" type="string"/>
@@ -131,7 +127,7 @@
     </Attributes>
   </Frame>
   
-  <Frame name="WXHBLHotbar3" inherits="WXHBHotbarTemplate" parent="WXHBCrosshotbar" frameStrata="MEDIUM" hidden="false">
+  <Frame name="WXHBLHotbar3" inherits="WXHBHotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <KeyValues>
       <KeyValue key="BarName" value="MultiBar5" type="string"/>
@@ -148,7 +144,7 @@
     </Attributes>
   </Frame>
   
-  <Frame name="WXHBRHotbar1" inherits="WXHBHotbarTemplate" parent="WXHBCrosshotbar" frameStrata="MEDIUM" hidden="false">
+  <Frame name="WXHBRHotbar1" inherits="WXHBHotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <KeyValues>
       <KeyValue key="BarName" value="MultiBarBottomLeft" type="string"/>
@@ -165,7 +161,7 @@
     </Attributes>
   </Frame>
   
-  <Frame name="WXHBRHotbar2" inherits="WXHBHotbarTemplate" parent="WXHBCrosshotbar" frameStrata="MEDIUM" hidden="false">
+  <Frame name="WXHBRHotbar2" inherits="WXHBHotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <KeyValues>
       <KeyValue key="BarName" value="MultiBarRight" type="string"/>
@@ -180,7 +176,7 @@
     </Attributes>
   </Frame>
   
-  <Frame name="WXHBRHotbar3" inherits="WXHBHotbarTemplate" parent="WXHBCrosshotbar" frameStrata="MEDIUM" hidden="false">
+  <Frame name="WXHBRHotbar3" inherits="WXHBHotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <KeyValues>
       <KeyValue key="BarName" value="MultiBar6" type="string"/>
@@ -196,7 +192,7 @@
     </Attributes>
   </Frame>
   
-  <Frame name="WXHBLRHotbar1" inherits="WXHBHotbarTemplate" parent="WXHBCrosshotbar" frameStrata="MEDIUM" hidden="false">
+  <Frame name="WXHBLRHotbar1" inherits="WXHBHotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <KeyValues>
       <KeyValue key="BarName" value="MultiBarBottomRight" type="string"/>
@@ -213,7 +209,7 @@
     </Attributes>
   </Frame>
   
-  <Frame name="WXHBRLHotbar1" inherits="WXHBHotbarTemplate" parent="WXHBCrosshotbar" frameStrata="MEDIUM" hidden="false">
+  <Frame name="WXHBRLHotbar1" inherits="WXHBHotbarTemplate" parent="Crosshotbar" frameStrata="MEDIUM" hidden="false">
     <Anchors><Anchor point="CENTER" relativePoint="CENTER" x="0" y="0" /></Anchors>
     <KeyValues>
       <KeyValue key="BarName" value="MultiBar7" type="string"/>

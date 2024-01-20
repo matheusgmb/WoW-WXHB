@@ -37,7 +37,6 @@ function GroupNavigatorMixin:OnEvent(event, ...)
       self:updateRoster()               
    elseif event == 'PLAYER_ENTERING_WORLD' then
       self:updateRoster()
-      self:ApplyConfig()
       if ChatFrame1EditBox then
          ChatFrame1EditBox:SetAltArrowKeyMode(false)
       end

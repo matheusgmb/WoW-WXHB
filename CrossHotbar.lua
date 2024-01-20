@@ -22,6 +22,28 @@ config:ConfigListAdd("HotbarActions", ActionList, "NONE")
 CrossHotbarMixin = {
 }
 
+function CrossHotbarMixin:SaveLayout()
+   StaticPopupDialogs["CROSSHOTBAR_SAVEACTIONBARTOLAYOUT"] = {
+      text = [[Double Click: Save/Overwrite ActionBar positions to the active layout?]],
+      button1 = "Save",
+      button2 = "Cancel",
+      OnAccept = function()
+         local layouts = C_EditMode.GetLayouts()
+         for i,sysInfo in ipairs(layouts.layouts[layouts.activeLayout].systems) do
+            if sysInfo.system == 0 then
+               print(sysInfo.system, sysInfo.systemIndex)
+            end
+         end
+         print("Saved")
+      end,
+      timeout = 0,
+      whileDead = true,
+      hideOnEscape = true,
+      preferredIndex = 3
+   }
+   StaticPopup_Show("CROSSHOTBAR_SAVEACTIONBARTOLAYOUT")
+end
+
 function CrossHotbarMixin:SetupCrosshotbar()
    self.LHotbar = { WXHBLHotbar1, WXHBLHotbar2, WXHBLHotbar3 }
    self.RHotbar = { WXHBRHotbar1, WXHBRHotbar2, WXHBRHotbar3 }
@@ -35,6 +57,34 @@ function CrossHotbarMixin:SetupCrosshotbar()
    SecureHandlerSetFrameRef(self, 'Hotbar6', WXHBRHotbar3)
    SecureHandlerSetFrameRef(self, 'Hotbar7', WXHBLRHotbar1)
    SecureHandlerSetFrameRef(self, 'Hotbar8', WXHBRLHotbar1)
+
+   self:SetAttribute('SetHotbarPlacement', [[
+      for i = 1,8 do
+         Hotbar = self:GetFrameRef('Hotbar'..i)
+         if Hotbar then
+            Hotbar:RunAttribute("SetHotbarPlacement")
+         end
+      end                  
+   ]])
+   SecureHandlerSetFrameRef(WXHBCrossHotbarMover, 'Crosshotbar', Crosshotbar)
+   SecureHandlerWrapScript(WXHBCrossHotbarMover, "OnClick", WXHBCrossHotbarMover, [[
+      local Crosshotbar = self:GetFrameRef('Crosshotbar')
+      Crosshotbar:RunAttribute("SetHotbarPlacement")
+      self:SetWidth(Crosshotbar:GetWidth())
+   ]])
+   SecureHandlerWrapScript(WXHBCrossHotbarMover, "OnDoubleClick", WXHBCrossHotbarMover, [[
+      local Crosshotbar = self:GetFrameRef('Crosshotbar')
+      Crosshotbar:RunAttribute("SetHotbarPlacement")
+      self:SetWidth(Crosshotbar:GetWidth())
+      Crosshotbar:CallMethod("SaveLayout")
+   ]])
+   SecureHandlerWrapScript(WXHBCrossHotbarMover, "OnEnter", WXHBCrossHotbarMover, [[
+      self:SetFrameLevel(10)
+   ]])
+   SecureHandlerWrapScript(WXHBCrossHotbarMover, "OnLeave", WXHBCrossHotbarMover, [[
+      self:SetFrameLevel(0)
+      self:SetWidth(16)
+   ]])
 end
 
 function CrossHotbarMixin:ApplyConfig()
@@ -49,9 +99,7 @@ function CrossHotbarMixin:ApplyConfig()
 
    for button, attributes in pairs(config.PadActions) do
       if ActionList[attributes.TRIGACTION] then
-         for i = 1,nbindings do
-            bindings[attributes.TRIGACTION][i] = attributes.BIND
-         end
+         bindings[attributes.TRIGACTION][1] = attributes.BIND
       end
    end
 
@@ -68,10 +116,10 @@ function CrossHotbarMixin:ApplyConfig()
    bindings["HOTBARBTN11"][nbindings] = bindings["HOTBARBTN3"][1]
    bindings["HOTBARBTN12"][nbindings] = bindings["HOTBARBTN4"][1]
    
-   self:OverrideKeyBindings(WXHBLHotbar1.ActionBar, "ACTIONBUTTON", "ActionButton", bindings)
-   self:OverrideKeyBindings(WXHBRHotbar1.ActionBar, "MULTIACTIONBAR1BUTTON", WXHBRHotbar1.BtnPrefix, bindings)
-   self:OverrideKeyBindings(WXHBLRHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", WXHBLRHotbar1.BtnPrefix, bindings)
-   self:OverrideKeyBindings(WXHBRLHotbar1.ActionBar, "MULTIACTIONBAR2BUTTON", WXHBRLHotbar1.BtnPrefix, bindings)
+   WXHBLHotbar1:AddOverrideKeyBindings(bindings)
+   WXHBRHotbar1:AddOverrideKeyBindings(bindings)
+   WXHBLRHotbar1:AddOverrideKeyBindings(bindings)
+   WXHBRLHotbar1:AddOverrideKeyBindings(bindings)
 
    local hotbars = { self:GetChildren() }
    for k,hotbar in pairs(hotbars) do
@@ -90,22 +138,34 @@ function CrossHotbarMixin:OnLoad()
    self:AddPaddleHandler()
    self:AddExpandHandler()
    self:AddNextPageHandler()
+   self:RegisterEvent("ADDON_LOADED")
+   self:RegisterEvent("PLAYER_ENTERING_WORLD")
    self:RegisterEvent("PLAYER_ENTERING_WORLD")
    self:HideHudElements()
    addon.Crosshotbar = self
    addon.CreateGamePadButtons(self)
    addon.CreateGroupNavigator(self)
+
 end
 
 function CrossHotbarMixin:OnEvent(event, ...)
    if ( event == "PLAYER_ENTERING_WORLD" ) then
-      self:SetupCrosshotbar()
       self:ApplyConfig()
       self:UpdateCrosshotbar()
       self:Execute([[
          self:SetAttribute("triggerstate", 4)
          self:SetAttribute("state-trigger", 4)
       ]])
+      
+      EventRegistry:RegisterCallback("EditMode.Exit", function(ownerID, ...)
+         if not InCombatLockdown() then 
+            self:Execute([[self:RunAttribute("SetHotbarPlacement")]])
+         end
+      end, self)
+      
+   elseif event == 'ADDON_LOADED' then
+      self:SetupCrosshotbar()
+      self:UnregisterEvent("ADDON_LOADED")
    end
 end
 
@@ -189,29 +249,6 @@ function CrossHotbarMixin:AddNextPageHandler()
          hotbar:SetAttribute("state-hotbar-nextpage", newstate)
       end
   ]])
-end
-
-function CrossHotbarMixin:OverrideKeyBindings(ActBar, ActionPrefix, BtnPrefix, ConfigBindings)
-   --local idx = 1
-   local containers = { ActBar:GetChildren() }
-   for i, container in ipairs(containers) do
-      local buttons = { container:GetChildren() }
-      for j, button in ipairs(buttons) do            
-         if button ~= nil and button:GetName() ~= nil then
-            if string.find(button:GetName(), BtnPrefix) then
-               local index = button:GetID();
-               local ActionName = string.gsub(button:GetName(), BtnPrefix, ActionPrefix)
-               --local key1, key2 = GetBindingKey(ActionName)
-               for i, key in ipairs(ConfigBindings["HOTBARBTN"..index]) do               
-                  button:SetAttribute('over_key'..i, key)
-               end
-               button:SetAttribute("numbindings", #ConfigBindings["HOTBARBTN"..index])
-               button.HotKey:SetText(RANGE_INDICATOR);
-               button.HotKey:Show();
-            end
-         end
-      end
-   end
 end
 
 function CrossHotbarMixin:UpdateCrosshotbar()

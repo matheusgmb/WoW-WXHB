@@ -1,5 +1,7 @@
 local ADDON, addon = ...
 
+local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
+
 local config = addon.Config
 local preset = CrossHotbar_DB.ActivePreset
 
@@ -179,9 +181,9 @@ local Locale = {
    dadaTypeToolTip = "The Cross hotbar can have two layouts. One with each bar on a given side or another that interleaves the hotbars.",
    pageIndexToolTip = "The default page displayed by the hotbar.",
    pagePrefixToolTip = "The prefix macro conditional to control paging under certain conditionals. Default page should not be included in this string.",
-   enabeGamePadToolTip = "Toggle GamePad mode. Disabling turns off Gamepad support.",
-   enabeCVarToolTip = "Toggle CVar settings by Crosshotbar. Disabling requires external setup.",
-   gamepadLookToolTip = "Toggle camera look for gamepad controls. Disabling requires external look control,",
+   enabeGamePadToolTip = "Toggle global GamePad mode.",
+   enabeCVarToolTip = "Toggle CVar settings and hooks used by Crosshotbar. Disabling requires reloading.",
+   gamepadLookToolTip = "Toggle CrossHotbar camera look handling and mouse mode for GamePad controls.",
    mouseLookToolTip = "Toggle mouse look handling. Enabling allows camera look control for keyboard binding setup.",
    deviceToolTip = "The DeviceId of the gamepad.",
    leftclickToolTip = "Left click binding for mouse mode.",
@@ -315,14 +317,17 @@ function ConfigUI:CreateFrame()
    self.InterfaceFrame.name = ADDON
    self.InterfaceFrame:Hide()
 
+   self.InterfaceFrame:RegisterEvent("ADDON_LOADED")
    self.InterfaceFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
    local function OnEvent(self, event, ...)
       if event == 'PLAYER_ENTERING_WORLD' then
-         preset = CrossHotbar_DB.ActivePreset         
-         config:StorePreset(config, CrossHotbar_DB.Presets[preset])
          addon.GamePadButtons:ApplyConfig()
          addon.GroupNavigator:ApplyConfig()
          addon.Crosshotbar:ApplyConfig()
+      elseif event == 'ADDON_LOADED' then         
+         preset = CrossHotbar_DB.ActivePreset         
+         config:StorePreset(config, CrossHotbar_DB.Presets[preset])
+         self:UnregisterEvent("ADDON_LOADED")
       end
    end
    self.InterfaceFrame:HookScript("OnEvent", OnEvent)
@@ -356,31 +361,21 @@ Addon to reconfigure default Actionbars into the WXHB Crosshotbar found in FFXIV
 
 Features:
 
-         Left and right hotbar selection with extended right-left and left-right back hotbars.
-
-         Double click expands hotbar and maps actions buttons[9-12] onto face buttons.
-
-         Reconfigurable modifier buttons to override default action settings.
-
-         Target traversal with trigger shoulder pad combinations.
-
-         Unit raid and party navigation actions for dpad party traversal.
-
-         Cursor and camera look support through bindable actions.
-
-         Actions to execute user macros named CH_MACRO_[1-4]
-
-         Drag bar activated by clicking on the hotbar seperator line.
+         -Left and right hotbar selection with extended right-left and left-right back hotbars.
+         -Double click expands hotbar and maps actions buttons[9-12] onto face buttons.
+         -Reconfigurable modifier buttons to override default action settings.
+         -Target traversal with trigger shoulder pad combinations.
+         -Unit raid and party navigation actions for dpad party traversal.
+         -Cursor and camera look support through bindable actions.
+         -Actions to execute user macros named CH_MACRO_[1-4]
+         -Drag bar activated by clicking on the hotbar seperator line.
 
 Settings:
 
          Presets: Load and Save controler settings, bindings, and actions.
-
          Actions: Set button bindings and action assignments.
-
          Hotbars: Hotbar specific settings controlling paging and display.
-
-         Gamepad: Gamepad settings with camera and cursor controls.
+         GamePad: Gamepad settings with camera and cursor controls.
 ]])
       descript:SetTextColor(1,1,1,1)
       
@@ -707,24 +702,24 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetsubtitle:SetJustifyV("TOP")
    presetsubtitle:SetText("Presets")
    
-   local PresetsFrame = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local PresetsFrame = LibDD:Create_UIDropDownMenu(nil, configFrame)
    PresetsFrame:SetPoint("TOPLEFT", presetsubtitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(PresetsFrame, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(PresetsFrame, "Presets")
-   UIDropDownMenu_JustifyText(PresetsFrame, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(PresetsFrame, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(PresetsFrame, "Presets")
+   LibDD:UIDropDownMenu_JustifyText(PresetsFrame, "LEFT")
    
    local function PresetDropDownDemo_OnClick(self, arg1, arg2, checked)
       if preset ~= arg1 then
          preset = arg1
-         UIDropDownMenu_SetText(arg2, self:GetText())
+         LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
          ConfigUI:Refresh()
       end
    end
    
-   UIDropDownMenu_Initialize(PresetsFrame, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(PresetsFrame, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          local presets = CrossHotbar_DB.Presets
          for i,p in ipairs(presets) do
@@ -733,9 +728,9 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
             info.arg1 = i
             info.arg2 = self
             info.func = PresetDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if preset == i then 
-               UIDropDownMenu_SetText(self, CrossHotbar_DB.Presets[preset].Name)
+               LibDD:UIDropDownMenu_SetText(self, CrossHotbar_DB.Presets[preset].Name)
             end
          end
       end
@@ -748,6 +743,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetloadbutton:SetText("Load")
    
    presetloadbutton:SetScript("OnClick", function(self, button, down)
+      CrossHotbar_DB.ActivePreset = preset
       config:StorePreset(config, CrossHotbar_DB.Presets[preset])
       ConfigUI:Refresh()
    end)
@@ -865,7 +861,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    table.insert(self.RefreshCallbacks, function()
                    presetdeletebutton:SetEnabled(CrossHotbar_DB.Presets[preset].Mutable)
                    presetfileeditbox:SetText(config.Name)
-                   UIDropDownMenu_SetText(PresetsFrame, CrossHotbar_DB.Presets[preset].Name)
+                   LibDD:UIDropDownMenu_SetText(PresetsFrame, CrossHotbar_DB.Presets[preset].Name)
                    descriptfileeditbox:SetText(config.Description)
    end)
    
@@ -929,15 +925,15 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
          buttonsubtitle:SetJustifyV("TOP")
          buttonsubtitle:SetText(("|A:Gamepad_%s_64:24:24|a"):format(GamePadButtonShp[button]))
          
-         local bindingframe = CreateFrame("Frame", nil, bindingframe, "UIDropDownMenuTemplate")
+         local bindingframe = LibDD:Create_UIDropDownMenu(nil, bindingframe)
          bindingframe:SetPoint("TOPLEFT", bindinganchor, "BOTTOMLEFT", 0, 0)
          
-         UIDropDownMenu_SetWidth(bindingframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(bindingframe, "NONE")
-         UIDropDownMenu_JustifyText(bindingframe, "LEFT")
-         UIDropDownMenu_Initialize(bindingframe, function(self, level, menuList)     
-            local info = UIDropDownMenu_CreateInfo()
-            UIDropDownMenu_SetText(self, "")
+         LibDD:UIDropDownMenu_SetWidth(bindingframe, DropDownWidth-self.DropDownSpacing)
+         LibDD:UIDropDownMenu_SetText(bindingframe, "NONE")
+         LibDD:UIDropDownMenu_JustifyText(bindingframe, "LEFT")
+         LibDD:UIDropDownMenu_Initialize(bindingframe, function(self, level, menuList)     
+            local info = LibDD:UIDropDownMenu_CreateInfo()
+            LibDD:UIDropDownMenu_SetText(self, "")
             if (level or 1) == 1 then
                local a = config.PadActions
                for _,binding in ipairs(GamePadBindingList) do
@@ -945,9 +941,9 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
                   info.menuList, info.hasArrow = i, false
                   info.arg1, info.arg2 = button, ConfigUI
                   info.func = BindingDropDownDemo_OnClick
-                  UIDropDownMenu_AddButton(info)
+                  LibDD:UIDropDownMenu_AddButton(info)
                   if (a[button].BIND == binding) then 
-                     UIDropDownMenu_SetText(self, binding)
+                     LibDD:UIDropDownMenu_SetText(self, binding)
                   end
                end
             end
@@ -956,7 +952,7 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
          ConfigUI:AddToolTip(bindingframe, Locale.bindingToolTip, true)
 
          table.insert(self.RefreshCallbacks, function()
-                         UIDropDownMenu_SetText(bindingframe, config.PadActions[button].BIND)
+                         LibDD:UIDropDownMenu_SetText(bindingframe, config.PadActions[button].BIND)
          end)
          
          buttoninset = 0
@@ -998,15 +994,15 @@ function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, 
    for i,button in ipairs(GamePadButtonList) do
       if config.PadActions[button] then
          local attributes = config.PadActions[button]
-         local actionframe = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+         local actionframe = LibDD:Create_UIDropDownMenu(nil, configFrame)
          actionframe:SetPoint("TOPLEFT", actionanchor, "BOTTOMLEFT", 0, 0)
          
-         UIDropDownMenu_SetWidth(actionframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(actionframe, "NONE")
-         UIDropDownMenu_JustifyText(actionframe, "LEFT")
-         UIDropDownMenu_Initialize(actionframe, function(self, level, menuList)     
-            local info = UIDropDownMenu_CreateInfo()
-            UIDropDownMenu_SetText(self, "")
+         LibDD:UIDropDownMenu_SetWidth(actionframe, DropDownWidth-self.DropDownSpacing)
+         LibDD:UIDropDownMenu_SetText(actionframe, "NONE")
+         LibDD:UIDropDownMenu_JustifyText(actionframe, "LEFT")
+         LibDD:UIDropDownMenu_Initialize(actionframe, function(self, level, menuList)     
+            local info = LibDD:UIDropDownMenu_CreateInfo()
+            LibDD:UIDropDownMenu_SetText(self, "")
             if (level or 1) == 1 then
                local a = config.PadActions
                local actions = {"NONE"}
@@ -1018,23 +1014,23 @@ function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, 
                   info.menuList, info.hasArrow = i, false
                   info.arg1, info.arg2 = button, prefix .. "ACTION"
                   info.func = ActionDropDownDemo_OnClick
-                  UIDropDownMenu_AddButton(info)
+                  LibDD:UIDropDownMenu_AddButton(info)
                   if (a[button][prefix .. "ACTION"] == action) then 
-                     UIDropDownMenu_SetText(self, FilterDropDownText(action))
+                     LibDD:UIDropDownMenu_SetText(self, FilterDropDownText(action))
                   end
                end
             end
          end)
 
-         local hotbaractionframe = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+         local hotbaractionframe = LibDD:Create_UIDropDownMenu(nil, configFrame)
          hotbaractionframe:SetPoint("TOPLEFT", hotbaranchor, "BOTTOMLEFT", 0, 0)
          
-         UIDropDownMenu_SetWidth(hotbaractionframe, DropDownWidth-self.DropDownSpacing)
-         UIDropDownMenu_SetText(hotbaractionframe, "NONE")
-         UIDropDownMenu_JustifyText(hotbaractionframe, "LEFT")
-         UIDropDownMenu_Initialize(hotbaractionframe, function(self, level, menuList)     
-            local info = UIDropDownMenu_CreateInfo()
-            UIDropDownMenu_SetText(self, "")
+         LibDD:UIDropDownMenu_SetWidth(hotbaractionframe, DropDownWidth-self.DropDownSpacing)
+         LibDD:UIDropDownMenu_SetText(hotbaractionframe, "NONE")
+         LibDD:UIDropDownMenu_JustifyText(hotbaractionframe, "LEFT")
+         LibDD:UIDropDownMenu_Initialize(hotbaractionframe, function(self, level, menuList)     
+            local info = LibDD:UIDropDownMenu_CreateInfo()
+            LibDD:UIDropDownMenu_SetText(self, "")
             if (level or 1) == 1 then
                local a = config.PadActions
                local actions = {"NONE"}
@@ -1046,9 +1042,9 @@ function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, 
                   info.menuList, info.hasArrow = i, false
                   info.arg1, info.arg2 = button, prefix .. "TRIGACTION"
                   info.func = HotbarBtnDropDownDemo_OnClick
-                  UIDropDownMenu_AddButton(info)
+                  LibDD:UIDropDownMenu_AddButton(info)
                   if (a[button][prefix .. "TRIGACTION"] == action) then 
-                     UIDropDownMenu_SetText(self, FilterDropDownText(action))
+                     LibDD:UIDropDownMenu_SetText(self, FilterDropDownText(action))
                   end
                end
             end
@@ -1058,8 +1054,8 @@ function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, 
          ConfigUI:AddToolTip(hotbaractionframe, Locale.hotbaractionToolTip, true)
          
          table.insert(self.RefreshCallbacks, function()
-                         UIDropDownMenu_SetText(actionframe, FilterDropDownText(config.PadActions[button][prefix .. "ACTION"]))
-                         UIDropDownMenu_SetText(hotbaractionframe, FilterDropDownText(config.PadActions[button][prefix .. "TRIGACTION"]))
+                         LibDD:UIDropDownMenu_SetText(actionframe, FilterDropDownText(config.PadActions[button][prefix .. "ACTION"]))
+                         LibDD:UIDropDownMenu_SetText(hotbaractionframe, FilterDropDownText(config.PadActions[button][prefix .. "TRIGACTION"]))
          end)
          
          actionanchor = actionframe
@@ -1111,22 +1107,22 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    expdsubtitle:SetJustifyV("TOP")
    expdsubtitle:SetText("Expanded Type")
 
-   local expddropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local expddropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    expddropdown:SetPoint("TOPLEFT", expdsubtitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(expddropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(expddropdown, "Type")
-   UIDropDownMenu_JustifyText(expddropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(expddropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(expddropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(expddropdown, "LEFT")
 
    local function ExpdDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.WXHBType = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
    
-   UIDropDownMenu_Initialize(expddropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(expddropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i,wxhbtype in ipairs(addon.HotbarWXHBTypes) do
             info.text, info.checked = wxhbtypestr[wxhbtype], (config.Hotbar.WXHBType == wxhbtype)
@@ -1134,9 +1130,9 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
             info.arg1 = wxhbtype
             info.arg2 = self
             info.func = ExpdDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.Hotbar.WXHBType == wxhbtype then 
-               UIDropDownMenu_SetText(self, wxhbtypestr[wxhbtype])
+               LibDD:UIDropDownMenu_SetText(self, wxhbtypestr[wxhbtype])
             end
          end
       end
@@ -1157,22 +1153,22 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    ddaasubtitle:SetJustifyV("TOP")
    ddaasubtitle:SetText("Hotbar Layout")
 
-   local ddaadropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local ddaadropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    ddaadropdown:SetPoint("TOPLEFT", ddaasubtitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(ddaadropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(ddaadropdown, "Type")
-   UIDropDownMenu_JustifyText(ddaadropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(ddaadropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(ddaadropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(ddaadropdown, "LEFT")
 
    local function DdaaDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.DDAAType = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
    
-   UIDropDownMenu_Initialize(ddaadropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(ddaadropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i,ddaatype in ipairs(addon.HotbarDDAATypes) do
             info.text, info.checked = ddaatypestr[ddaatype], (config.Hotbar.DDAAType == ddaatype)
@@ -1180,9 +1176,9 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
             info.arg1 = ddaatype
             info.arg2 = self
             info.func = DdaaDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.Hotbar.DDAAType == ddaatype then 
-               UIDropDownMenu_SetText(self, ddaatypestr[ddaatype])
+               LibDD:UIDropDownMenu_SetText(self, ddaatypestr[ddaatype])
             end
          end
       end
@@ -1212,22 +1208,22 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lpageidxsubtitle:SetJustifyV("TOP")
    lpageidxsubtitle:SetText("Left Hotbar ActionPage")
 
-   local lpageidxdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local lpageidxdropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    lpageidxdropdown:SetPoint("TOPLEFT", lpageidxsubtitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(lpageidxdropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(lpageidxdropdown, "Type")
-   UIDropDownMenu_JustifyText(lpageidxdropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(lpageidxdropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(lpageidxdropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(lpageidxdropdown, "LEFT")
 
    local function LpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.LPageIndex = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
    
-   UIDropDownMenu_Initialize(lpageidxdropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(lpageidxdropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i = 1,10 do
             info.text, info.checked = "ActionPage "..i, (config.Hotbar.LPageIndex == i)
@@ -1235,9 +1231,9 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
             info.arg1 = i
             info.arg2 = self
             info.func = LpageidxDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.Hotbar.LPageIndex == i then 
-               UIDropDownMenu_SetText(self, info.text)
+               LibDD:UIDropDownMenu_SetText(self, info.text)
             end
          end
       end
@@ -1258,22 +1254,22 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rpageidxsubtitle:SetJustifyV("TOP")
    rpageidxsubtitle:SetText("Right Hotbar ActionPage")
 
-   local rpageidxdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local rpageidxdropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    rpageidxdropdown:SetPoint("TOPLEFT", rpageidxsubtitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(rpageidxdropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(rpageidxdropdown, "Type")
-   UIDropDownMenu_JustifyText(rpageidxdropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(rpageidxdropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(rpageidxdropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(rpageidxdropdown, "LEFT")
 
    local function RpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.RPageIndex = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
    
-   UIDropDownMenu_Initialize(rpageidxdropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(rpageidxdropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i = 1,10 do
             info.text, info.checked = "ActionPage "..i, (config.Hotbar.RPageIndex == i)
@@ -1281,9 +1277,9 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
             info.arg1 = i
             info.arg2 = self
             info.func = RpageidxDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.Hotbar.RPageIndex == i then 
-               UIDropDownMenu_SetText(self, info.text)
+               LibDD:UIDropDownMenu_SetText(self, info.text)
             end
          end
       end
@@ -1304,22 +1300,22 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lrpageidxsubtitle:SetJustifyV("TOP")
    lrpageidxsubtitle:SetText("Left Right Hotbar ActionPage")
 
-   local lrpageidxdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local lrpageidxdropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    lrpageidxdropdown:SetPoint("TOPLEFT", lrpageidxsubtitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(lrpageidxdropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(lrpageidxdropdown, "Type")
-   UIDropDownMenu_JustifyText(lrpageidxdropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(lrpageidxdropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(lrpageidxdropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(lrpageidxdropdown, "LEFT")
 
    local function LrpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.LRPageIndex = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
    
-   UIDropDownMenu_Initialize(lrpageidxdropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(lrpageidxdropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i = 1,10 do
             info.text, info.checked = "ActionPage "..i, (config.Hotbar.LRPageIndex == i)
@@ -1327,9 +1323,9 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
             info.arg1 = i
             info.arg2 = self
             info.func = LrpageidxDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.Hotbar.LRPageIndex == i then 
-               UIDropDownMenu_SetText(self, info.text)
+               LibDD:UIDropDownMenu_SetText(self, info.text)
             end
          end
       end
@@ -1350,22 +1346,22 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rlpageidxsubtitle:SetJustifyV("TOP")
    rlpageidxsubtitle:SetText("Right Left Hotbar ActionPage")
 
-   local rlpageidxdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local rlpageidxdropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    rlpageidxdropdown:SetPoint("TOPLEFT", rlpageidxsubtitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(rlpageidxdropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(rlpageidxdropdown, "Type")
-   UIDropDownMenu_JustifyText(rlpageidxdropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(rlpageidxdropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(rlpageidxdropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(rlpageidxdropdown, "LEFT")
 
    local function RlpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.RLPageIndex = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
    
-   UIDropDownMenu_Initialize(rlpageidxdropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(rlpageidxdropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i = 1,10 do
             info.text, info.checked = "ActionPage "..i, (config.Hotbar.RLPageIndex == i)
@@ -1373,9 +1369,9 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
             info.arg1 = i
             info.arg2 = self
             info.func = RlpageidxDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.Hotbar.RLPageIndex == i then 
-               UIDropDownMenu_SetText(self, info.text)
+               LibDD:UIDropDownMenu_SetText(self, info.text)
             end
          end
       end
@@ -1505,12 +1501,12 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    ConfigUI:AddToolTip(rlhotbareditbox, Locale.pagePrefixToolTip, true)
 
    table.insert(self.RefreshCallbacks, function()
-                   UIDropDownMenu_SetText(expddropdown, wxhbtypestr[config.Hotbar.WXHBType])
-                   UIDropDownMenu_SetText(ddaadropdown, ddaatypestr[config.Hotbar.DDAAType])
-                   UIDropDownMenu_SetText(lpageidxdropdown, "ActionPage " .. config.Hotbar.LPageIndex)
-                   UIDropDownMenu_SetText(rpageidxdropdown, "ActionPage " .. config.Hotbar.RPageIndex)
-                   UIDropDownMenu_SetText(lrpageidxdropdown, "ActionPage " .. config.Hotbar.LRPageIndex)
-                   UIDropDownMenu_SetText(rlpageidxdropdown, "ActionPage " .. config.Hotbar.RLPageIndex)
+                   LibDD:UIDropDownMenu_SetText(expddropdown, wxhbtypestr[config.Hotbar.WXHBType])
+                   LibDD:UIDropDownMenu_SetText(ddaadropdown, ddaatypestr[config.Hotbar.DDAAType])
+                   LibDD:UIDropDownMenu_SetText(lpageidxdropdown, "ActionPage " .. config.Hotbar.LPageIndex)
+                   LibDD:UIDropDownMenu_SetText(rpageidxdropdown, "ActionPage " .. config.Hotbar.RPageIndex)
+                   LibDD:UIDropDownMenu_SetText(lrpageidxdropdown, "ActionPage " .. config.Hotbar.LRPageIndex)
+                   LibDD:UIDropDownMenu_SetText(rlpageidxdropdown, "ActionPage " .. config.Hotbar.RLPageIndex)
                    lhotbareditbox:SetText(config.Hotbar.LPagePrefix)
                    rhotbareditbox:SetText(config.Hotbar.RPagePrefix)
                    lrhotbareditbox:SetText(config.Hotbar.LRPagePrefix)
@@ -1582,21 +1578,21 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    cvarenablesubtitle:SetNonSpaceWrap(true)
    cvarenablesubtitle:SetJustifyH("Middle")
    cvarenablesubtitle:SetJustifyV("TOP")
-   cvarenablesubtitle:SetText("CVars Enable")
+   cvarenablesubtitle:SetText("CVars & Hooks")
    
    local cvarenablebutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
    cvarenablebutton:SetPoint("TOPLEFT", cvarenablesubtitle, "BOTTOMLEFT", 0, 0)
    cvarenablebutton:SetHeight(self.ButtonHeight)
    cvarenablebutton:SetWidth(OptionWidth)
 
-   if config.GamePad.GPSetup then
+   if config.GamePad.CVSetup then
       cvarenablebutton:SetText("Disable")
    else
       cvarenablebutton:SetText("Enable")
    end
    
    cvarenablebutton:SetScript("OnClick", function(self, button, down)
-      config.GamePad.GPSetup = not config.GamePad.GPSetup
+      config.GamePad.CVSetup = not config.GamePad.CVSetup
       ConfigUI:Refresh()
    end)
    
@@ -1699,22 +1695,22 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    devicetitle:SetJustifyV("TOP")
    devicetitle:SetText("Device")
 
-   local devicedropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local devicedropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    devicedropdown:SetPoint("TOPLEFT", devicetitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(devicedropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(devicedropdown, "Type")
-   UIDropDownMenu_JustifyText(devicedropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(devicedropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(devicedropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(devicedropdown, "LEFT")
 
    local function DeviceDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.GamePad.GPDeviceID = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
 
-   UIDropDownMenu_Initialize(devicedropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(devicedropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i,device in ipairs(C_GamePad.GetAllDeviceIDs()) do
             local devicestate = C_GamePad.GetDeviceRawState(i-1)
@@ -1730,9 +1726,9 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
             info.arg1 = device
             info.arg2 = self
             info.func = DeviceDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.GamePad.GPDeviceID == device then 
-               UIDropDownMenu_SetText(self, name)
+               LibDD:UIDropDownMenu_SetText(self, name)
             end
          end
       end
@@ -1753,23 +1749,25 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    leftclicktitle:SetJustifyV("TOP")
    leftclicktitle:SetText("Left Click")
 
-   local leftclickdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local leftclickdropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    leftclickdropdown:SetPoint("TOPLEFT", leftclicktitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(leftclickdropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(leftclickdropdown, "Type")
-   UIDropDownMenu_JustifyText(leftclickdropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(leftclickdropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(leftclickdropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(leftclickdropdown, "LEFT")
 
    local function LeftclickDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.GamePad.GPLeftClick = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      if config.GamePad.GPRightClick == arg1 then
+         config.GamePad.GPRightClick = "NONE"
+      end
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
-
    
-   UIDropDownMenu_Initialize(leftclickdropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(leftclickdropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i,binding in ipairs(bindings) do
             info.text, info.checked = binding, (config.GamePad.GPLeftClick == binding)
@@ -1777,9 +1775,9 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
             info.arg1 = binding
             info.arg2 = self
             info.func = LeftclickDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.GamePad.GPLeftClick == binding then 
-               UIDropDownMenu_SetText(self, binding)
+               LibDD:UIDropDownMenu_SetText(self, binding)
             end
          end
       end
@@ -1801,23 +1799,25 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    rightclicktitle:SetJustifyV("TOP")
    rightclicktitle:SetText("Right Click")
 
-   local rightclickdropdown = CreateFrame("Frame", nil, configFrame, "UIDropDownMenuTemplate")
+   local rightclickdropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
    rightclickdropdown:SetPoint("TOPLEFT", rightclicktitle, "BOTTOMLEFT", 0, 0)
    
-   UIDropDownMenu_SetWidth(rightclickdropdown, DropDownWidth-self.DropDownSpacing)
-   UIDropDownMenu_SetText(rightclickdropdown, "Type")
-   UIDropDownMenu_JustifyText(rightclickdropdown, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(rightclickdropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(rightclickdropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(rightclickdropdown, "LEFT")
 
    local function RightclickDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.GamePad.GPRightClick = arg1
-      UIDropDownMenu_SetText(arg2, self:GetText())
+      if config.GamePad.GPLeftClick == arg1 then
+         config.GamePad.GPLeftClick = "NONE"
+      end
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
       ConfigUI:Refresh()
    end
-
    
-   UIDropDownMenu_Initialize(rightclickdropdown, function(self, level, menuList)     
-      local info = UIDropDownMenu_CreateInfo()
-      UIDropDownMenu_SetText(self, "")
+   LibDD:UIDropDownMenu_Initialize(rightclickdropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
          for i,binding in ipairs(bindings) do
             info.text, info.checked = binding, (config.GamePad.GPRightClick == binding)
@@ -1825,9 +1825,9 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
             info.arg1 = binding
             info.arg2 = self
             info.func = RightclickDropDownDemo_OnClick
-            UIDropDownMenu_AddButton(info)
+            LibDD:UIDropDownMenu_AddButton(info)
             if config.GamePad.GPRightClick == binding then 
-               UIDropDownMenu_SetText(self, binding)
+               LibDD:UIDropDownMenu_SetText(self, binding)
             end
          end
       end
@@ -1932,17 +1932,17 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
          mouselookbutton:SetText("Enable")
       end
       
-      if config.GamePad.GPSetup then
+      if config.GamePad.CVSetup then
          cvarenablebutton:SetText("Disable")
       else
          cvarenablebutton:SetText("Enable")
       end
       local devicestate = C_GamePad.GetDeviceRawState(config.GamePad.GPDeviceID-1)
       if devicestate then         
-         UIDropDownMenu_SetText(devicedropdown, devicestate.name)
+         LibDD:UIDropDownMenu_SetText(devicedropdown, devicestate.name)
       end
-      UIDropDownMenu_SetText(leftclickdropdown, config.GamePad.GPLeftClick)      
-      UIDropDownMenu_SetText(rightclickdropdown, config.GamePad.GPRightClick)
+      LibDD:UIDropDownMenu_SetText(leftclickdropdown, config.GamePad.GPLeftClick)      
+      LibDD:UIDropDownMenu_SetText(rightclickdropdown, config.GamePad.GPRightClick)
       yaweditbox:SetText(config.GamePad.GPYawSpeed)
       pitcheditbox:SetText(config.GamePad.GPPitchSpeed)
       overlapmouseeditbox:SetText(config.GamePad.GPOverlapMouse)

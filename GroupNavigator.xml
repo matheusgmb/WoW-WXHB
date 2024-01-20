@@ -8,4 +8,5 @@
       </Layer>
     </Layers>
   </Frame>
+  <Script file="GroupNavigator.lua"/>
 </Ui>
