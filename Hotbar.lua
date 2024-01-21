@@ -27,14 +27,14 @@ local ButtonLayout = {
       RHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
          BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-         GrpPos = {{11.9, 0.0}, {8.05, 0.0}, {14.90, 2.5}},
+         GrpPos = {{11.9, 0.0}, {8.05, 0.0}, {12.90, 2.5}},
          GrpOff = {{-12.0, 0.0}, {10.0, 0.0}, {10.0, 0.0}},
          SclOff = {{-2.8, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
       },
       RLHotbar = {
          BtnPos = {{-1.0, 0.5}, {-1.0, -0.5}, {-2.0, 0}}, 
          BtnOff = {{-6.0, 2.0}, {-6.0, 2.0}, {-6.0, 2.0}},
-         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, {14.90, 2.5}},
+         GrpPos = {{8.05, 0.0}, {4.90, 0.0}, {12.90, 2.5}},
          GrpOff = {{10.0, 0.0}, {-12.0, 0.0}, {10.0, 0.0}},
          SclOff = {{-0.5, 0.5}, {-0.5, 0.5}, {-1.0, 1.0}}
       },
@@ -96,6 +96,12 @@ function HotbarMixin:SetHotbarLayout(layouttype)
 end
 
 function HotbarMixin:OnLoad()
+   self:RegisterEvent("PLAYER_ENTERING_WORLD")
+   addon:AddInitCallback(GenerateClosure(self.SetupHotbar, self))
+   addon:AddApplyCallback(GenerateClosure(self.ApplyConfig, self))
+end
+
+function HotbarMixin:SetupHotbar()
    self.AnchorButtons = {}
    self.Highlights = {}
    self:AddActionBar()
@@ -113,45 +119,69 @@ function HotbarMixin:OnLoad()
    UnregisterStateDriver(self.ActionBar,'visibility')
    UnregisterStateDriver(self,'page')
    RegisterStateDriver(self, 'page', pageprefix .. pageindex)
-   
-   self.Locked = true
-   self.Point = {self:GetPoint(1)}
 
-   self:RegisterEvent("PLAYER_ENTERING_WORLD")
+   self.BtnLock = true
+   self.BarLock = true
+   self.BarLockPoint = {self:GetPoint(1)}
 end
 
-function HotbarMixin:SetPointActionBar(actionbor, ...)
+function HotbarMixin:SetPointHook(actionbor, ...)
    local point, relativeFrame, relativePoint, ofsx, ofsy = ...
-   if self and self.Point ~= nil then
-      if self.Locked == false then 
-         self.Point = {self.ActionBar:GetPoint(1)}
+   if self and self.BarLockPoint ~= nil then
+      if self.BarLock == false then 
+         self.BarLockPoint = {self.ActionBar:GetPoint(1)}
       else
-         local p = self.Point
-         self.Point = nil
+         local p = self.BarLockPoint
+         self.BarLockPoint = nil
          if not InCombatLockdown() then 
            self.ActionBar:ClearAllPoints()          
            self.ActionBar:SetPoint(unpack(p))
          end
-         self.Point = p
+         self.BarLockPoint = p
          p = nil
       end
    end
 end
 
+function HotbarMixin:SetAlphaHook(button, alpha)
+   local lock = self.BtnLock     
+   if lock == false then
+      button.CHBAlpha = alpha
+   elseif button.CHBAlpha ~= nil then
+      local alpha_reset = button.CHBAlpha
+      button.CHBAlpha = nil
+      button:SetAlpha(alpha_reset)
+      button.CHBAlpha = alpha_reset
+   end
+end
+
+function HotbarMixin:HookDesatHook(icon, Saturation)
+   local lock = self.BtnLock         
+   if lock == false then
+      icon.CHBDesat = Saturation
+   elseif icon.CHBDesat ~= nil then
+      local Saturation_reset = icon.CHBDesat
+      icon.CHBDesat = nil
+      icon:SetDesaturated(Saturation_reset)
+      icon.CHBDesat = Saturation_reset
+   end
+end
+      
 function HotbarMixin:AddActionBar()
-   if 1 == 1 then
+   if config.Hotbar.HBARType == "LIBA" then
+      self.Buttons = {}
+      self.BtnPrefix = self:GetName() .. "Button"
+
       self.ActionBar = CreateFrame("Frame", nil, UIParent, "SecureHandlerStateTemplate")
       self.ActionBar:SetAttribute("_onstate-page", [[
          self:SetAttribute('actionpage', newstate)
-         self:SetAttribute("state", newstate)
-         control:ChildUpdate("state", newstate)
+         self:SetAttribute("state", newstate)     
+         self:ChildUpdate("state", newstate)
       ]])
-
+      
       self.ActionBar:SetAttribute('actionpage', 1)
       self.ActionBar:SetAttribute("state-page", "1")
       self.ActionBar:SetID(0)
-      self.BtnPrefix = self:GetName() .. "Button"
-      self.Buttons = {}
 
       local customExitButton = {
          func = function(button)
@@ -161,9 +191,15 @@ function HotbarMixin:AddActionBar()
          tooltip = LEAVE_VEHICLE,
       }
       
+      local ActBTnConfig = {
+         showGrid = true
+      }
+      
       for i = 1,12 do
-         self.Buttons[i] = LibActBtn:CreateButton(i, self.BtnPrefix .. i, self.ActionBar)
+         self.Buttons[i] = LibActBtn:CreateButton(i, self.BtnPrefix .. i, self.ActionBar, ActBTnConfig)
          self.Buttons[i]:SetID(i)
+         hooksecurefunc(self.Buttons[i], "SetAlpha", GenerateClosure(self.SetAlphaHook, self))
+         hooksecurefunc(self.Buttons[i].icon, "SetDesaturated", GenerateClosure(self.HookDesatHook, self))
          local offset = 0
          local offsetid = (i + offset - 1) % 12 + 1
          for k = 1,18 do
@@ -207,6 +243,7 @@ function HotbarMixin:AddActionBar()
       else
          _G[self.BarName]:Hide()
       end
+      _G[self.BarName]:SetParent(addon.UIHider)
       
       _G[self.BarName]:UnregisterEvent("PLAYER_REGEN_ENABLED")
       _G[self.BarName]:UnregisterEvent("PLAYER_REGEN_DISABLED")
@@ -222,7 +259,7 @@ function HotbarMixin:AddActionBar()
             button:SetAttribute("statehidden", true)
          end
       end
-   else   
+   elseif config.Hotbar.HBARType == "BLIZ" then
       self.Buttons = {}
       self.ActionBar = _G[self.BarName]
       local containers = { self.ActionBar:GetChildren() }
@@ -281,7 +318,7 @@ function HotbarMixin:AddBindingFunc()
       local activestate = self:GetAttribute("activestate")
       local expanded = self:GetAttribute("expanded")
       local modifier = self:GetAttribute("modifier")
-      if currentstate == activestate then
+      if currentstate ~= 0 and currentstate == activestate then
          for i = 1, 12 do
             local b = self:GetFrameRef('ActionButton'..i)
             if b then 
@@ -293,8 +330,8 @@ function HotbarMixin:AddBindingFunc()
                end
             end
          end
-         self:CallMethod("UpdateHotkeys", modifier)
       end
+      self:CallMethod("UpdateHotkeys")
    ]])
 end
 
@@ -349,11 +386,6 @@ function HotbarMixin:AddVisibilityHandler()
          end
          RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;hide")
       end
-
-      local expanded = self:GetAttribute("expanded")
-      local activestate = self:GetAttribute("activestate")
-      local expandedstate = self:GetAttribute("expanded-state")
-      self:CallMethod("SetExpandIconsActive", expandedstate, expanded)
    ]])
 end
 
@@ -362,54 +394,6 @@ function HotbarMixin:AddModHandler()
       self:SetAttribute("modifier", 1+newstate)
       self:RunAttribute("SetHotbarBindings")
    ]])
-end
-
-function HotbarMixin:SetExpandIconsActive(newstate, enable)
-   local active = false
-   if self.Type == "LHotbar" and newstate == 1 then active = true end
-   if self.Type == "RHotbar" and newstate == 2 then active = true end
-   if self.Type == "LRHotbar" and newstate == 1 then active = true end
-   if self.Type == "RLHotbar" and newstate == 2 then active = true end
-
-   for i,highlight in ipairs(self.Highlights) do
-      if i == 3 then
-         if enable ~= 0 and active then
-            highlight:SetAlpha(1.0)
-         else
-            highlight:SetAlpha(0.0)
-         end
-      else 
-         if enable ~= 0 and active then
-            highlight:SetAlpha(0.0)
-         else
-            highlight:SetAlpha(1.0)
-         end
-      end
-   end
-
-   for i,button in ipairs(self.Buttons) do
-      if  button:GetID() >= 9 then 
-         if newstate ~= 0 and active then
-            button:SetAlpha(1.0)
-            button.icon:SetDesaturated(nil);
-         else
-            button:SetAlpha(self.ExpandedAlpha1)
-            if newstate ~= 0 then
-               button.icon:SetDesaturated(self.DesatExpanded);
-            else
-               button.icon:SetDesaturated(nil);
-            end
-         end
-      else
-         if newstate ~= 0 and active then
-            button:SetAlpha(self.ExpandedAlpha2)
-            button.icon:SetDesaturated(self.DesatExpanded);
-         else
-            button:SetAlpha(1.0)
-            button.icon:SetDesaturated(nil);
-         end
-      end
-   end
 end
 
 function HotbarMixin:AddExpandHandler()
@@ -423,8 +407,6 @@ function HotbarMixin:AddExpandHandler()
 
       self:SetAttribute("expanded", enable)
       self:SetAttribute("expanded-state", newstate)
-
-      self:CallMethod("SetExpandIconsActive", newstate, enable)
    ]])
 end
 
@@ -555,11 +537,11 @@ function HotbarMixin:UpdateHotbar()
       local point, relativeTo, relativePoint, xOfs, yOfs = self:GetPoint()  
       local w, h = self:GetSize()
       local s = self:GetScale()
-      self.Locked = false
+      self.BarLock = false
       self.ActionBar:SetScale(s)
       self.ActionBar:ClearAllPoints()
       self.ActionBar:SetPoint("BOTTOMLEFT", relativeTo, relativePoint, xOfs*s-w*0.5, yOfs*s-h*0.5)
-      self.Locked = true
+      self.BarLock = true
    end
 end
 
@@ -575,28 +557,67 @@ function HotbarMixin:UpdateVisibility()
    self:UpdateHotbar();
 end
 
-function HotbarMixin:UpdateHotkeys(modifier)
+function HotbarMixin:UpdateHotkeys()
+   local currentstate = self:GetAttribute("currentstate")
+   local activestate = self:GetAttribute("activestate")
+   local expanded = self:GetAttribute("expanded")
+   local modifier = self:GetAttribute("modifier")
+      
+   local highlights = {}
+   highlights[1] = false
+   highlights[2] = false
+   highlights[3] = false
    for i, button in ipairs(self.Buttons) do
-      if modifier then
+      self.BtnLock = false
+      if currentstate ~= 0 and
+         currentstate == activestate then
+         local nbindings = button:GetAttribute('numbindings')
+         if expanded ~= 0 then modifier = nbindings end
          local key = button:GetAttribute('over_key' .. modifier)
          if key and key ~= "" then
             button.HotKey:SetText(('%s'):format(GetBindingText(key, '_ABBR')));
+            button:SetAlpha(1.0)
+            button.icon:SetDesaturated(false);
+            if i < 5 then
+               highlights[1] = true 
+            elseif i < 9 then
+               highlights[2] = true
+            elseif i < 13 then
+               highlights[3] = true
+            end
          else
-            button.HotKey:SetText(RANGE_INDICATOR);
+            button.HotKey:SetText(RANGE_INDICATOR);            
+            if  button:GetID() >= 9 then 
+               button:SetAlpha(self.ExpandedAlpha1)
+            else
+               button:SetAlpha(self.ExpandedAlpha2)
+               button.icon:SetDesaturated(self.DesatExpanded);
+            end
          end
       else
-         button.HotKey:SetText(RANGE_INDICATOR);
+         button.HotKey:SetText(RANGE_INDICATOR);            
+         if  button:GetID() >= 9 then 
+            button:SetAlpha(self.ExpandedAlpha1)
+         else
+            button:SetAlpha(1.0)
+            button.icon:SetDesaturated(false);
+         end
       end
+      self.BtnLock = true
       button.HotKey:Show();
+   end
+   for i,highlight in ipairs(self.Highlights) do
+      if highlights[i] then
+         highlight:SetAlpha(1.0)
+      else
+         highlight:SetAlpha(0.0)
+      end
    end
 end
 
 function HotbarMixin:OnEvent(event, ...)
    if ( event == "PLAYER_ENTERING_WORLD" ) then
       self:UpdateHotbar();
-      for i,highlight in ipairs(self.Highlights) do
-         SecureHandlerSetFrameRef(self, 'Highlight'..i, highlight)
-      end
    end
 end
 
@@ -627,6 +648,5 @@ function HotbarMixin:ApplyConfig()
    end
    
    self:SetHotbarLayout(config.Hotbar.DDAAType)
-   local expanded = self:GetAttribute("expanded")
-   self:SetExpandIconsActive(expanded, expanded)
+   self:UpdateHotkeys()
 end

@@ -1,5 +1,9 @@
 local ADDON, addon = ...
 
+addon.ConfigUpdated = true
+addon.ApplyCallbacks = {}
+addon.InitializeCallbacks = {}
+
 addon.GamePadButtonList = {
    "FACER",
    "FACEU",
@@ -40,6 +44,7 @@ CrossHotbar_DB = {
          Name = "Gamepad_Preset",
          Description="Preset for PS4/5 Controllers which mirrors FFXIV controller settings. The default dpad is set to party and raid unit naviation for both up and down and left and right. Zoom actions are moved from L1 RSTICK to L1 DPad up and DPad down. Paging is available with R1 and Face buttons with next and previous page in DPad up and down.",
          Hotbar = {
+            HBARType = "LIBA",
             WXHBType = "HIDE",
             DDAAType = "DADA",
             LPagePrefix = "",
@@ -100,6 +105,7 @@ CrossHotbar_DB = {
          Name = "Keyboard_Preset",
          Description="Preset for keyboard binding swhich mirrors FFXIV controller settings. The default dpad is set to party and raid unit naviation for both up and down and left and right. Zoom actions are moved from L1 RSTICK to L1 DPad up and DPad down. Paging is available with R1 and Face buttons with next and previous page in DPad up and down.",
          Hotbar = {
+            HBARType = "LIBA",
             WXHBType = "HIDE",
             DDAAType = "DADA",
             LPagePrefix = "",
@@ -160,6 +166,7 @@ CrossHotbar_DB = {
          Name = "Steam_Controller",
          Description="Preset for Steam Controller with Face buttons on the touch pad and dpad mapped to controller face buttons. DPad swap with left back paddle. Quick party select with R1 and Face buttons. Hold mouse with right back paddle for mouse over actions. Requires correct steam config.",
          Hotbar = {
+            HBARType = "LIBA",
             WXHBType = "SHOW",
             DDAAType = "DDAA",
             LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
@@ -220,6 +227,7 @@ CrossHotbar_DB = {
          Name = "Dualshock 5 Edge",
          Description="Preset for DS5 Edge with back paddles. DPad swap with left back paddle. Quick party select with R1 and Face buttons. Hold mouse with right back paddle for mouse over actions.",
          Hotbar = {
+            HBARType = "LIBA",
             WXHBType = "SHOW",
             DDAAType = "DDAA",
             LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
@@ -238,7 +246,7 @@ CrossHotbar_DB = {
             GPAutoCursor = 0,
             GPAutoSticks = 0,
             GPAutoJump = 0,
-            GPTargetCursor = 1,
+            GPTargetCursor = 0,
             GPCenterCursor = 1,
             GPCenterEmu = 1,
             GPDeviceID = 1,
@@ -283,6 +291,7 @@ addon.Config = {
    Name = "Custom",
    Description="Custom: Preset for PS4/5 Controllers with customized actions",
    Hotbar = {
+      HBARType = "LIBA",
       WXHBType = "HIDE",
       DDAAType = "DDAA",
       LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
@@ -383,9 +392,41 @@ function addon.Config:StorePreset(to, from)
    end
 end
 
-function addon.Config:ProcessConfig(config)
+function addon:AddApplyCallback(applyfunc)
+   table.insert(self.ApplyCallbacks, applyfunc)
 end
 
-local config = addon.Config
-local preset = CrossHotbar_DB.ActivePreset;
-config:StorePreset(config, CrossHotbar_DB.Presets[preset])
+function addon:AddInitCallback(initfunc)
+   table.insert(self.InitializeCallbacks, initfunc)
+end
+
+function addon:ApplyConfig(updated)
+   if updated then
+      addon.ConfigUpdated = true
+   end
+   if addon.ConfigUpdated then
+      if not InCombatLockdown() then 
+         for i,callback in ipairs(addon.ApplyCallbacks) do
+            callback()
+         end
+         addon.ConfigUpdated = false
+      end
+   end
+end
+
+function addon:InitConfig()
+   local config = addon.Config
+   local preset = CrossHotbar_DB.ActivePreset;
+   config:StorePreset(config, CrossHotbar_DB.Presets[preset])
+   for i,callback in ipairs(addon.InitializeCallbacks) do
+      callback()
+   end
+   EventRegistry:UnregisterFrameEventAndCallback("ADDON_LOADED", addon)
+end
+
+EventRegistry:RegisterFrameEventAndCallback("PLAYER_ENTERING_WORLD", addon.ApplyConfig, addon)
+EventRegistry:RegisterFrameEventAndCallback("PLAYER_REGEN_ENABLED", addon.ApplyConfig, addon)
+EventRegistry:RegisterFrameEventAndCallback("ADDON_LOADED", addon.InitConfig, addon)
+
+addon.UIHider = CreateFrame("Frame")
+addon.UIHider:Hide()

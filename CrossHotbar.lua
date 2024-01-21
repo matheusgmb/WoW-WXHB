@@ -22,9 +22,10 @@ config:ConfigListAdd("HotbarActions", ActionList, "NONE")
 CrossHotbarMixin = {
 }
 
+--[[
 function CrossHotbarMixin:SaveLayout()
    StaticPopupDialogs["CROSSHOTBAR_SAVEACTIONBARTOLAYOUT"] = {
-      text = [[Double Click: Save/Overwrite ActionBar positions to the active layout?]],
+      text = "Double Click: Save/Overwrite ActionBar positions to the active layout?",
       button1 = "Save",
       button2 = "Cancel",
       OnAccept = function()
@@ -43,6 +44,7 @@ function CrossHotbarMixin:SaveLayout()
    }
    StaticPopup_Show("CROSSHOTBAR_SAVEACTIONBARTOLAYOUT")
 end
+--]]
 
 function CrossHotbarMixin:SetupCrosshotbar()
    self.LHotbar = { WXHBLHotbar1, WXHBLHotbar2, WXHBLHotbar3 }
@@ -72,12 +74,16 @@ function CrossHotbarMixin:SetupCrosshotbar()
       Crosshotbar:RunAttribute("SetHotbarPlacement")
       self:SetWidth(Crosshotbar:GetWidth())
    ]])
-   SecureHandlerWrapScript(WXHBCrossHotbarMover, "OnDoubleClick", WXHBCrossHotbarMover, [[
-      local Crosshotbar = self:GetFrameRef('Crosshotbar')
-      Crosshotbar:RunAttribute("SetHotbarPlacement")
-      self:SetWidth(Crosshotbar:GetWidth())
-      Crosshotbar:CallMethod("SaveLayout")
-   ]])
+
+--   if config.Hotbar.HBARType == "BLIZ" then
+--      SecureHandlerWrapScript(WXHBCrossHotbarMover, "OnDoubleClick", WXHBCrossHotbarMover, [[
+--         local Crosshotbar = self:GetFrameRef('Crosshotbar')
+--         Crosshotbar:RunAttribute("SetHotbarPlacement")
+--         self:SetWidth(Crosshotbar:GetWidth())
+--         Crosshotbar:CallMethod("SaveLayout")
+--      ]])
+--   end
+   
    SecureHandlerWrapScript(WXHBCrossHotbarMover, "OnEnter", WXHBCrossHotbarMover, [[
       self:SetFrameLevel(10)
    ]])
@@ -138,34 +144,26 @@ function CrossHotbarMixin:OnLoad()
    self:AddPaddleHandler()
    self:AddExpandHandler()
    self:AddNextPageHandler()
-   self:RegisterEvent("ADDON_LOADED")
-   self:RegisterEvent("PLAYER_ENTERING_WORLD")
-   self:RegisterEvent("PLAYER_ENTERING_WORLD")
    self:HideHudElements()
    addon.Crosshotbar = self
    addon.CreateGamePadButtons(self)
    addon.CreateGroupNavigator(self)
 
+   self:RegisterEvent("PLAYER_ENTERING_WORLD")
+   
+   EventRegistry:RegisterCallback("EditMode.Exit", function(ownerID, ...)
+      if not InCombatLockdown() then 
+         self:Execute([[self:RunAttribute("SetHotbarPlacement")]])
+      end
+   end, self)
+
+   addon:AddInitCallback(GenerateClosure(self.SetupCrosshotbar, self))
+   addon:AddApplyCallback(GenerateClosure(self.ApplyConfig, self))
 end
 
 function CrossHotbarMixin:OnEvent(event, ...)
    if ( event == "PLAYER_ENTERING_WORLD" ) then
-      self:ApplyConfig()
       self:UpdateCrosshotbar()
-      self:Execute([[
-         self:SetAttribute("triggerstate", 4)
-         self:SetAttribute("state-trigger", 4)
-      ]])
-      
-      EventRegistry:RegisterCallback("EditMode.Exit", function(ownerID, ...)
-         if not InCombatLockdown() then 
-            self:Execute([[self:RunAttribute("SetHotbarPlacement")]])
-         end
-      end, self)
-      
-   elseif event == 'ADDON_LOADED' then
-      self:SetupCrosshotbar()
-      self:UnregisterEvent("ADDON_LOADED")
    end
 end
 
@@ -273,13 +271,8 @@ function CrossHotbarMixin:UpdateCrosshotbar()
 end
 
 function CrossHotbarMixin:HideHudElements()
-   if self.UIHider == nil then
-      self.UIHider = CreateFrame("Frame")
-      self.UIHider:Hide()
-   end
-   
    OverrideActionBar:Hide()
-   OverrideActionBar:SetParent(self.UIHider)
+   OverrideActionBar:SetParent(addon.UIHider)
    
    hooksecurefunc(MainMenuBarVehicleLeaveButton, "Update", self.MainMenuBarVehicleLeaveButton_Update)
    
@@ -303,7 +296,6 @@ end
 
 function CrossHotbarMixin:MainMenuBarVehicleLeaveButton_Update()
    if ShouldVehicleButtonBeShown() then
-      --self.bar:PerformLayout()
       MainMenuBarVehicleLeaveButton:Show()
       MainMenuBarVehicleLeaveButton:Enable()
    else

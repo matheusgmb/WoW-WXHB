@@ -3,7 +3,6 @@ local ADDON, addon = ...
 local LibDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
 
 local config = addon.Config
-local preset = CrossHotbar_DB.ActivePreset
 
 local GamePadButtonList = addon.GamePadButtonList
 
@@ -192,6 +191,7 @@ local Locale = {
 
 
 local ConfigUI = {
+   preset = 0,
    Inset = 16,
    ConfigSpacing = 20,
    TextHeight = 20,
@@ -224,7 +224,7 @@ local function BindingDropDownDemo_OnClick(self, arg1, arg2, checked)
       end
       config.PadActions[arg1].BIND = newaction
    end
-   ConfigUI:Refresh()
+   ConfigUI:Refresh(true)
 end
 
 local function ActionDropDownDemo_OnClick(self, arg1, arg2, checked)
@@ -243,7 +243,7 @@ local function ActionDropDownDemo_OnClick(self, arg1, arg2, checked)
       end
       config.PadActions[arg1][arg2] = newaction
    end
-   ConfigUI:Refresh()
+   ConfigUI:Refresh(true)
 end
 
 local function HotbarBtnDropDownDemo_OnClick(self, arg1, arg2, checked)
@@ -262,7 +262,7 @@ local function HotbarBtnDropDownDemo_OnClick(self, arg1, arg2, checked)
       end
       config.PadActions[arg1][arg2] = newaction
    end
-   ConfigUI:Refresh()
+   ConfigUI:Refresh(true)
 end
 
 local function FilterDropDownText(name)
@@ -298,18 +298,21 @@ function ConfigUI:AddToolTip(frame, text, wrap)
    end)
 end
 
-function ConfigUI:Refresh()
-   --if not ConfigUI.InterfaceFrame:IsVisible() then return end
-
-   config:ProcessConfig(config)
-
-   for i,callback in ipairs(ConfigUI.RefreshCallbacks) do
-      callback()
+function ConfigUI:Refresh(updated)
+   if self.InterfaceFrame:IsVisible() or
+      self.PresetFrame:IsVisible() or
+      self.ActionFrame:IsVisible() or
+      self.HotbarFrame:IsVisible() or
+      self.GamePadFrame:IsVisible() then 
+      for i,callback in ipairs(self.RefreshCallbacks) do
+         callback()
+      end
+      addon:ApplyConfig(updated)
    end
+end
 
-   addon.GamePadButtons:ApplyConfig()
-   addon.GroupNavigator:ApplyConfig()
-   addon.Crosshotbar:ApplyConfig()
+function ConfigUI:OnConfigInit()
+   ConfigUI.preset = CrossHotbar_DB.ActivePreset 
 end
 
 function ConfigUI:CreateFrame()
@@ -317,20 +320,7 @@ function ConfigUI:CreateFrame()
    self.InterfaceFrame.name = ADDON
    self.InterfaceFrame:Hide()
 
-   self.InterfaceFrame:RegisterEvent("ADDON_LOADED")
-   self.InterfaceFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-   local function OnEvent(self, event, ...)
-      if event == 'PLAYER_ENTERING_WORLD' then
-         addon.GamePadButtons:ApplyConfig()
-         addon.GroupNavigator:ApplyConfig()
-         addon.Crosshotbar:ApplyConfig()
-      elseif event == 'ADDON_LOADED' then         
-         preset = CrossHotbar_DB.ActivePreset         
-         config:StorePreset(config, CrossHotbar_DB.Presets[preset])
-         self:UnregisterEvent("ADDON_LOADED")
-      end
-   end
-   self.InterfaceFrame:HookScript("OnEvent", OnEvent)
+   addon:AddInitCallback(GenerateClosure(self.OnConfigInit, self))
 
    self.InterfaceFrame:SetScript("OnShow", function(InterfaceFrame)
       local title = InterfaceFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightHuge")
@@ -379,35 +369,35 @@ Settings:
 ]])
       descript:SetTextColor(1,1,1,1)
       
-      InterfaceFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      InterfaceFrame:SetScript("OnShow", function(frame) ConfigUI:Refresh() end) 
       ConfigUI:Refresh()
    end)
 
    InterfaceOptions_AddCategory(self.InterfaceFrame)
 
-   local PresetFrame = CreateFrame("Frame", ADDON .. "PresetsSettings", self.InterfaceFrame)
-   PresetFrame.name = "Presets"
-   PresetFrame.parent = self.InterfaceFrame.name
-   PresetFrame:Hide()
+   self.PresetFrame = CreateFrame("Frame", ADDON .. "PresetsSettings", self.InterfaceFrame)
+   self.PresetFrame.name = "Presets"
+   self.PresetFrame.parent = self.InterfaceFrame.name
+   self.PresetFrame:Hide()
    
-   PresetFrame:SetScript("OnShow", function(PresetFrame)
+   self.PresetFrame:SetScript("OnShow", function(PresetFrame)
       local title = PresetFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightHuge")
       title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
       title:SetText("Presets")
       local anchor = title
       anchor = ConfigUI:CreatePresets(PresetFrame, anchor)
-      PresetFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      PresetFrame:SetScript("OnShow", function(frame) ConfigUI:Refresh() end) 
       ConfigUI:Refresh()
    end)
    
-   InterfaceOptions_AddCategory(PresetFrame)
+   InterfaceOptions_AddCategory(self.PresetFrame)
    
-   local ActionFrame = CreateFrame("Frame", ADDON .. "ActionsSettings", self.InterfaceFrame)
-   ActionFrame.name = "Actions"
-   ActionFrame.parent = self.InterfaceFrame.name
-   ActionFrame:Hide()
+   self.ActionFrame = CreateFrame("Frame", ADDON .. "ActionsSettings", self.InterfaceFrame)
+   self.ActionFrame.name = "Actions"
+   self.ActionFrame.parent = self.InterfaceFrame.name
+   self.ActionFrame:Hide()
 
-   ActionFrame:SetScript("OnShow", function(ActionFrame)
+   self.ActionFrame:SetScript("OnShow", function(ActionFrame)
       local scrollFrame = CreateFrame("ScrollFrame", nil, ActionFrame, "UIPanelScrollFrameTemplate")
       scrollFrame:SetPoint("TOPLEFT", 3, -4)
       scrollFrame:SetPoint("BOTTOMRIGHT", -27, 4)
@@ -450,18 +440,18 @@ Settings:
          PanelTemplates_SetTabEnabled(anchor, 5, ppadractive)
       end)
       
-      ActionFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      ActionFrame:SetScript("OnShow", function(frame) ConfigUI:Refresh() end) 
       ConfigUI:Refresh()
    end)
    
-   InterfaceOptions_AddCategory(ActionFrame)
+   InterfaceOptions_AddCategory(self.ActionFrame)
    
-   local HotbarFrame = CreateFrame("Frame", ADDON .. "HotbarsSettings", self.InterfaceFrame)
-   HotbarFrame.name = "Hotbars"
-   HotbarFrame.parent = self.InterfaceFrame.name
-   HotbarFrame:Hide()
+   self.HotbarFrame = CreateFrame("Frame", ADDON .. "HotbarsSettings", self.InterfaceFrame)
+   self.HotbarFrame.name = "Hotbars"
+   self.HotbarFrame.parent = self.InterfaceFrame.name
+   self.HotbarFrame:Hide()
 
-   HotbarFrame:SetScript("OnShow", function(HotbarFrame)
+   self.HotbarFrame:SetScript("OnShow", function(HotbarFrame)
       local scrollFrame = CreateFrame("ScrollFrame", nil, HotbarFrame, "UIPanelScrollFrameTemplate")
       scrollFrame:SetPoint("TOPLEFT", 3, -4)
       scrollFrame:SetPoint("BOTTOMRIGHT", -27, 4)
@@ -479,18 +469,18 @@ Settings:
   
       anchor = ConfigUI:CreateHotbarSettings(scrollChild, anchor)
       
-      HotbarFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      HotbarFrame:SetScript("OnShow", function(frame) ConfigUI:Refresh() end) 
       ConfigUI:Refresh()
    end)
    
-   InterfaceOptions_AddCategory(HotbarFrame)
+   InterfaceOptions_AddCategory(self.HotbarFrame)
    
-   local GamePadFrame = CreateFrame("Frame", ADDON .. "GamePadSettings", self.InterfaceFrame)
-   GamePadFrame.name = "GamePad"
-   GamePadFrame.parent = self.InterfaceFrame.name
-   GamePadFrame:Hide()
+   self.GamePadFrame = CreateFrame("Frame", ADDON .. "GamePadSettings", self.InterfaceFrame)
+   self.GamePadFrame.name = "GamePad"
+   self.GamePadFrame.parent = self.InterfaceFrame.name
+   self.GamePadFrame:Hide()
 
-   GamePadFrame:SetScript("OnShow", function(GamePadFrame)
+   self.GamePadFrame:SetScript("OnShow", function(GamePadFrame)
       local title = GamePadFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightHuge")
       title:SetPoint("TOPLEFT", self.Inset, -self.Inset)
       title:SetText("GamePad Settings")
@@ -498,11 +488,11 @@ Settings:
       local anchor = title
       anchor = ConfigUI:CreateGamePadSettings(GamePadFrame, anchor)
       
-      GamePadFrame:SetScript("OnShow", ConfigUI.Refresh) 
+      GamePadFrame:SetScript("OnShow", function(frame) ConfigUI:Refresh() end) 
       ConfigUI:Refresh()
    end)      
 
-   InterfaceOptions_AddCategory(GamePadFrame)
+   InterfaceOptions_AddCategory(self.GamePadFrame)
 
    SLASH_WXHBCROSSHOTBAR1, SLASH_WXHBCROSSHOTBAR2 = '/chb', '/wxhb';
    local function slashcmd(msg, editBox)
@@ -710,10 +700,10 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    LibDD:UIDropDownMenu_JustifyText(PresetsFrame, "LEFT")
    
    local function PresetDropDownDemo_OnClick(self, arg1, arg2, checked)
-      if preset ~= arg1 then
-         preset = arg1
+      if ConfigUI.preset ~= arg1 then
+         ConfigUI.preset = arg1
          LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-         ConfigUI:Refresh()
+         ConfigUI:Refresh(true)
       end
    end
    
@@ -723,14 +713,14 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
       if (level or 1) == 1 then
          local presets = CrossHotbar_DB.Presets
          for i,p in ipairs(presets) do
-            info.text, info.checked = p.Name, preset == i
+            info.text, info.checked = p.Name, ConfigUI.preset == i
             info.menuList, info.hasArrow = i, false
             info.arg1 = i
             info.arg2 = self
             info.func = PresetDropDownDemo_OnClick
             LibDD:UIDropDownMenu_AddButton(info)
-            if preset == i then 
-               LibDD:UIDropDownMenu_SetText(self, CrossHotbar_DB.Presets[preset].Name)
+            if ConfigUI.preset == i then 
+               LibDD:UIDropDownMenu_SetText(self, CrossHotbar_DB.Presets[ConfigUI.preset].Name)
             end
          end
       end
@@ -743,9 +733,9 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetloadbutton:SetText("Load")
    
    presetloadbutton:SetScript("OnClick", function(self, button, down)
-      CrossHotbar_DB.ActivePreset = preset
-      config:StorePreset(config, CrossHotbar_DB.Presets[preset])
-      ConfigUI:Refresh()
+      CrossHotbar_DB.ActivePreset = ConfigUI.preset
+      config:StorePreset(config, CrossHotbar_DB.Presets[ConfigUI.preset])
+      ConfigUI:Refresh(true)
    end)
    
    local presetdeletebutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
@@ -756,17 +746,17 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetdeletebutton:SetText("Delete")
 
    presetdeletebutton:SetScript("OnClick", function(self, button, down)
-      if CrossHotbar_DB.Presets[preset].Mutable then
-         table.remove(CrossHotbar_DB.Presets, preset)
-         preset = preset + 1
-         if preset > #CrossHotbar_DB.Presets then             
-            preset = #CrossHotbar_DB.Presets
+      if CrossHotbar_DB.Presets[ConfigUI.preset].Mutable then
+         table.remove(CrossHotbar_DB.Presets, ConfigUI.preset)
+         ConfigUI.preset = ConfigUI.preset + 1
+         if ConfigUI.preset > #CrossHotbar_DB.Presets then             
+            ConfigUI.preset = #CrossHotbar_DB.Presets
          end
-         CrossHotbar_DB.ActivePreset = preset
+         CrossHotbar_DB.ActivePreset = ConfigUI.preset
       end
       config.Name = "Custom"
-      config:StorePreset(config, CrossHotbar_DB.Presets[preset])
-      ConfigUI:Refresh()
+      config:StorePreset(config, CrossHotbar_DB.Presets[ConfigUI.preset])
+      ConfigUI:Refresh(true)
    end)
 
    local filesubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -807,14 +797,14 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
          }
          config:StorePreset(newpreset, config)
          table.insert(CrossHotbar_DB.Presets, newpreset)
-         preset = #CrossHotbar_DB.Presets
-         CrossHotbar_DB.ActivePreset = preset
+         ConfigUI.preset = #CrossHotbar_DB.Presets
+         CrossHotbar_DB.ActivePreset = ConfigUI.preset
       elseif CrossHotbar_DB.Presets[foundpreset].Mutable then
-         preset = foundpreset
-         CrossHotbar_DB.ActivePreset = preset
-         config:StorePreset(CrossHotbar_DB.Presets[preset], config)
+         ConfigUI.preset = foundpreset
+         CrossHotbar_DB.ActivePreset = ConfigUI.preset
+         config:StorePreset(CrossHotbar_DB.Presets[ConfigUI.preset], config)
       end
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
 
    local descripttitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -859,9 +849,9 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    scrollFrame:SetScrollChild(descriptfileeditbox)
    
    table.insert(self.RefreshCallbacks, function()
-                   presetdeletebutton:SetEnabled(CrossHotbar_DB.Presets[preset].Mutable)
+                   presetdeletebutton:SetEnabled(CrossHotbar_DB.Presets[ConfigUI.preset].Mutable)
                    presetfileeditbox:SetText(config.Name)
-                   LibDD:UIDropDownMenu_SetText(PresetsFrame, CrossHotbar_DB.Presets[preset].Name)
+                   LibDD:UIDropDownMenu_SetText(PresetsFrame, CrossHotbar_DB.Presets[ConfigUI.preset].Name)
                    descriptfileeditbox:SetText(config.Description)
    end)
    
@@ -1117,7 +1107,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    local function ExpdDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.WXHBType = arg1
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
    
    LibDD:UIDropDownMenu_Initialize(expddropdown, function(self, level, menuList)     
@@ -1163,7 +1153,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    local function DdaaDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.DDAAType = arg1
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
    
    LibDD:UIDropDownMenu_Initialize(ddaadropdown, function(self, level, menuList)     
@@ -1218,7 +1208,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    local function LpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.LPageIndex = arg1
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
    
    LibDD:UIDropDownMenu_Initialize(lpageidxdropdown, function(self, level, menuList)     
@@ -1264,7 +1254,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    local function RpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.RPageIndex = arg1
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
    
    LibDD:UIDropDownMenu_Initialize(rpageidxdropdown, function(self, level, menuList)     
@@ -1310,7 +1300,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    local function LrpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.LRPageIndex = arg1
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
    
    LibDD:UIDropDownMenu_Initialize(lrpageidxdropdown, function(self, level, menuList)     
@@ -1356,7 +1346,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    local function RlpageidxDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.Hotbar.RLPageIndex = arg1
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
    
    LibDD:UIDropDownMenu_Initialize(rlpageidxdropdown, function(self, level, menuList)     
@@ -1411,7 +1401,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lhotbareditbox:SetText(config.Hotbar.LPagePrefix)
    lhotbareditbox:SetScript("OnEditFocusLost", function(self)
       config.Hotbar.LPagePrefix = self:GetText()
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
 
    ConfigUI:AddToolTip(lhotbareditbox, Locale.pagePrefixToolTip, true)
@@ -1439,7 +1429,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rhotbareditbox:SetText(config.Hotbar.RPagePrefix)
    rhotbareditbox:SetScript("OnEditFocusLost", function(self)
       config.Hotbar.RPagePrefix = self:GetText()
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
 
    ConfigUI:AddToolTip(rhotbareditbox, Locale.pagePrefixToolTip, true)
@@ -1467,7 +1457,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lrhotbareditbox:SetText(config.Hotbar.LRPagePrefix)
    lrhotbareditbox:SetScript("OnEditFocusLost", function(self)
       config.Hotbar.LRPagePrefix = self:GetText()
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
 
    ConfigUI:AddToolTip(lrhotbareditbox, Locale.pagePrefixToolTip, true)
@@ -1495,7 +1485,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rlhotbareditbox:SetText(config.Hotbar.RPagePrefix)
    rlhotbareditbox:SetScript("OnEditFocusLost", function(self)
       config.Hotbar.RLPagePrefix = self:GetText()
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
 
    ConfigUI:AddToolTip(rlhotbareditbox, Locale.pagePrefixToolTip, true)
@@ -1562,7 +1552,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
       else
          SetCVar('GamePadEnable', 0)
       end                                 
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
 
    ConfigUI:AddToolTip(gamepadenablebutton, Locale.enabeGamePadToolTip, true)
@@ -1593,7 +1583,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    
    cvarenablebutton:SetScript("OnClick", function(self, button, down)
       config.GamePad.CVSetup = not config.GamePad.CVSetup
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
    
    ConfigUI:AddToolTip(cvarenablebutton, Locale.enabeCVarToolTip, true)
@@ -1624,7 +1614,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    
    gamepadlookbutton:SetScript("OnClick", function(self, button, down)
       config.GamePad.GamePadLook = not config.GamePad.GamePadLook
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
 
    ConfigUI:AddToolTip(gamepadlookbutton, Locale.gamepadLookToolTip, true)
@@ -1655,7 +1645,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    
    mouselookbutton:SetScript("OnClick", function(self, button, down)
       config.GamePad.MouseLook = not config.GamePad.MouseLook
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
 
    
@@ -1705,7 +1695,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    local function DeviceDropDownDemo_OnClick(self, arg1, arg2, checked)
       config.GamePad.GPDeviceID = arg1
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
 
    LibDD:UIDropDownMenu_Initialize(devicedropdown, function(self, level, menuList)     
@@ -1762,7 +1752,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
          config.GamePad.GPRightClick = "NONE"
       end
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
    
    LibDD:UIDropDownMenu_Initialize(leftclickdropdown, function(self, level, menuList)     
@@ -1812,7 +1802,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
          config.GamePad.GPLeftClick = "NONE"
       end
       LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end
    
    LibDD:UIDropDownMenu_Initialize(rightclickdropdown, function(self, level, menuList)     
@@ -1858,7 +1848,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    yaweditbox:SetText(config.GamePad.GPYawSpeed)
    yaweditbox:SetScript("OnEditFocusLost", function(self)
       config.GamePad.GPYawSpeed = self:GetText()
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
    
    --[[
@@ -1884,7 +1874,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    pitcheditbox:SetText(config.GamePad.GPPitchSpeed)
    pitcheditbox:SetScript("OnEditFocusLost", function(self)
       config.GamePad.GPPitchSpeed = self:GetText()
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
    
    --[[
@@ -1910,7 +1900,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    overlapmouseeditbox:SetText(config.GamePad.GPOverlapMouse)
    overlapmouseeditbox:SetScript("OnEditFocusLost", function(self)
       config.GamePad.GPOverlapMouse = self:GetText()
-      ConfigUI:Refresh()
+      ConfigUI:Refresh(true)
    end)
    
    table.insert(self.RefreshCallbacks, function()

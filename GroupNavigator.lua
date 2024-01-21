@@ -25,6 +25,8 @@ function GroupNavigatorMixin:OnLoad()
    self:RegisterEvent("GROUP_ROSTER_UPDATE")
    self:RegisterEvent("PLAYER_ENTERING_WORLD")
    self:WrapOnClickDiscrete()
+   
+   addon:AddApplyCallback(GenerateClosure(self.ApplyConfig, self))
 end
 
 function GroupNavigatorMixin:OnEvent(event, ...)
@@ -65,8 +67,11 @@ function GroupNavigatorMixin:AddStateHandlers()
    self:SetAttribute("modstate", 0)
    self:SetAttribute("modname", "")
    
-   self:SetAttribute("SetActionBindings",  [[
+   self:SetAttribute("SetActionBindings", [[
       local prefix = ...
+      if prefix == "" or prefix == "TRIG" then
+         self:ClearBindings()
+      end
       local binding = self:GetAttribute(prefix .. "UNITNAVUP")
       if binding and binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "Button4") end
       binding = self:GetAttribute(prefix .. "UNITNAVDOWN")                  
@@ -77,62 +82,7 @@ function GroupNavigatorMixin:AddStateHandlers()
       if binding and binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "RightButton") end
       binding = self:GetAttribute(prefix .. "CLEARTARGETING")                  
       if binding and binding ~= "" then self:SetBindingClick(true, binding, self:GetName(), "MiddleButton") end
-   ]])
-
-   self:SetAttribute("_onstate-trigger", [[
-      local modstate = self:GetAttribute("modstate")
-      if newstate ~= 4 then
-         if modstate == 0 then
-            self:SetAttribute("modstate", 1)
-         end
-      else
-         if modstate == 1 then
-            self:SetAttribute("modstate", 0)
-         end
-         local modname = self:GetAttribute("modname")
-         self:RunAttribute("SetActionBindings", modname)
-      end
-   ]])
-
-   self:SetAttribute("_onstate-shoulder", [[
-      local modstate = self:GetAttribute("modstate")
-      if modstate == 0 or modstate == 2 then
-         if newstate == 6 or newstate == 3 or newstate == 2 then
-            self:SetAttribute("modstate", 2)
-            self:SetAttribute("modname", "SPADL")
-            self:RunAttribute("SetActionBindings", "SPADL")
-         elseif newstate == 7 or newstate == 5 or newstate == 1 then
-            self:SetAttribute("modstate", 2)
-            self:SetAttribute("modname", "SPADR")
-            self:RunAttribute("SetActionBindings", "SPADL")
-         else
-            self:ClearBindings()
-            self:SetAttribute("modstate", 0)
-            self:SetAttribute("modname", "")
-            self:RunAttribute("SetActionBindings", "")
-         end
-      end
-   ]])
-   
-   self:SetAttribute("_onstate-paddle", [[
-      local modstate = self:GetAttribute("modstate")
-      if modstate == 0 or modstate == 3 then
-         if newstate == 6 or newstate == 3 or newstate == 2 then
-            self:SetAttribute("modstate", 3)
-            self:SetAttribute("modname", "PPADL")
-            self:RunAttribute("SetActionBindings", "PPADL")
-         elseif newstate == 7 or newstate == 5 or newstate == 1 then
-            self:SetAttribute("modstate", 3)
-            self:SetAttribute("modname", "SPADR")
-            self:RunAttribute("SetActionBindings", "PPADL")
-         else
-            self:ClearBindings()
-            self:SetAttribute("modstate", 0)
-            self:SetAttribute("modname", "")
-            self:RunAttribute("SetActionBindings", "")
-         end
-      end
-   ]])
+    ]])
 end
 
 function GroupNavigatorMixin:ClearConfig()

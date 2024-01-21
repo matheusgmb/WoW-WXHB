@@ -464,6 +464,22 @@ local SetButtonExpanded = [[
    end
 ]]
 
+local UpdateModifierName = [[
+   local newstate, modprefix1, modprefix2 = ...
+   local modname = self:GetAttribute("modname")
+   if newstate == 6 or newstate == 3 or newstate == 2 then
+      modname = string.gsub(modname, modprefix1, "")
+      self:SetAttribute("modname", modprefix1 .. modname)
+   elseif newstate == 7 or newstate == 5 or newstate == 1 then
+      modname = string.gsub(modname, modprefix2, "")
+      self:SetAttribute("modname", modprefix2 .. modname)
+   else
+      modname = string.gsub(modname, modprefix1, "")
+      modname = string.gsub(modname, modprefix2, "")
+      self:SetAttribute("modname", modname)
+   end
+]]
+
 function GamePadButtonsMixin:CreatePairButton(ButtonName)
    local Button = CreateFrame("Button", ADDON .. ButtonName .. "ButtonFrame",
                                          self, "SecureActionButtonTemplate" )
@@ -555,142 +571,17 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
    self[Name.."Button"]:SetAttribute("modstate", 0)
    self[Name.."Button"]:SetAttribute("modname", "")
    self[Name.."Button"]:SetAttribute("trigstate", 4)
-   self[Name.."Button"]:SetAttribute("_onstate-trigger", [[
-      self:SetAttribute("trigstate", newstate)
-      local modstate = self:GetAttribute("modstate")
-      if newstate ~= 4 then
-         if modstate == 0 then
-            self:SetAttribute("modstate", 1)
-         end
-         local modname = self:GetAttribute("modname")
-         local binding = self:GetAttribute(modname .. "TRIGBINDING")
-         if binding ~= nil and binding ~= "" then
-            local action = self:GetAttribute(modname .. "TRIGACTION")
-            self:SetAttribute("ACTIVE", action) 
-            self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-         else 
-            local binding = self:GetAttribute("TRIGBINDING")
-            if binding ~= nil and binding ~= "" then
-               local action = self:GetAttribute("TRIGACTION")
-               self:SetAttribute("ACTIVE", action) 
-               self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-            end
-         end
-      else
+   self[Name.."Button"]:SetAttribute("SetActionBindings", [[
+      local modname = ...
+      if modname == "" or modname == "TRIG" then
          self:ClearBindings()
          self:SetAttribute("macrotext1", "")
-         if modstate == 1 then
-            self:SetAttribute("modstate", 0)
-            self:SetAttribute("modname", "")
-            local binding = self:GetAttribute("BINDING")
-            if binding ~= nil and binding ~= "" then
-               local action = self:GetAttribute("ACTION")
-               self:SetAttribute("ACTIVE", action) 
-               self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-            end
-         else
-            local modname = self:GetAttribute("modname")
-            local binding = self:GetAttribute(modname .. "BINDING")
-            if binding ~= nil and binding ~= "" then
-               local action = self:GetAttribute(modname .. "ACTION")
-               self:SetAttribute("ACTIVE", action) 
-               self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-            end
-         end
       end
-   ]])
-   self[Name.."Button"]:SetAttribute("_onstate-shoulder", [[
-      local modstate = self:GetAttribute("modstate")
-      if modstate == 0 or modstate == 2 then
-         if newstate == 6 or newstate == 3 or newstate == 2 then
-            self:SetAttribute("modstate", 2)
-            self:SetAttribute("modname", "SPADL")
-            local binding = self:GetAttribute("SPADLBINDING")
-            if binding ~= nil and binding ~= "" then
-               local action = self:GetAttribute("SPADLACTION")
-               self:SetAttribute("ACTIVE", action)
-               self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-            end
-         elseif newstate == 7 or newstate == 5 or newstate == 1 then
-            self:SetAttribute("modstate", 2)
-            self:SetAttribute("modname", "SPADR")
-            local binding = self:GetAttribute("SPADRBINDING")
-            if binding ~= nil and binding ~= "" then
-               local action = self:GetAttribute("SPADRACTION")
-               self:SetAttribute("ACTIVE", action)
-               self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-            end
-         else
-            self:ClearBindings()
-            self:SetAttribute("macrotext1", "")
-            local trigstate = self:GetAttribute("trigstate")
-            if trigstate == 4 then
-               self:SetAttribute("modstate", 0)
-               self:SetAttribute("modname", "")
-               local binding = self:GetAttribute("BINDING")
-               if binding ~= nil and binding ~= "" then
-                  local action = self:GetAttribute("ACTION")
-                  self:SetAttribute("ACTIVE", action) 
-                  self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-               end
-            else
-               self:SetAttribute("modstate", 1)
-               self:SetAttribute("modname", "")
-               local binding = self:GetAttribute("TRIGBINDING")
-               if binding ~= nil and binding ~= "" then
-                  local action = self:GetAttribute("TRIGACTION")
-                  self:SetAttribute("ACTIVE", action) 
-                  self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-               end
-            end
-         end
-      end
-   ]])
-   self[Name.."Button"]:SetAttribute("_onstate-paddle", [[                         
-      local modstate = self:GetAttribute("modstate")
-      if modstate == 0 or modstate == 3 then
-         if newstate == 6 or newstate == 3 or newstate == 2 then
-            self:SetAttribute("modstate", 3)
-            self:SetAttribute("modname", "PPADL")
-            local binding = self:GetAttribute("PPADLBINDING")
-            if binding ~= nil and binding ~= "" then
-               local action = self:GetAttribute("PPADLACTION")
-               self:SetAttribute("ACTIVE", action)
-               self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-            end
-         elseif newstate == 7 or newstate == 5 or newstate == 1 then
-            self:SetAttribute("modstate", 3)
-            self:SetAttribute("modname", "PPADR")
-            local binding = self:GetAttribute("PPADRBINDING")
-            if binding ~= nil and binding ~= "" then
-               local action = self:GetAttribute("PPADRACTION")
-               self:SetAttribute("ACTIVE", action)
-               self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-            end
-         else
-            self:ClearBindings()
-            self:SetAttribute("macrotext1", "")
-            local trigstate = self:GetAttribute("trigstate")
-            if trigstate == 4 then
-               self:SetAttribute("modstate", 0)
-               self:SetAttribute("modname", "")
-               local binding = self:GetAttribute("BINDING")
-               if binding ~= nil and binding ~= "" then
-                  local action = self:GetAttribute("ACTION")
-                  self:SetAttribute("ACTIVE", action) 
-                  self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-               end
-            else
-               self:SetAttribute("modstate", 1)
-               self:SetAttribute("modname", "")
-               local binding = self:GetAttribute("TRIGBINDING")
-               if binding ~= nil and binding ~= "" then
-                  local action = self:GetAttribute("TRIGACTION")
-                  self:SetAttribute("ACTIVE", action) 
-                  self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
-               end
-            end
-         end
+      local binding = self:GetAttribute(modname .. "BINDING")
+      if binding ~= nil and binding ~= "" then
+         local action = self:GetAttribute(modname .. "ACTION")
+         self:SetAttribute("ACTIVE", action) 
+         self:SetBindingClick(true, binding, self:GetName(), "LeftButton")
       end
    ]])
    SecureHandlerWrapScript(self[Name.."Button"], "OnClick", self[Name.."Button"], [[
@@ -706,17 +597,21 @@ function GamePadButtonsMixin:AddTriggerHandler()
    self:SetAttribute("triggerstate", 4)
    self:SetAttribute("_onstate-trigger", [[
       self:SetAttribute("triggerstate", newstate)
+
+      self:RunAttribute("UpdateModifierName", newstate, "TRIG", "TRIG")
+      local modname = self:GetAttribute("modname")
+
       local nbuttons = self:GetAttribute("NumModifierButtons")
       for i = 1,nbuttons do
          local button = self:GetFrameRef('ModifierButton'..i)
          if button ~= nil then
-            button:SetAttribute("state-trigger", newstate)
+            button:RunAttribute("SetActionBindings", modname)
          end
       end
       
       local GroupNavigator = self:GetFrameRef('GroupNavigator')
       if GroupNavigator ~= nil then
-         GroupNavigator:SetAttribute("state-trigger", newstate)
+         GroupNavigator:RunAttribute("SetActionBindings", modname)
       end
       
       local Crosshotbar = self:GetFrameRef('Crosshotbar')
@@ -730,17 +625,21 @@ function GamePadButtonsMixin:AddShoulderHandler()
    self:SetAttribute("shoulderstate", 4)
    self:SetAttribute("_onstate-shoulder", [[
       self:SetAttribute("shoulderstate", newstate)
+
+      self:RunAttribute("UpdateModifierName", newstate, "SPADL", "SPADR")
+      local modname = self:GetAttribute("modname")
+
       local nbuttons = self:GetAttribute("NumModifierButtons")
       for i = 1,nbuttons do
          local button = self:GetFrameRef('ModifierButton'..i)
          if button ~= nil then
-            button:SetAttribute("state-shoulder", newstate)
+            button:RunAttribute("SetActionBindings", modname)
          end
       end
 
       local GroupNavigator = self:GetFrameRef('GroupNavigator')
       if GroupNavigator ~= nil then
-         GroupNavigator:SetAttribute("state-shoulder", newstate)
+         GroupNavigator:RunAttribute("SetActionBindings", modname)
       end
       
       local Crosshotbar = self:GetFrameRef('Crosshotbar')
@@ -754,17 +653,21 @@ function GamePadButtonsMixin:AddPaddleHandler()
    self:SetAttribute("paddlestate", 4)
    self:SetAttribute("_onstate-paddle", [[
       self:SetAttribute("paddlestate", newstate)
+
+      self:RunAttribute("UpdateModifierName", newstate, "PPADL", "PPADR")
+      local modname = self:GetAttribute("modname")
+
       local nbuttons = self:GetAttribute("NumModifierButtons")
       for i = 1,nbuttons do
          local button = self:GetFrameRef('ModifierButton'..i)
          if button ~= nil then
-            button:SetAttribute("state-paddle", newstate)
+            button:RunAttribute("SetActionBindings", modname)
          end
       end
       
       local GroupNavigator = self:GetFrameRef('GroupNavigator')
       if GroupNavigator ~= nil then
-         GroupNavigator:SetAttribute("state-paddle", newstate)
+         GroupNavigator:RunAttribute("SetActionBindings", modname)
       end
       
       local Crosshotbar = self:GetFrameRef('Crosshotbar')
@@ -786,9 +689,8 @@ function GamePadButtonsMixin:AddExpandedHandler()
 end
 
 function GamePadButtonsMixin:OnLoad()
-   self:SetAttribute("GetActionBindings", GetActionBindings)
-   self:SetAttribute("SetActionBindings", SetActionBindings)
-   self:SetAttribute("SetButtonModified", SetButtonModified)
+   self:SetAttribute("modname", "")
+   self:SetAttribute("UpdateModifierName", UpdateModifierName)
 
    self:AddTriggerHandler()
    self:AddShoulderHandler()
@@ -812,11 +714,12 @@ function GamePadButtonsMixin:OnLoad()
    self:RegisterEvent("PLAYER_ENTERING_WORLD")
    self:RegisterEvent("CURSOR_CHANGED")
    self:RegisterEvent("CURRENT_SPELL_CAST_CHANGED")
+   
+   addon:AddApplyCallback(GenerateClosure(self.ApplyConfig, self))
 end
 
 function GamePadButtonsMixin:OnEvent(event, ...)
    if event == 'PLAYER_ENTERING_WORLD' then
-      self:ApplyConfig()
    elseif event == 'CURSOR_CHANGED' then 
       if SpellIsTargeting() and self.SpellTargetingStarted then
          if self.MouseLookEnabled then
@@ -844,6 +747,9 @@ function GamePadButtonsMixin:OnEvent(event, ...)
             end
             SetCVar('GamePadCursorLeftClick', self.SpellTargetConfirmButton)
             SetCVar('GamePadCursorRightClick', self.SpellTargetCancelButton)
+            if GetCVar('GamePadCursorForTargeting') == "1" then
+               SetGamePadCursorControl(true)
+            end
          end
       elseif self.SpellTargetingStarted then
          if self.GamePadLookEnabled and not self.GamePadMouseMode then
