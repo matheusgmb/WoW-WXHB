@@ -270,6 +270,8 @@ function HotbarMixin:AddActionBar()
                local index = button:GetID();
                if string.find(button:GetName(), "Button") then -- self.BtnPrefix
                   self.Buttons[index] = button
+                  hooksecurefunc(self.Buttons[index], "SetAlpha", GenerateClosure(self.SetAlphaHook, self))
+                  hooksecurefunc(self.Buttons[index].icon, "SetDesaturated", GenerateClosure(self.HookDesatHook, self))
                end
             end
          end
@@ -407,6 +409,7 @@ function HotbarMixin:AddExpandHandler()
 
       self:SetAttribute("expanded", enable)
       self:SetAttribute("expanded-state", newstate)
+      self:CallMethod("UpdateExpanded", newstate)
    ]])
 end
 
@@ -557,7 +560,33 @@ function HotbarMixin:UpdateVisibility()
    self:UpdateHotbar();
 end
 
-function HotbarMixin:UpdateHotkeys()
+function HotbarMixin:UpdateExpanded(newstate)
+   self.BtnLock = false
+   if ((newstate == 1 and self.Type == "LHotbar") or
+         (newstate == 2 and self.Type == "RHotbar")) then
+      for i, button in ipairs(self.Buttons) do
+         if  button:GetID() >= 9 then 
+            button:SetAlpha(self.ExpandedAlpha1)
+         else
+            button:SetAlpha(self.ExpandedAlpha2)
+            button.icon:SetDesaturated(self.DesatExpanded);
+         end
+      end
+   else
+      for i, button in ipairs(self.Buttons) do
+         if  button:GetID() >= 9 then 
+            button:SetAlpha(self.ExpandedAlpha1)
+         else
+         button:SetAlpha(1.0)
+         button.icon:SetDesaturated(false);
+         end
+      end
+   end
+   self.BtnLock = true
+end
+
+function HotbarMixin:UpdateHotkeys()   
+   self.BtnLock = false
    local currentstate = self:GetAttribute("currentstate")
    local activestate = self:GetAttribute("activestate")
    local expanded = self:GetAttribute("expanded")
@@ -568,7 +597,6 @@ function HotbarMixin:UpdateHotkeys()
    highlights[2] = false
    highlights[3] = false
    for i, button in ipairs(self.Buttons) do
-      self.BtnLock = false
       if currentstate ~= 0 and
          currentstate == activestate then
          local nbindings = button:GetAttribute('numbindings')
@@ -603,7 +631,6 @@ function HotbarMixin:UpdateHotkeys()
             button.icon:SetDesaturated(false);
          end
       end
-      self.BtnLock = true
       button.HotKey:Show();
    end
    for i,highlight in ipairs(self.Highlights) do
@@ -613,10 +640,11 @@ function HotbarMixin:UpdateHotkeys()
          highlight:SetAlpha(0.0)
       end
    end
+   self.BtnLock = true
 end
 
 function HotbarMixin:OnEvent(event, ...)
-   if ( event == "PLAYER_ENTERING_WORLD" ) then
+   if event == "PLAYER_ENTERING_WORLD" then
       self:UpdateHotbar();
    end
 end

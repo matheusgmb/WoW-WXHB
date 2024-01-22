@@ -392,6 +392,7 @@ function GamePadButtonsMixin:SetGamePadMouse(enable)
             SetCVar('GamePadCursorRightClick', self.GamePadRightClick);
             self.GamePadMouseMode = true
             SetGamePadCursorControl(true)
+            self.MouseModeFrame:Show()
          else
             SetCVar('GamePadCursorAutoEnable', self.GamePadAutoEnable)
             SetCVar('GamePadCursorAutoDisableSticks', self.GamePadAutoDisableSticks)
@@ -400,6 +401,7 @@ function GamePadButtonsMixin:SetGamePadMouse(enable)
             SetCVar('GamePadCursorRightClick', 'NONE');      
             self.GamePadMouseMode = false
             SetGamePadCursorControl(false)
+            self.MouseModeFrame:Hide()
          end
       end
       self:GPPlaySound(100)
@@ -768,6 +770,16 @@ function GamePadButtonsMixin:OnEvent(event, ...)
       SecureHandlerSetFrameRef(self, 'GamePadButtons', addon.GamePadButtons)
       SecureHandlerSetFrameRef(self, 'GroupNavigator', addon.GroupNavigator)
       
+      self.MouseModeFrame = CreateFrame("Frame")
+      self.MouseModeFrame:SetPoint("CENTER", Crosshotbar, "TOP", 0 , 4)
+      self.MouseModeFrame.tex = self.MouseModeFrame:CreateTexture()
+      self.MouseModeFrame.tex:SetPoint("CENTER")
+      self.MouseModeFrame.tex:SetAtlas("ClickCast-Icon-Mouse", true)
+      self.MouseModeFrame.tex:SetSize(32, 32)
+      self.MouseModeFrame:SetSize(32, 32)
+      self.MouseModeFrame:Hide()
+      SecureHandlerSetFrameRef(self, "MouseModeFrame", self.MouseModeFrame)
+   
       local mouselookstate = false
       local gamepadlookstate = false
       local mousehandlerstart = function(self)
