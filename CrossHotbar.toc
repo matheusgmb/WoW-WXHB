@@ -4,7 +4,7 @@
 ## Version: 1.0
 ## Notes: Implements a WXHB Crosshotbar as an actionbar.
 ## Author: ChainStratagem (phodoe) - https://github.com/ChainStratagem/CrossHotbar
-## SavedVariables:
+## SavedVariables: CrossHotbar_DB
 
 #@no-lib-strip@
 Libs\LibStub\LibStub.lua

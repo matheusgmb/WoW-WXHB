@@ -35,9 +35,7 @@ addon.GamePadModifierList = {
    "PPADR"
 }
 
-CrossHotbar_DB = {
-   Version = "v1.0.0",
-   ActivePreset = 4,
+addon.Defaults_DB = {
    Presets = {
       [1] = {
          Mutable = false,
@@ -286,67 +284,15 @@ CrossHotbar_DB = {
    }
 }
 
-addon.Config = {
-   Mutable = true,
-   Name = "Custom",
-   Description="Custom: Preset for PS4/5 Controllers with customized actions",
-   Hotbar = {
-      HBARType = "LIBA",
-      WXHBType = "HIDE",
-      DDAAType = "DDAA",
-      LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
-      RPagePrefix = "",
-      LRPagePrefix = "",
-      RLPagePrefix = "",
-      LPageIndex = 2,
-      RPageIndex = 1,
-      LRPageIndex = 6,
-      RLPageIndex = 5
-   },
-   GamePad = {
-      CVSetup = true,
-      MouseLook = false,
-      GamePadLook = true,
-      GPAutoCursor = 0,
-      GPAutoSticks = 0,
-      GPAutoJump = 0,
-      GPTargetCursor = 1,
-      GPCenterCursor = 0,
-      GPCenterEmu = 0,
-      GPDeviceID = 1,
-      GPYawSpeed = 3,
-      GPPitchSpeed = 3,
-      GPShift = "NONE",
-      GPCtrl = "NONE",
-      GPAlt = "NONE",
-      GPLeftClick = "PADLTRIGGER",
-      GPRightClick = "PADRTRIGGER",
-      GPOverlapMouse = 2000
-   },
-   PadActions = {
-      FACER = {BIND="PAD2",         ACTION="CLEARTARGETING",   TRIGACTION="HOTBARBTN1",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGEONE",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVRIGHT",        PPADLTRIGACTION="HOTBARBTN5",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      FACEU = {BIND="PAD4",         ACTION="JUMP",             TRIGACTION="HOTBARBTN2",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGETWO",      SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVUP",           PPADLTRIGACTION="HOTBARBTN6",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      FACED = {BIND="PAD1",         ACTION="INTERACTTARGET",   TRIGACTION="HOTBARBTN3",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGETHREE",    SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVDOWN",         PPADLTRIGACTION="HOTBARBTN7",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      FACEL = {BIND="PAD3" ,        ACTION="TOGGLEWORLDMAP",   TRIGACTION="HOTBARBTN4",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PAGEFOUR",     SPADRTRIGACTION="NONE",     PPADLACTION="UNITNAVLEFT",         PPADLTRIGACTION="HOTBARBTN8",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      DPADR = {BIND="PADDRIGHT",    ACTION="UNITNAVRIGHT",     TRIGACTION="HOTBARBTN5",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NEXTPAGE",     SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="HOTBARBTN9",      PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      DPADU = {BIND="PADDUP",       ACTION="UNITNAVUP",        TRIGACTION="HOTBARBTN6",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="ZOOMIN",       SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="HOTBARBTN10",     PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      DPADD = {BIND="PADDDOWN",     ACTION="UNITNAVDOWN",      TRIGACTION="HOTBARBTN7",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="ZOOMOUT",      SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="HOTBARBTN11",     PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      DPADL = {BIND="PADDLEFT",     ACTION="UNITNAVLEFT",      TRIGACTION="HOTBARBTN8",          SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="PREVPAGE",     SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="HOTBARBTN12",     PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      STCKL = {BIND="PADLSTICK",    ACTION="MACRO CH_MACRO_1", TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      STCKR = {BIND="PADRSTICK",    ACTION="TOGGLESHEATH",     TRIGACTION="EXTRAACTIONBUTTON1",  SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      SPADL = {BIND="PADLSHOULDER", ACTION="LEFTSHOULDER",     TRIGACTION="TARGETPREVIOUSENEMY", SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="TARGETLASTHOSTILE",   PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      SPADR = {BIND="PADRSHOULDER", ACTION="RIGHTSHOULDER",    TRIGACTION="TARGETNEARESTENEMY",  SPADLACTION="TOGGLESHEATH",  SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="ASSISTTARGET",        PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      TRIGL = {BIND="PADLTRIGGER",  ACTION="LEFTHOTBAR",       TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      TRIGR = {BIND="PADRTRIGGER",  ACTION="RIGHTHOTBAR",      TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      PPADL = {BIND="PADPADDLE2",   ACTION="LEFTPADDLE",       TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      PPADR = {BIND="PADPADDLE1",   ACTION="RIGHTPADDLE",      TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      TPADL = {BIND="PADBACK",      ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      TPADR = {BIND="PAD6",         ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      SOCIA = {BIND="PADSOCIAL",    ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      OPTIO = {BIND="PADFORWARD",   ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-      SYSTM = {BIND="PADSYSTEM",    ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"}
-   }
+CrossHotbar_DB = {
+   Version = "v1.0.0",
+   ActivePreset = 1,
+   Presets = {}
 }
+
+addon.Config = CopyTable(addon.Defaults_DB.Presets[1])
+addon.Config.Mutable = true
+addon.Config.Name = ""
 
 function addon.Config:ConfigListAdd(listname, valuetable, initvalue)
    if addon[listname] == nil then
@@ -368,6 +314,8 @@ function addon.Config:StorePreset(to, from)
    if to.Mutable then
       if from.Mutable then
          to.Name = from.Name
+      else
+         to.Name = ""
       end
       to.Description = from.Description
       to.Hotbar = {}
@@ -415,9 +363,19 @@ function addon:ApplyConfig(updated)
 end
 
 function addon:InitConfig()
-   local config = addon.Config
    local preset = CrossHotbar_DB.ActivePreset;
-   config:StorePreset(config, CrossHotbar_DB.Presets[preset])
+   local hassaves = false
+   for k,preset in pairs(CrossHotbar_DB.Presets) do
+      if preset.Mutable then
+         hassaves = true
+      end
+   end
+   for k,default in pairs(addon.Defaults_DB.Presets) do
+      if not default.Mutable or not hassaves then
+         CrossHotbar_DB.Presets[k] = CopyTable(default)
+      end
+   end
+   addon.Config:StorePreset(addon.Config, CrossHotbar_DB.Presets[preset])
    for i,callback in ipairs(addon.InitializeCallbacks) do
       callback()
    end

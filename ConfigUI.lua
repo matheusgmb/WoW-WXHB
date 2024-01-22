@@ -784,25 +784,27 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetsavebutton:SetText("Save")
    
    presetsavebutton:SetScript("OnClick", function(self, button, down)
-      local foundpreset = 0
-      for i,p in ipairs(CrossHotbar_DB.Presets) do
-         if p.Name == presetfileeditbox:GetText() then
-            foundpreset = i
+      if presetfileeditbox:GetText() ~= "" then
+         local foundpreset = 0
+         for i,p in ipairs(CrossHotbar_DB.Presets) do
+            if p.Name == presetfileeditbox:GetText() then
+               foundpreset = i
+            end
          end
-      end
-      if foundpreset == 0 then
-         config.Name = presetfileeditbox:GetText()
-         local newpreset = {
-            Mutable = true
-         }
-         config:StorePreset(newpreset, config)
-         table.insert(CrossHotbar_DB.Presets, newpreset)
-         ConfigUI.preset = #CrossHotbar_DB.Presets
-         CrossHotbar_DB.ActivePreset = ConfigUI.preset
-      elseif CrossHotbar_DB.Presets[foundpreset].Mutable then
-         ConfigUI.preset = foundpreset
-         CrossHotbar_DB.ActivePreset = ConfigUI.preset
-         config:StorePreset(CrossHotbar_DB.Presets[ConfigUI.preset], config)
+         if foundpreset == 0 then
+            config.Name = presetfileeditbox:GetText()
+            local newpreset = {
+               Mutable = true
+            }
+            config:StorePreset(newpreset, config)
+            table.insert(CrossHotbar_DB.Presets, newpreset)
+            ConfigUI.preset = #CrossHotbar_DB.Presets
+            CrossHotbar_DB.ActivePreset = ConfigUI.preset
+         elseif CrossHotbar_DB.Presets[foundpreset].Mutable then
+            ConfigUI.preset = foundpreset
+            CrossHotbar_DB.ActivePreset = ConfigUI.preset
+            config:StorePreset(CrossHotbar_DB.Presets[ConfigUI.preset], config)
+         end
       end
       ConfigUI:Refresh(true)
    end)
