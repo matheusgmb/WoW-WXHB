@@ -176,10 +176,18 @@ local ModifierActions = {
         end
       end
    ]],
+   ["CAMERALOOKTOGGLE"] = [[local down = ...
+      if down then
+         local GamePadButtons = self:GetFrameRef('GamePadButtons')
+         if GamePadButtons then
+            GamePadButtons:CallMethod("ToggleCameraLook")
+         end
+      end
+   ]],
    ["CAMERALOOKHOLD"] = [[local down = ...
       local GamePadButtons = self:GetFrameRef('GamePadButtons')
       if GamePadButtons then
-         GamePadButtons:CallMethod("ToggleCameraLookHold", down)
+         GamePadButtons:CallMethod("HoldCameraLook", down)
       end
    ]],
    ["NEXTPAGE"] = [[local down = ...
@@ -300,6 +308,22 @@ end
 
 function GamePadButtonsMixin:SetGamePadCursorControl(enable)
    self.GamePadCursorEnabled = enable
+   if enable then
+      if self.GamePadMouseMode then
+         self.MouseStatusFrame.pointtex:Hide()
+         self.MouseStatusFrame.mousetex:Show()
+      else
+         self.MouseStatusFrame.pointtex:Show()
+         self.MouseStatusFrame.mousetex:Hide()
+      end
+      self.MouseStatusFrame:Show()
+   else
+      if not self.GamePadMouseMode then
+         self.MouseStatusFrame.pointtex:Hide()
+         self.MouseStatusFrame.mousetex:Hide()
+         self.MouseStatusFrame:Hide()
+      end
+   end
 end
 
 function GamePadButtonsMixin:GPPlaySound(soundid)
@@ -326,7 +350,11 @@ function GamePadButtonsMixin:ZoomOut(down)
    end
 end
 
-function GamePadButtonsMixin:ToggleCameraLookHold(isheld)
+function GamePadButtonsMixin:ToggleCameraLook()
+   self:HoldCameraLook(not self.GamePadLookHold)
+end
+
+function GamePadButtonsMixin:HoldCameraLook(isheld)
    if self.MouseLookEnabled then
       if IsMouselooking() then
          MouselookStop()
@@ -392,7 +420,6 @@ function GamePadButtonsMixin:SetGamePadMouse(enable)
             SetCVar('GamePadCursorRightClick', self.GamePadRightClick);
             self.GamePadMouseMode = true
             SetGamePadCursorControl(true)
-            self.MouseModeFrame:Show()
          else
             SetCVar('GamePadCursorAutoEnable', self.GamePadAutoEnable)
             SetCVar('GamePadCursorAutoDisableSticks', self.GamePadAutoDisableSticks)
@@ -401,7 +428,6 @@ function GamePadButtonsMixin:SetGamePadMouse(enable)
             SetCVar('GamePadCursorRightClick', 'NONE');      
             self.GamePadMouseMode = false
             SetGamePadCursorControl(false)
-            self.MouseModeFrame:Hide()
          end
       end
       self:GPPlaySound(100)
@@ -743,6 +769,12 @@ function GamePadButtonsMixin:OnEvent(event, ...)
          end        
          self.SpellTargetingStarted = true
          if self.GamePadLookEnabled and not self.GamePadMouseMode then
+            if config.GamePad.GPCenterCursor == 0 then
+               SetCVar('GamePadCursorCentering', true)
+            end
+            if config.GamePad.GPCenterEmu == 0 then
+               SetCVar('GamePadCursorCenteredEmulation', true)
+            end
             if not self.GamePadLookHold then
                self.GamePadLeftClickCache = GetCVar('GamePadCursorLeftClick')
                self.GamePadRightClickCache = GetCVar('GamePadCursorRightClick')
@@ -762,6 +794,12 @@ function GamePadButtonsMixin:OnEvent(event, ...)
                   SetGamePadCursorControl(false)
                end
             end
+            if config.GamePad.GPCenterCursor == 0 then
+               SetCVar('GamePadCursorCentering', false)
+            end
+            if config.GamePad.GPCenterEmu == 0 then
+               SetCVar('GamePadCursorCenteredEmulation', false)
+            end
          end
          self.SpellTargetingStarted = false
       end
@@ -770,15 +808,28 @@ function GamePadButtonsMixin:OnEvent(event, ...)
       SecureHandlerSetFrameRef(self, 'GamePadButtons', addon.GamePadButtons)
       SecureHandlerSetFrameRef(self, 'GroupNavigator', addon.GroupNavigator)
       
-      self.MouseModeFrame = CreateFrame("Frame")
-      self.MouseModeFrame:SetPoint("CENTER", Crosshotbar, "TOP", 0 , 4)
-      self.MouseModeFrame.tex = self.MouseModeFrame:CreateTexture()
-      self.MouseModeFrame.tex:SetPoint("CENTER")
-      self.MouseModeFrame.tex:SetAtlas("ClickCast-Icon-Mouse", true)
-      self.MouseModeFrame.tex:SetSize(32, 32)
-      self.MouseModeFrame:SetSize(32, 32)
-      self.MouseModeFrame:Hide()
-      SecureHandlerSetFrameRef(self, "MouseModeFrame", self.MouseModeFrame)
+      self.MouseStatusFrame = CreateFrame("Frame")
+      self.MouseStatusFrame:SetPoint("CENTER", Crosshotbar, "TOP", 0 , 4)
+      self.MouseStatusFrame.backgtex = self.MouseStatusFrame:CreateTexture(nil,"BACKGROUND")
+      self.MouseStatusFrame.backgtex:SetAtlas("CircleMaskScalable", true)
+      self.MouseStatusFrame.backgtex:SetVertexColor(0,0,0,1)
+      self.MouseStatusFrame.backgtex:SetPoint("CENTER")
+      self.MouseStatusFrame.backgtex:SetSize(32, 32)
+      self.MouseStatusFrame.backgtex:Show()
+      self.MouseStatusFrame.mousetex = self.MouseStatusFrame:CreateTexture()
+      self.MouseStatusFrame.mousetex:SetAtlas("ClickCast-Icon-Mouse", true)
+      self.MouseStatusFrame.mousetex:SetPoint("CENTER")
+      self.MouseStatusFrame.mousetex:SetSize(32, 32)
+      self.MouseStatusFrame.mousetex:Hide()
+      self.MouseStatusFrame.pointtex = self.MouseStatusFrame:CreateTexture()
+      self.MouseStatusFrame.pointtex:SetAtlas("Cursor_cast_32", true)
+      self.MouseStatusFrame.pointtex:SetPoint("CENTER", 2, -2)
+      self.MouseStatusFrame.pointtex:SetSize(24, 24)
+      self.MouseStatusFrame.pointtex:SetAlpha(0.9)
+      self.MouseStatusFrame.pointtex:Hide()
+      self.MouseStatusFrame:SetSize(32, 32)
+      self.MouseStatusFrame:Hide()
+      SecureHandlerSetFrameRef(self, "MouseStatusFrame", self.MouseStatusFrame)
    
       local mouselookstate = false
       local gamepadlookstate = false
@@ -810,8 +861,8 @@ function GamePadButtonsMixin:OnEvent(event, ...)
       end
 
       local cinemarichandler = function(self, button)
-         CinematicFrameCloseDialogResumeButton:SetText(('%s %s'):format(GetBindingText('PAD2', '_ABBR'), NO))
-         CinematicFrameCloseDialogConfirmButton:SetText(('%s %s'):format(GetBindingText('PAD1', '_ABBR'), YES))
+         CinematicFrameCloseDialogResumeButton:SetText(('%s %s'):format(GetBindingText('PAD2', 'KEY_ABBR'), NO))
+         CinematicFrameCloseDialogConfirmButton:SetText(('%s %s'):format(GetBindingText('PAD1', 'KEY_ABBR'), YES))
          if self.closeDialog then
             if self.closeDialog:IsShown() then
                if button == config.PadActions.FACER.BIND then CinematicFrameCloseDialogResumeButton:Click() end
@@ -876,7 +927,8 @@ function GamePadButtonsMixin:SetupGamePad()
          SetCVar("cameraPitchMoveSpeed", 20)
          SetCVar("enableMouseSpeed", 0)
       end
-      
+
+      SetCVar('GamePadEnable', CrossHotbar_DB.GPEnable)
       SetCVar('GamePadEmulateShift', config.GamePad.GPShift)
       SetCVar('GamePadEmulateCtrl', config.GamePad.GPCtrl)
       SetCVar('GamePadEmulateAlt', config.GamePad.GPAlt)

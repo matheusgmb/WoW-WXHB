@@ -28,6 +28,30 @@ addon.GamePadButtonList = {
    "SYSTM"
 }
 
+addon.GamePadButtonHotKeys = {
+   FACER = {'PAD2', '', ''},
+   FACEU = {'PAD4', '', ''},
+   FACED = {'PAD1', '', ''},
+   FACEL = {'PAD3', '', ''},
+   DPADR = {'PADDRIGHT', '', ''},
+   DPADU = {'PADDUP', '', ''},
+   DPADD = {'PADDDOWN', '', ''},
+   DPADL = {'PADDLEFT', '', ''},
+   STCKL = {'PADLSTICK', '', ''},
+   STCKR = {'PADRSTICK', '', ''},
+   SPADL = {'PADLSHOULDER', '', ''},
+   SPADR = {'PADRSHOULDER', '', ''},
+   TRIGL = {'PADLTRIGGER', '', ''},
+   TRIGR = {'PADRTRIGGER', '', ''},
+   PPADL = {'PADPADDLE2', '', ''},
+   PPADR = {'PADPADDLE1', '', ''},
+   TPADL = {'PADBACK', '', ''},
+   TPADR = {'PAD6', '', ''},
+   SOCIA = {'PADSOCIAL', '', ''},
+   OPTIO = {'PADFORWARD', '', ''},
+   SYSTM = {'PADSYSTEM', '', ''}
+}
+
 addon.GamePadModifierList = {
    "SPADL",
    "SPADR",
@@ -36,15 +60,17 @@ addon.GamePadModifierList = {
 }
 
 addon.Defaults_DB = {
+   HBARType = "LIBA",
+   GPEnable = true,
    Presets = {
       [1] = {
          Mutable = false,
          Name = "Gamepad_Preset",
          Description="Preset for PS4/5 Controllers which mirrors FFXIV controller settings. The default dpad is set to party and raid unit naviation for both up and down and left and right. Zoom actions are moved from L1 RSTICK to L1 DPad up and DPad down. Paging is available with R1 and Face buttons with next and previous page in DPad up and down.",
          Hotbar = {
-            HBARType = "LIBA",
             WXHBType = "HIDE",
             DDAAType = "DADA",
+            HKEYType = "_SHP",
             LPagePrefix = "",
             RPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
             LRPagePrefix = "",
@@ -63,7 +89,7 @@ addon.Defaults_DB = {
             GPAutoJump = 0,
             GPTargetCursor = 1,
             GPCenterCursor = 0,
-            GPCenterEmu = 0,
+            GPCenterEmu = 1,
             GPDeviceID = 1,
             GPYawSpeed = 3,
             GPPitchSpeed = 3,
@@ -94,7 +120,7 @@ addon.Defaults_DB = {
             TPADL = {BIND="PADBACK",      ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
             TPADR = {BIND="PAD6",         ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
             SOCIA = {BIND="PADSOCIAL",    ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
-            OPTIO = {BIND="PADFORWARD",   ACTION="TOGGLEGAMEMENU",   TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
+            OPTIO = {BIND="PADFORWARD",   ACTION="TOGGLEGAMEMENU",   TRIGACTION="CAMERALOOKTOGGLE",    SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"},
             SYSTM = {BIND="PADSYSTEM",    ACTION="NONE",             TRIGACTION="NONE",                SPADLACTION="NONE",          SPADLTRIGACTION="NONE",     SPADRACTION="NONE",         SPADRTRIGACTION="NONE",     PPADLACTION="NONE",                PPADLTRIGACTION="NONE",            PPADRACTION="NONE",      PPADRTRIGACTION="NONE"}
          }
       },
@@ -103,9 +129,9 @@ addon.Defaults_DB = {
          Name = "Keyboard_Preset",
          Description="Preset for keyboard binding swhich mirrors FFXIV controller settings. The default dpad is set to party and raid unit naviation for both up and down and left and right. Zoom actions are moved from L1 RSTICK to L1 DPad up and DPad down. Paging is available with R1 and Face buttons with next and previous page in DPad up and down.",
          Hotbar = {
-            HBARType = "LIBA",
             WXHBType = "HIDE",
             DDAAType = "DADA",
+            HKEYType = "_LTR",
             LPagePrefix = "",
             RPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
             LRPagePrefix = "",
@@ -124,7 +150,7 @@ addon.Defaults_DB = {
             GPAutoJump = 0,
             GPTargetCursor = 1,
             GPCenterCursor = 0,
-            GPCenterEmu = 0,
+            GPCenterEmu = 1,
             GPDeviceID = 1,
             GPYawSpeed = 3,
             GPPitchSpeed = 3,
@@ -164,9 +190,9 @@ addon.Defaults_DB = {
          Name = "Steam_Controller",
          Description="Preset for Steam Controller with Face buttons on the touch pad and dpad mapped to controller face buttons. DPad swap with left back paddle. Quick party select with R1 and Face buttons. Hold mouse with right back paddle for mouse over actions. Requires correct steam config.",
          Hotbar = {
-            HBARType = "LIBA",
             WXHBType = "SHOW",
             DDAAType = "DDAA",
+            HKEYType = "_LTR",
             LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
             RPagePrefix = "",
             LRPagePrefix = "",
@@ -185,7 +211,7 @@ addon.Defaults_DB = {
             GPAutoJump = 0,
             GPTargetCursor = 1,
             GPCenterCursor = 0,
-            GPCenterEmu = 0,
+            GPCenterEmu = 1,
             GPDeviceID = 1,
             GPYawSpeed = 3,
             GPPitchSpeed = 3,
@@ -225,9 +251,9 @@ addon.Defaults_DB = {
          Name = "Dualshock 5 Edge",
          Description="Preset for DS5 Edge with back paddles. DPad swap with left back paddle. Quick party select with R1 and Face buttons. Hold mouse with right back paddle for mouse over actions.",
          Hotbar = {
-            HBARType = "LIBA",
             WXHBType = "SHOW",
             DDAAType = "DDAA",
+            HKEYType = "_SHP",
             LPagePrefix = "[overridebar][possessbar][shapeshift][bonusbar:5]possess;[bonusbar:3]9;[bonusbar:1,stealth:1]8;[bonusbar:1]7;[bonusbar:4]10;",
             RPagePrefix = "",
             LRPagePrefix = "",
@@ -245,7 +271,7 @@ addon.Defaults_DB = {
             GPAutoSticks = 0,
             GPAutoJump = 0,
             GPTargetCursor = 0,
-            GPCenterCursor = 1,
+            GPCenterCursor = 0,
             GPCenterEmu = 1,
             GPDeviceID = 1,
             GPYawSpeed = 3,
@@ -287,12 +313,17 @@ addon.Defaults_DB = {
 CrossHotbar_DB = {
    Version = "v1.0.0",
    ActivePreset = 1,
+   HBARType = "LIBA",
+   GPEnable = true,
    Presets = {}
 }
 
 addon.Config = CopyTable(addon.Defaults_DB.Presets[1])
 addon.Config.Mutable = true
 addon.Config.Name = ""
+
+function addon.Config:SetHotKeyText()
+end
 
 function addon.Config:ConfigListAdd(listname, valuetable, initvalue)
    if addon[listname] == nil then
@@ -348,9 +379,30 @@ function addon:AddInitCallback(initfunc)
    table.insert(self.InitializeCallbacks, initfunc)
 end
 
+function addon:GetButtonIcon(button)
+   return addon.GamePadButtonHotKeys[button][2]
+end
+
+function addon:GetButtonHotKey(button)
+   return addon.GamePadButtonHotKeys[button][3]
+end
+
 function addon:ApplyConfig(updated)
    if updated then
       addon.ConfigUpdated = true
+   end
+   for key,button in pairs(addon.GamePadButtonHotKeys) do
+      local text = button[1] .. addon.Config.Hotbar.HKEYType
+      button[2] = GetBindingText(text)
+      if button[2] == text then
+         button[2] = GetBindingText(button[1])
+      end
+      button[3] = GetBindingText(text, 'KEY_ABBR_')
+      if button[3] == text then
+         button[3] = GetBindingText(button[1], 'KEY_ABBR_')
+      end
+      addon.GamePadButtonHotKeys[key][2] = button[2]
+      addon.GamePadButtonHotKeys[key][3] = button[3]
    end
    if addon.ConfigUpdated then
       if not InCombatLockdown() then 
@@ -370,15 +422,28 @@ function addon:InitConfig()
          hassaves = true
       end
    end
+   
+   for k,default in pairs(addon.Defaults_DB) do
+      if CrossHotbar_DB[k] == nil then
+         if type(default) == "table" then
+            CrossHotbar_DB[k] = CopyTable(default)
+         else
+            CrossHotbar_DB[k] = default
+         end
+      end
+   end
+   
    for k,default in pairs(addon.Defaults_DB.Presets) do
       if not default.Mutable or not hassaves then
          CrossHotbar_DB.Presets[k] = CopyTable(default)
       end
    end
+
    addon.Config:StorePreset(addon.Config, CrossHotbar_DB.Presets[preset])
    for i,callback in ipairs(addon.InitializeCallbacks) do
       callback()
    end
+   
    EventRegistry:UnregisterFrameEventAndCallback("ADDON_LOADED", addon)
 end
 

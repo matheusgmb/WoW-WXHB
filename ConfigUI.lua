@@ -54,31 +54,6 @@ local GamePadBindingList = {
 "`"
 }
 
-   
-local GamePadButtonShp = {
-   FACER="Shp_Circle",
-   FACEU="Shp_Triangle",
-   FACED="Shp_Cross",
-   FACEL="Shp_Square",
-   DPADR="Gen_Right",
-   DPADU="Gen_Up",
-   DPADD="Gen_Down",
-   DPADL="Gen_Left",
-   STCKL="Shp_LStickIn",
-   STCKR="Shp_RStickIn",
-   SPADL="Shp_LShoulder",
-   SPADR="Shp_RShoulder",
-   TRIGL="Shp_LTrigger",
-   TRIGR="Shp_RTrigger",
-   PPADL="Gen_Paddle1",
-   PPADR="Gen_Paddle2",
-   TPADL="Shp_TouchpadL",
-   TPADR="Shp_TouchpadR",
-   SOCIA="Shp_Share",
-   OPTIO="Shp_Menu",
-   SYSTM="Shp_System"
-}
-
 local GamePadActionMap = {
    FACER=addon.GamePadActions,
    FACEU=addon.GamePadActions,
@@ -176,6 +151,8 @@ local Locale = {
    spadrTabToolTip = "Actions and hotbar assignments when under the RIGHTSHOULDER modifier. An unassigned button will recieve the DEFAULT actions. Modifiers are exclusive and only modify the DEFAULT tab.",
    ppadlTabToolTip = "Actions and hotbar assignments when under the LEFTPADDLE modifier. An unassigned button will recieve the DEFAULT actions. Modifiers are exclusive and only modify the DEFAULT tab.",
    ppadrTabToolTip = "Actions and hotbar assignments when under the RIGHTPADDLE modifier. An unassigned button will recieve the DEFAULT actions. Modifiers are exclusive and only modify the DEFAULT tab.",
+   hotbarTypeToolTip = "Hotbars can be created with LibActionButton or reuse the existing Blizzard Actionbars. When using Blizzard Actiobars Edit Mode can change the hotbar positions. Interacting with the Crosshotbar will restore the positions if moved.",
+   hotkeyTypeToolTip = "Button icons used in the gui and hotkeys can be set to shapes or letters.",
    expandedTypeToolTip = "When either LEFTHOTBAR or RIGHTHOTBAR  are double clicked HOTBARBTN[9-12] are mapped to HOTBARBTN[1-4]. This setting controls the visual cue of their activation.",
    dadaTypeToolTip = "The Cross hotbar can have two layouts. One with each bar on a given side or another that interleaves the hotbars.",
    pageIndexToolTip = "The default page displayed by the hotbar.",
@@ -692,12 +669,12 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetsubtitle:SetJustifyV("TOP")
    presetsubtitle:SetText("Presets")
    
-   local PresetsFrame = LibDD:Create_UIDropDownMenu(nil, configFrame)
-   PresetsFrame:SetPoint("TOPLEFT", presetsubtitle, "BOTTOMLEFT", 0, 0)
+   local PresetsDropDown = LibDD:Create_UIDropDownMenu(nil, configFrame)
+   PresetsDropDown:SetPoint("TOPLEFT", presetsubtitle, "BOTTOMLEFT", 0, 0)
    
-   LibDD:UIDropDownMenu_SetWidth(PresetsFrame, DropDownWidth-self.DropDownSpacing)
-   LibDD:UIDropDownMenu_SetText(PresetsFrame, "Presets")
-   LibDD:UIDropDownMenu_JustifyText(PresetsFrame, "LEFT")
+   LibDD:UIDropDownMenu_SetWidth(PresetsDropDown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(PresetsDropDown, "Presets")
+   LibDD:UIDropDownMenu_JustifyText(PresetsDropDown, "LEFT")
    
    local function PresetDropDownDemo_OnClick(self, arg1, arg2, checked)
       if ConfigUI.preset ~= arg1 then
@@ -707,7 +684,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
       end
    end
    
-   LibDD:UIDropDownMenu_Initialize(PresetsFrame, function(self, level, menuList)     
+   LibDD:UIDropDownMenu_Initialize(PresetsDropDown, function(self, level, menuList)     
       local info = LibDD:UIDropDownMenu_CreateInfo()
       LibDD:UIDropDownMenu_SetText(self, "")
       if (level or 1) == 1 then
@@ -727,7 +704,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    end)
    
    local presetloadbutton = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
-   presetloadbutton:SetPoint("TOPLEFT", PresetsFrame, "TOPRIGHT", 0, 0)
+   presetloadbutton:SetPoint("TOPLEFT", PresetsDropDown, "TOPRIGHT", 0, 0)
    presetloadbutton:SetHeight(self.ButtonHeight)
    presetloadbutton:SetWidth(self.ButtonWidth)
    presetloadbutton:SetText("Load")
@@ -756,13 +733,14 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
       end
       config.Name = "Custom"
       config:StorePreset(config, CrossHotbar_DB.Presets[ConfigUI.preset])
-      ConfigUI:Refresh(true)
+      LibDD:UIDropDownMenu_SetText(PresetsDropDown, CrossHotbar_DB.Presets[ConfigUI.preset].Name)
+      --ConfigUI:Refresh(true)
    end)
 
    local filesubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    filesubtitle:SetHeight(self.TextHeight)
    filesubtitle:SetWidth(DropDownWidth)
-   filesubtitle:SetPoint("TOPLEFT", PresetsFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   filesubtitle:SetPoint("TOPLEFT", PresetsDropDown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    filesubtitle:SetNonSpaceWrap(true)
    filesubtitle:SetJustifyH("Middle")
    filesubtitle:SetJustifyV("TOP")
@@ -853,11 +831,11 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    table.insert(self.RefreshCallbacks, function()
                    presetdeletebutton:SetEnabled(CrossHotbar_DB.Presets[ConfigUI.preset].Mutable)
                    presetfileeditbox:SetText(config.Name)
-                   LibDD:UIDropDownMenu_SetText(PresetsFrame, CrossHotbar_DB.Presets[ConfigUI.preset].Name)
+                   LibDD:UIDropDownMenu_SetText(PresetsDropDown, CrossHotbar_DB.Presets[ConfigUI.preset].Name)
                    descriptfileeditbox:SetText(config.Description)
    end)
    
-   return PresetsFrame
+   return PresetsDropDown
 end
 
 --[[
@@ -915,7 +893,8 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
          buttonsubtitle:SetNonSpaceWrap(true)
          buttonsubtitle:SetJustifyH("MIDDLE")
          buttonsubtitle:SetJustifyV("TOP")
-         buttonsubtitle:SetText(("|A:Gamepad_%s_64:24:24|a"):format(GamePadButtonShp[button]))
+         buttonsubtitle:SetText(addon:GetButtonIcon(button))
+         buttonsubtitle:SetScript("OnShow", function(frame) buttonsubtitle:SetText(addon:GetButtonIcon(button)) end) 
          
          local bindingframe = LibDD:Create_UIDropDownMenu(nil, bindingframe)
          bindingframe:SetPoint("TOPLEFT", bindinganchor, "BOTTOMLEFT", 0, 0)
@@ -1064,10 +1043,16 @@ end
 
 function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
 
-   --[[
-      Expanded button settings
-   --]]    
+   local hbartypestr = {
+      ["LIBA"] = "Create HotBars using LibActionButton.",
+      ["BLIZ"] = "Use Blizzard ActionBars.",
+   }
 
+   local hkeytypestr = {
+      ["_SHP"] = "Use shapes for button icons.",
+      ["_LTR"] = "Use letters for button icons.",
+   }
+   
    local wxhbtypestr = {
       ["HIDE"] = "Hide extra actions when not active",
       ["FADE"] = "Fade extra actions when not active",
@@ -1089,11 +1074,107 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    featuresubtitle:SetJustifyH("Left")
    featuresubtitle:SetJustifyV("TOP")
    featuresubtitle:SetText("Features")
+
+   --[[
+      Hotbar button type
+   --]]
+   
+   local hbarsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   hbarsubtitle:SetHeight(self.TextHeight)
+   hbarsubtitle:SetWidth(DropDownWidth)
+   hbarsubtitle:SetPoint("TOPLEFT", featuresubtitle, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   hbarsubtitle:SetNonSpaceWrap(true)
+   hbarsubtitle:SetJustifyH("MIDDLE")
+   hbarsubtitle:SetJustifyV("TOP")
+   hbarsubtitle:SetText("Hotbar Type")
+
+   local hbardropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
+   hbardropdown:SetPoint("TOPLEFT", hbarsubtitle, "BOTTOMLEFT", 0, 0)
+   
+   LibDD:UIDropDownMenu_SetWidth(hbardropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(hbardropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(hbardropdown, "LEFT")
+
+   local function HbarDropDownDemo_OnClick(self, arg1, arg2, checked)
+      CrossHotbar_DB.HBARType = arg1
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
+      ConfigUI:Refresh(true)
+   end
+   
+   LibDD:UIDropDownMenu_Initialize(hbardropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i,hbartype in ipairs(addon.HotbarHBARTypes) do
+            info.text, info.checked = hbartypestr[hbartype], (CrossHotbar_DB.HBARType == hbartype)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = hbartype
+            info.arg2 = self
+            info.func = HbarDropDownDemo_OnClick
+            LibDD:UIDropDownMenu_AddButton(info)
+            if CrossHotbar_DB.HBARType == hbartype then 
+               LibDD:UIDropDownMenu_SetText(self, hbartypestr[hbartype])
+            end
+         end
+      end
+   end)
+
+   ConfigUI:AddToolTip(hbardropdown, Locale.hotbarTypeToolTip, true)
+
+   --[[
+      HKEY hotbar button layout
+   --]]    
+
+   local hkeysubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+   hkeysubtitle:SetHeight(self.TextHeight)
+   hkeysubtitle:SetWidth(DropDownWidth)
+   hkeysubtitle:SetPoint("TOPLEFT", hbarsubtitle, "TOPRIGHT", 0, 0)
+   hkeysubtitle:SetNonSpaceWrap(true)
+   hkeysubtitle:SetJustifyH("MIDDLE")
+   hkeysubtitle:SetJustifyV("TOP")
+   hkeysubtitle:SetText("Hotbar Layout")
+
+   local hkeydropdown = LibDD:Create_UIDropDownMenu(nil, configFrame)
+   hkeydropdown:SetPoint("TOPLEFT", hkeysubtitle, "BOTTOMLEFT", 0, 0)
+   
+   LibDD:UIDropDownMenu_SetWidth(hkeydropdown, DropDownWidth-self.DropDownSpacing)
+   LibDD:UIDropDownMenu_SetText(hkeydropdown, "Type")
+   LibDD:UIDropDownMenu_JustifyText(hkeydropdown, "LEFT")
+
+   local function HkeyDropDownDemo_OnClick(self, arg1, arg2, checked)
+      config.Hotbar.HKEYType = arg1
+      LibDD:UIDropDownMenu_SetText(arg2, self:GetText())
+      ConfigUI:Refresh(true)
+   end
+   
+   LibDD:UIDropDownMenu_Initialize(hkeydropdown, function(self, level, menuList)     
+      local info = LibDD:UIDropDownMenu_CreateInfo()
+      LibDD:UIDropDownMenu_SetText(self, "")
+      if (level or 1) == 1 then
+         for i,hkeytype in ipairs(addon.HotbarHKEYTypes) do
+            info.text, info.checked = hkeytypestr[hkeytype], (config.Hotbar.HKEYType == hkeytype)
+            info.menuList, info.hasArrow = i, false
+            info.arg1 = hkeytype
+            info.arg2 = self
+            info.func = HkeyDropDownDemo_OnClick
+            LibDD:UIDropDownMenu_AddButton(info)
+            if config.Hotbar.HKEYType == hkeytype then 
+               LibDD:UIDropDownMenu_SetText(self, hkeytypestr[hkeytype])
+            end
+         end
+      end
+   end)
+
+   ConfigUI:AddToolTip(hkeydropdown, Locale.hotkeyTypeToolTip, true)
+ 
+   --[[
+      Expanded button settings
+   --]]
    
    local expdsubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
    expdsubtitle:SetHeight(self.TextHeight)
    expdsubtitle:SetWidth(DropDownWidth)
-   expdsubtitle:SetPoint("TOPLEFT", featuresubtitle, "BOTTOMLEFT", 0, -self.ConfigSpacing)
+   expdsubtitle:SetPoint("TOPLEFT", hbardropdown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    expdsubtitle:SetNonSpaceWrap(true)
    expdsubtitle:SetJustifyH("MIDDLE")
    expdsubtitle:SetJustifyV("TOP")
@@ -1176,6 +1257,8 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
       end
    end)
 
+   ConfigUI:AddToolTip(ddaadropdown, Locale.dadaTypeToolTip, true)
+   
    local actionpagesubtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
    actionpagesubtitle:SetHeight(self.TextHeight)
    actionpagesubtitle:SetWidth(DropDownWidth)
@@ -1184,8 +1267,6 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    actionpagesubtitle:SetJustifyH("Left")
    actionpagesubtitle:SetJustifyV("TOP")
    actionpagesubtitle:SetText("ActionPage")
-
-   ConfigUI:AddToolTip(ddaadropdown, Locale.dadaTypeToolTip, true)
 
    --[[
        LHotbar page index
@@ -1493,6 +1574,8 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    ConfigUI:AddToolTip(rlhotbareditbox, Locale.pagePrefixToolTip, true)
 
    table.insert(self.RefreshCallbacks, function()
+                   LibDD:UIDropDownMenu_SetText(hbardropdown, hbartypestr[CrossHotbar_DB.HBARType])
+                   LibDD:UIDropDownMenu_SetText(hkeydropdown, hkeytypestr[config.Hotbar.HKEYType])
                    LibDD:UIDropDownMenu_SetText(expddropdown, wxhbtypestr[config.Hotbar.WXHBType])
                    LibDD:UIDropDownMenu_SetText(ddaadropdown, ddaatypestr[config.Hotbar.DDAAType])
                    LibDD:UIDropDownMenu_SetText(lpageidxdropdown, "ActionPage " .. config.Hotbar.LPageIndex)
@@ -1549,11 +1632,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    end
    
    gamepadenablebutton:SetScript("OnClick", function(self, button, down)
-      if GetCVar('GamePadEnable') == "0" then
-         SetCVar('GamePadEnable', 1)
-      else
-         SetCVar('GamePadEnable', 0)
-      end                                 
+      CrossHotbar_DB.GPEnable = config.GPEnable
       ConfigUI:Refresh(true)
    end)
 

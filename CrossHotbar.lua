@@ -20,6 +20,7 @@ local ActionList = {
 config:ConfigListAdd("HotbarActions", ActionList, "NONE")
 
 CrossHotbarMixin = {
+   HBARType = nil
 }
 
 --[[
@@ -75,7 +76,7 @@ function CrossHotbarMixin:SetupCrosshotbar()
       self:SetWidth(Crosshotbar:GetWidth())
    ]])
 
---   if config.Hotbar.HBARType == "BLIZ" then
+--   if CrossHotbar_DB.HBARType == "BLIZ" then
 --      SecureHandlerWrapScript(WXHBCrossHotbarMover, "OnDoubleClick", WXHBCrossHotbarMover, [[
 --         local Crosshotbar = self:GetFrameRef('Crosshotbar')
 --         Crosshotbar:RunAttribute("SetHotbarPlacement")
@@ -94,25 +95,34 @@ function CrossHotbarMixin:SetupCrosshotbar()
 end
 
 function CrossHotbarMixin:ApplyConfig()
+
+   if self.HBARType == nil then
+      self.HBARType = CrossHotbar_DB.HBARType
+   elseif self.HBARType ~= CrossHotbar_DB.HBARType then
+      ReloadUI()
+   end
+   
    local bindings = {}
    local nbindings = #GamePadModifierList + 2
    for action,value in pairs(ActionList) do
       bindings[action] = {}
       for i = 1,nbindings do
-         table.insert(bindings[action], "")
+         table.insert(bindings[action], {"", ""})
       end
    end
 
    for button, attributes in pairs(config.PadActions) do
       if ActionList[attributes.TRIGACTION] then
-         bindings[attributes.TRIGACTION][1] = attributes.BIND
+         bindings[attributes.TRIGACTION][1][1] = attributes.BIND
+         bindings[attributes.TRIGACTION][1][2] = addon:GetButtonHotKey(button)
       end
    end
 
    for i,modifier in ipairs(GamePadModifierList) do
       for button, attributes in pairs(config.PadActions) do
          if ActionList[ attributes[modifier .. "TRIGACTION"] ] then
-            bindings[ attributes[modifier .. "TRIGACTION"] ][1+i] = attributes.BIND
+            bindings[ attributes[modifier .. "TRIGACTION"] ][1+i][1] = attributes.BIND
+            bindings[ attributes[modifier .. "TRIGACTION"] ][1+i][2] = addon:GetButtonHotKey(button)
          end
       end
    end

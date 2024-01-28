@@ -1,6 +1,19 @@
 local ADDON, addon = ...
 local config = addon.Config
 local LibActBtn = LibStub("LibActionButton-1.0")
+
+local HBARList = {
+   ["LIBA"] = true,
+   ["BLIZ"] = true,
+}
+config:ConfigListAdd("HotbarHBARTypes", HBARList)
+
+local HKEYList = {
+   ["_SHP"] = true,
+   ["_LTR"] = true,
+}
+config:ConfigListAdd("HotbarHKEYTypes", HKEYList)
+
 local WXHBList = {
    ["HIDE"] = true,
    ["FADE"] = true,
@@ -168,7 +181,7 @@ function HotbarMixin:HookDesatHook(icon, Saturation)
 end
       
 function HotbarMixin:AddActionBar()
-   if config.Hotbar.HBARType == "LIBA" then
+   if CrossHotbar_DB.HBARType == "LIBA" then
       self.Buttons = {}
       self.BtnPrefix = self:GetName() .. "Button"
 
@@ -198,6 +211,7 @@ function HotbarMixin:AddActionBar()
       for i = 1,12 do
          self.Buttons[i] = LibActBtn:CreateButton(i, self.BtnPrefix .. i, self.ActionBar, ActBTnConfig)
          self.Buttons[i]:SetID(i)
+         self.Buttons[i]:SetAttribute("checkmouseovercast", true);
          hooksecurefunc(self.Buttons[i], "SetAlpha", GenerateClosure(self.SetAlphaHook, self))
          hooksecurefunc(self.Buttons[i].icon, "SetDesaturated", GenerateClosure(self.HookDesatHook, self))
          local offset = 0
@@ -259,7 +273,7 @@ function HotbarMixin:AddActionBar()
             button:SetAttribute("statehidden", true)
          end
       end
-   elseif config.Hotbar.HBARType == "BLIZ" then
+   elseif CrossHotbar_DB.HBARType == "BLIZ" then
       self.Buttons = {}
       self.ActionBar = _G[self.BarName]
       local containers = { self.ActionBar:GetChildren() }
@@ -288,8 +302,9 @@ end
 function HotbarMixin:AddOverrideKeyBindings(ConfigBindings)
    for i,button in ipairs(self.Buttons) do
       local index = button:GetID();
-      for j, key in ipairs(ConfigBindings["HOTBARBTN"..index]) do               
-         button:SetAttribute('over_key'..j, key)
+      for j, key in ipairs(ConfigBindings["HOTBARBTN"..index]) do
+         button:SetAttribute('over_key'..j, key[1])
+         button:SetAttribute('over_hotkey'..j, key[2])
       end
       button:SetAttribute("numbindings", #ConfigBindings["HOTBARBTN"..index])
       button.HotKey:SetText(RANGE_INDICATOR);
@@ -601,9 +616,9 @@ function HotbarMixin:UpdateHotkeys()
          currentstate == activestate then
          local nbindings = button:GetAttribute('numbindings')
          if expanded ~= 0 then modifier = nbindings end
-         local key = button:GetAttribute('over_key' .. modifier)
+         local key = button:GetAttribute('over_hotkey' .. modifier)
          if key and key ~= "" then
-            button.HotKey:SetText(('%s'):format(GetBindingText(key, '_ABBR')));
+            button.HotKey:SetText(key);
             button:SetAlpha(1.0)
             button.icon:SetDesaturated(false);
             if i < 5 then
