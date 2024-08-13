@@ -350,8 +350,10 @@ Settings:
       ConfigUI:Refresh()
    end)
 
-   InterfaceOptions_AddCategory(self.InterfaceFrame)
-
+   local category, layout = Settings.RegisterCanvasLayoutCategory(self.InterfaceFrame,
+                                                                  self.InterfaceFrame.name)
+   Settings.RegisterAddOnCategory(category)
+   
    self.PresetFrame = CreateFrame("Frame", ADDON .. "PresetsSettings", self.InterfaceFrame)
    self.PresetFrame.name = "Presets"
    self.PresetFrame.parent = self.InterfaceFrame.name
@@ -367,7 +369,9 @@ Settings:
       ConfigUI:Refresh()
    end)
    
-   InterfaceOptions_AddCategory(self.PresetFrame)
+   Settings.RegisterCanvasLayoutSubcategory(category,
+                                            self.PresetFrame,
+                                            self.PresetFrame.name)
    
    self.ActionFrame = CreateFrame("Frame", ADDON .. "ActionsSettings", self.InterfaceFrame)
    self.ActionFrame.name = "Actions"
@@ -420,8 +424,10 @@ Settings:
       ActionFrame:SetScript("OnShow", function(frame) ConfigUI:Refresh() end) 
       ConfigUI:Refresh()
    end)
-   
-   InterfaceOptions_AddCategory(self.ActionFrame)
+
+   Settings.RegisterCanvasLayoutSubcategory(category,
+                                            self.ActionFrame,
+                                            self.ActionFrame.name)
    
    self.HotbarFrame = CreateFrame("Frame", ADDON .. "HotbarsSettings", self.InterfaceFrame)
    self.HotbarFrame.name = "Hotbars"
@@ -450,7 +456,9 @@ Settings:
       ConfigUI:Refresh()
    end)
    
-   InterfaceOptions_AddCategory(self.HotbarFrame)
+   Settings.RegisterCanvasLayoutSubcategory(category,
+                                            self.HotbarFrame,
+                                            self.HotbarFrame.name)
    
    self.GamePadFrame = CreateFrame("Frame", ADDON .. "GamePadSettings", self.InterfaceFrame)
    self.GamePadFrame.name = "GamePad"
@@ -469,11 +477,13 @@ Settings:
       ConfigUI:Refresh()
    end)      
 
-   InterfaceOptions_AddCategory(self.GamePadFrame)
+   Settings.RegisterCanvasLayoutSubcategory(category,
+                                            self.GamePadFrame,
+                                            self.GamePadFrame.name)
 
    SLASH_WXHBCROSSHOTBAR1, SLASH_WXHBCROSSHOTBAR2 = '/chb', '/wxhb';
    local function slashcmd(msg, editBox)
-      Settings.OpenToCategory(ADDON)
+      Settings.OpenToCategory(category.ID)
    end
    SlashCmdList["WXHBCROSSHOTBAR"] = slashcmd;
 end
@@ -665,7 +675,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    presetsubtitle:SetWidth(DropDownWidth)
    presetsubtitle:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    presetsubtitle:SetNonSpaceWrap(true)
-   presetsubtitle:SetJustifyH("Middle")
+   presetsubtitle:SetJustifyH("CENTER")
    presetsubtitle:SetJustifyV("TOP")
    presetsubtitle:SetText("Presets")
    
@@ -742,7 +752,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    filesubtitle:SetWidth(DropDownWidth)
    filesubtitle:SetPoint("TOPLEFT", PresetsDropDown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    filesubtitle:SetNonSpaceWrap(true)
-   filesubtitle:SetJustifyH("Middle")
+   filesubtitle:SetJustifyH("CENTER")
    filesubtitle:SetJustifyV("TOP")
    filesubtitle:SetText("Name")
    
@@ -791,7 +801,7 @@ function ConfigUI:CreatePresets(configFrame, anchorFrame)
    descripttitle:SetPoint("TOPLEFT", presetfileeditbox, "BOTTOMLEFT", 0, -4*self.ConfigSpacing)
    descripttitle:SetWidth(2*DropDownWidth-self.DropDownSpacing)
    descripttitle:SetNonSpaceWrap(true)
-   descripttitle:SetJustifyH("Middle")
+   descripttitle:SetJustifyH("CENTER")
    descripttitle:SetJustifyV("TOP")
    descripttitle:SetText("Description")
 
@@ -867,7 +877,7 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
    buttonsubtitle:SetWidth(self.SymbolWidth+self.Inset)
    buttonsubtitle:SetPoint("TOPLEFT", bindingframe, "TOPLEFT", self.Inset, -self.ConfigSpacing)
    buttonsubtitle:SetNonSpaceWrap(true)
-   buttonsubtitle:SetJustifyH("MIDDLE")
+   buttonsubtitle:SetJustifyH("CENTER")
    buttonsubtitle:SetJustifyV("TOP")
    buttonsubtitle:SetText("Button")
    
@@ -876,7 +886,7 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
    bindingsubtitle:SetWidth(DropDownWidth)
    bindingsubtitle:SetPoint("TOPLEFT", buttonsubtitle, "TOPRIGHT", 0, 0)
    bindingsubtitle:SetNonSpaceWrap(true)
-   bindingsubtitle:SetJustifyH("MIDDLE")
+   bindingsubtitle:SetJustifyH("CENTER")
    bindingsubtitle:SetJustifyV("TOP")
    bindingsubtitle:SetText("Binding")
 
@@ -888,10 +898,10 @@ function ConfigUI:CreatePadBindings(configFrame, anchorFrame)
          local attributes = config.PadActions[button]
          local buttonsubtitle = bindingframe:CreateFontString(nil, "ARTWORK", "GameFontNormal")
          buttonsubtitle:SetHeight(32)
-         buttonsubtitle:SetWidth(self.SymbolWidth+100)
-         buttonsubtitle:SetPoint("TOPLEFT", buttonanchor, "BOTTOMLEFT", buttoninset, 0)
+         buttonsubtitle:SetWidth(self.SymbolWidth)
+         buttonsubtitle:SetPoint("TOPLEFT", buttonanchor, "BOTTOMLEFT", 0.5*buttoninset, 0)
          buttonsubtitle:SetNonSpaceWrap(true)
-         buttonsubtitle:SetJustifyH("MIDDLE")
+         buttonsubtitle:SetJustifyH("CENTER")
          buttonsubtitle:SetJustifyV("TOP")
          buttonsubtitle:SetText(addon:GetButtonIcon(button))
          buttonsubtitle:SetScript("OnShow", function(frame) buttonsubtitle:SetText(addon:GetButtonIcon(button)) end) 
@@ -947,7 +957,7 @@ function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, 
    actionsubtitle:SetWidth(DropDownWidth)
    actionsubtitle:SetPoint("TOPLEFT", anchorFrame, "TOPLEFT", self.Inset, -self.ConfigSpacing)
    actionsubtitle:SetNonSpaceWrap(true)
-   actionsubtitle:SetJustifyH("MIDDLE")
+   actionsubtitle:SetJustifyH("CENTER")
    actionsubtitle:SetJustifyV("TOP")
    actionsubtitle:SetText("Action")
 
@@ -956,7 +966,7 @@ function ConfigUI:CreatePadActions(configFrame, anchorFrame, prefix, ActionMap, 
    hotbarsubtitle:SetWidth(DropDownWidth)
    hotbarsubtitle:SetPoint("TOPLEFT", actionsubtitle, "TOPRIGHT", 0, 0)
    hotbarsubtitle:SetNonSpaceWrap(true)
-   hotbarsubtitle:SetJustifyH("MIDDLE")
+   hotbarsubtitle:SetJustifyH("CENTER")
    hotbarsubtitle:SetJustifyV("TOP")
    hotbarsubtitle:SetText("Hotbar Action")
 
@@ -1084,7 +1094,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    hbarsubtitle:SetWidth(DropDownWidth)
    hbarsubtitle:SetPoint("TOPLEFT", featuresubtitle, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    hbarsubtitle:SetNonSpaceWrap(true)
-   hbarsubtitle:SetJustifyH("MIDDLE")
+   hbarsubtitle:SetJustifyH("CENTER")
    hbarsubtitle:SetJustifyV("TOP")
    hbarsubtitle:SetText("Hotbar Type")
 
@@ -1130,7 +1140,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    hkeysubtitle:SetWidth(DropDownWidth)
    hkeysubtitle:SetPoint("TOPLEFT", hbarsubtitle, "TOPRIGHT", 0, 0)
    hkeysubtitle:SetNonSpaceWrap(true)
-   hkeysubtitle:SetJustifyH("MIDDLE")
+   hkeysubtitle:SetJustifyH("CENTER")
    hkeysubtitle:SetJustifyV("TOP")
    hkeysubtitle:SetText("Hotbar Layout")
 
@@ -1176,7 +1186,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    expdsubtitle:SetWidth(DropDownWidth)
    expdsubtitle:SetPoint("TOPLEFT", hbardropdown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    expdsubtitle:SetNonSpaceWrap(true)
-   expdsubtitle:SetJustifyH("MIDDLE")
+   expdsubtitle:SetJustifyH("CENTER")
    expdsubtitle:SetJustifyV("TOP")
    expdsubtitle:SetText("Expanded Type")
 
@@ -1222,7 +1232,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    ddaasubtitle:SetWidth(DropDownWidth)
    ddaasubtitle:SetPoint("TOPLEFT", expdsubtitle, "TOPRIGHT", 0, 0)
    ddaasubtitle:SetNonSpaceWrap(true)
-   ddaasubtitle:SetJustifyH("MIDDLE")
+   ddaasubtitle:SetJustifyH("CENTER")
    ddaasubtitle:SetJustifyV("TOP")
    ddaasubtitle:SetText("Hotbar Layout")
 
@@ -1277,7 +1287,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lpageidxsubtitle:SetWidth(DropDownWidth)
    lpageidxsubtitle:SetPoint("TOPLEFT", actionpagesubtitle, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    lpageidxsubtitle:SetNonSpaceWrap(true)
-   lpageidxsubtitle:SetJustifyH("MIDDLE")
+   lpageidxsubtitle:SetJustifyH("CENTER")
    lpageidxsubtitle:SetJustifyV("TOP")
    lpageidxsubtitle:SetText("Left Hotbar ActionPage")
 
@@ -1323,7 +1333,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rpageidxsubtitle:SetWidth(DropDownWidth)
    rpageidxsubtitle:SetPoint("TOPLEFT", lpageidxsubtitle, "TOPRIGHT", 0, 0)
    rpageidxsubtitle:SetNonSpaceWrap(true)
-   rpageidxsubtitle:SetJustifyH("MIDDLE")
+   rpageidxsubtitle:SetJustifyH("CENTER")
    rpageidxsubtitle:SetJustifyV("TOP")
    rpageidxsubtitle:SetText("Right Hotbar ActionPage")
 
@@ -1369,7 +1379,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    lrpageidxsubtitle:SetWidth(DropDownWidth)
    lrpageidxsubtitle:SetPoint("TOPLEFT", lpageidxdropdown, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    lrpageidxsubtitle:SetNonSpaceWrap(true)
-   lrpageidxsubtitle:SetJustifyH("MIDDLE")
+   lrpageidxsubtitle:SetJustifyH("CENTER")
    lrpageidxsubtitle:SetJustifyV("TOP")
    lrpageidxsubtitle:SetText("Left Right Hotbar ActionPage")
 
@@ -1415,7 +1425,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    rlpageidxsubtitle:SetWidth(DropDownWidth)
    rlpageidxsubtitle:SetPoint("TOPLEFT", lrpageidxsubtitle, "TOPRIGHT", 0, 0)
    rlpageidxsubtitle:SetNonSpaceWrap(true)
-   rlpageidxsubtitle:SetJustifyH("MIDDLE")
+   rlpageidxsubtitle:SetJustifyH("CENTER")
    rlpageidxsubtitle:SetJustifyV("TOP")
    rlpageidxsubtitle:SetText("Right Left Hotbar ActionPage")
 
@@ -1459,7 +1469,7 @@ function ConfigUI:CreateHotbarSettings(configFrame, anchorFrame)
    conditionalsubtitle:SetNonSpaceWrap(true)
    conditionalsubtitle:SetJustifyH("Left")
    conditionalsubtitle:SetJustifyV("TOP")
-   conditionalsubtitle:SetText("Conditional")
+   conditionalsubtitle:SetText("Conditionals")
    
    --[[
        LHotbar page prefix
@@ -1616,7 +1626,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    gamepadenablesubtitle:SetWidth(OptionWidth)
    gamepadenablesubtitle:SetPoint("TOPLEFT", controlsubtitle, "BOTTOMLEFT", self.Inset, -self.ConfigSpacing)
    gamepadenablesubtitle:SetNonSpaceWrap(true)
-   gamepadenablesubtitle:SetJustifyH("Middle")
+   gamepadenablesubtitle:SetJustifyH("CENTER")
    gamepadenablesubtitle:SetJustifyV("TOP")
    gamepadenablesubtitle:SetText("GamePadEnable")
    
@@ -1647,7 +1657,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    cvarenablesubtitle:SetWidth(OptionWidth)
    cvarenablesubtitle:SetPoint("TOPLEFT", gamepadenablesubtitle, "TOPRIGHT", 0, 0)
    cvarenablesubtitle:SetNonSpaceWrap(true)
-   cvarenablesubtitle:SetJustifyH("Middle")
+   cvarenablesubtitle:SetJustifyH("CENTER")
    cvarenablesubtitle:SetJustifyV("TOP")
    cvarenablesubtitle:SetText("CVars & Hooks")
    
@@ -1678,7 +1688,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    gamepadlooksubtitle:SetWidth(OptionWidth)
    gamepadlooksubtitle:SetPoint("TOPLEFT", cvarenablesubtitle, "TOPRIGHT", 0, 0)
    gamepadlooksubtitle:SetNonSpaceWrap(true)
-   gamepadlooksubtitle:SetJustifyH("Middle")
+   gamepadlooksubtitle:SetJustifyH("CENTER")
    gamepadlooksubtitle:SetJustifyV("TOP")
    gamepadlooksubtitle:SetText("GamePadLook")
    
@@ -1709,7 +1719,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    mouselooksubtitle:SetWidth(OptionWidth)
    mouselooksubtitle:SetPoint("TOPLEFT", gamepadlooksubtitle, "TOPRIGHT", 0, 0)
    mouselooksubtitle:SetNonSpaceWrap(true)
-   mouselooksubtitle:SetJustifyH("Middle")
+   mouselooksubtitle:SetJustifyH("CENTER")
    mouselooksubtitle:SetJustifyV("TOP")
    mouselooksubtitle:SetText("MouseLook")
    
@@ -1762,7 +1772,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    devicetitle:SetWidth(DropDownWidth)
    devicetitle:SetPoint("TOPLEFT", cvarsubtitle, "BOTTOMLEFT", 0, -self.ConfigSpacing)
    devicetitle:SetNonSpaceWrap(true)
-   devicetitle:SetJustifyH("MIDDLE")
+   devicetitle:SetJustifyH("CENTER")
    devicetitle:SetJustifyV("TOP")
    devicetitle:SetText("Device")
 
@@ -1816,7 +1826,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    leftclicktitle:SetWidth(DropDownWidth)
    leftclicktitle:SetPoint("TOPLEFT", devicetitle, "TOPRIGHT", 0,0 )
    leftclicktitle:SetNonSpaceWrap(true)
-   leftclicktitle:SetJustifyH("MIDDLE")
+   leftclicktitle:SetJustifyH("CENTER")
    leftclicktitle:SetJustifyV("TOP")
    leftclicktitle:SetText("Left Click")
 
@@ -1866,7 +1876,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    rightclicktitle:SetWidth(DropDownWidth)
    rightclicktitle:SetPoint("TOPLEFT", leftclicktitle, "TOPRIGHT", 0,0 )
    rightclicktitle:SetNonSpaceWrap(true)
-   rightclicktitle:SetJustifyH("MIDDLE")
+   rightclicktitle:SetJustifyH("CENTER")
    rightclicktitle:SetJustifyV("TOP")
    rightclicktitle:SetText("Right Click")
 
@@ -1915,7 +1925,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    yawspeedsubtitle:SetWidth(DropDownWidth-2*self.Inset)
    yawspeedsubtitle:SetPoint("TOPLEFT", devicedropdown, "BOTTOMLEFT", self.Inset, -self.ConfigSpacing)
    yawspeedsubtitle:SetNonSpaceWrap(true)
-   yawspeedsubtitle:SetJustifyH("MIDDLE")
+   yawspeedsubtitle:SetJustifyH("CENTER")
    yawspeedsubtitle:SetJustifyV("TOP")
    yawspeedsubtitle:SetText("Camera yaw speed")
    
@@ -1941,7 +1951,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    pitchspeedsubtitle:SetWidth(DropDownWidth-2*self.Inset)
    pitchspeedsubtitle:SetPoint("TOPLEFT", yawspeedsubtitle, "TOPRIGHT", 2*self.Inset, 0)
    pitchspeedsubtitle:SetNonSpaceWrap(true)
-   pitchspeedsubtitle:SetJustifyH("MIDDLE")
+   pitchspeedsubtitle:SetJustifyH("CENTER")
    pitchspeedsubtitle:SetJustifyV("TOP")
    pitchspeedsubtitle:SetText("Camera pitch speed")
    
@@ -1967,7 +1977,7 @@ function ConfigUI:CreateGamePadSettings(configFrame, anchorFrame)
    overlapmousespeedsubtitle:SetWidth(DropDownWidth-2*self.Inset)
    overlapmousespeedsubtitle:SetPoint("TOPLEFT", pitchspeedsubtitle, "TOPRIGHT", 2*self.Inset, 0)
    overlapmousespeedsubtitle:SetNonSpaceWrap(true)
-   overlapmousespeedsubtitle:SetJustifyH("MIDDLE")
+   overlapmousespeedsubtitle:SetJustifyH("CENTER")
    overlapmousespeedsubtitle:SetJustifyV("TOP")
    overlapmousespeedsubtitle:SetText("Overlap Mouse (ms)")
    
