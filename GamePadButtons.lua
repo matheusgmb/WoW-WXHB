@@ -290,9 +290,19 @@ local GamePadButtonsMixin = {
    LeftShoulderButton = nil,
    RightShoulderButton = nil,
    LeftPaddleButton = nil,
-   RightPaddleButton = nil
+   RightPaddleButton = nil,
+   MouseLookState = false
 }
 
+function GamePadButtonsMixin:SetMouseLook(enable)
+   self.MouseLookState = enable
+   if enable then
+      MouselookStart()
+   else
+      MouselookStop()
+   end
+end
+   
 function GamePadButtonsMixin:CanAutoSetGamePadCursorControl(enable)
    if self.GamePadAutoEnable == 1 and
       not self.GamePadMouseMode then
@@ -357,9 +367,9 @@ end
 function GamePadButtonsMixin:HoldCameraLook(isheld)
    if self.MouseLookEnabled then
       if IsMouselooking() then
-         MouselookStop()
+         self:SetMouseLook(false)
       else
-         MouselookStart()
+         self:SetMouseLook(true)
       end
    end
    if self.GamePadLookEnabled then
@@ -386,10 +396,10 @@ end
 
 function GamePadButtonsMixin:SetCameraLook(enable)
    if self.MouseLookEnabled then
-      if enable then
-         MouselookStop()
+     if enable then
+         self:SetMouseLook(false)
       else
-         MouselookStart()
+         self:SetMouseLook(true)
       end
    end
    if self.GamePadLookEnabled then
@@ -406,9 +416,9 @@ function GamePadButtonsMixin:SetGamePadMouse(enable)
       end
       if self.MouseLookEnabled then
          if enable then
-            MouselookStop()
+            self:SetMouseLook(false)
          else
-            MouselookStart()
+            self:SetMouseLook(true)
          end
       end
       if self.GamePadLookEnabled then
@@ -747,26 +757,20 @@ function GamePadButtonsMixin:OnLoad()
 end
 
 function GamePadButtonsMixin:OnEvent(event, ...)
+   -- print(event)
    if event == 'PLAYER_ENTERING_WORLD' then
-   elseif event == 'CURSOR_CHANGED' then 
-      if SpellIsTargeting() and self.SpellTargetingStarted then
-         if self.MouseLookEnabled then
-            if self.SpellTargetingUpdate then
-               MouselookStart()
-               self.SpellTargetingUpdate = false
-            end
-         end
-      end
+   elseif event == 'CURSOR_CHANGED' then
    elseif event == 'CURRENT_SPELL_CAST_CHANGED' then
       if SpellIsTargeting() then
          if self.MouseLookEnabled then
             if IsMouselooking() then
-               MouselookStop()
-               self.SpellTargetingUpdate = true
-            else
-               self.SpellTargetingUpdate = false
+               self:SetMouseLook(false)               
+               local function togglemouse()
+                  self:SetMouseLook(true)
+               end
+               C_Timer.After(0, togglemouse)
             end
-         end        
+         end
          self.SpellTargetingStarted = true
          if self.GamePadLookEnabled and not self.GamePadMouseMode then
             if config.GamePad.GPCenterCursor == 0 then
@@ -830,32 +834,48 @@ function GamePadButtonsMixin:OnEvent(event, ...)
       self.MouseStatusFrame:SetSize(32, 32)
       self.MouseStatusFrame:Hide()
       SecureHandlerSetFrameRef(self, "MouseStatusFrame", self.MouseStatusFrame)
-   
-      local mouselookstate = false
-      local gamepadlookstate = false
+
+      self.MouseLookState = IsMouselooking();
+      
+      self.MouseOnUpdateFrame = CreateFrame("Frame", ADDON .. "OnUpdateFrame")
+      
+      function self.MouseOnUpdateFrame:onUpdate(...)
+         if addon.GamePadButtons.MouseLookEnabled and
+            not SpellIsTargeting() then
+            if IsMouselooking() ~= addon.GamePadButtons.MouseLookState then
+               addon.GamePadButtons:SetMouseLook(addon.GamePadButtons.MouseLookState)
+            end
+         end
+      end
+
+      self.MouseOnUpdateFrame:SetScript("OnUpdate", self.MouseOnUpdateFrame.onUpdate)
+      self.MouseOnUpdateFrame:Hide()
+      
+      local mouselookhandlerstate = false
+      local gamepadlookhandlerstate = false
       local mousehandlerstart = function(self)
          if addon.GamePadButtons.MouseLookEnabled then
             if IsMouselooking() then
-               MouselookStop()
-               mouselookstate = true
+               addon.GamePadButtons:SetMouseLook(false)
+               mouselookhandlerstate = true
             end
          end
          if addon.GamePadButtons.GamePadLookEnabled then
             addon.GamePadButtons:SetGamePadMouse(true)
-            gamepadlookstate = true
+            gamepadlookhandlerstate = true
          end
       end
       local mousehandlerstop = function(self)
          if addon.GamePadButtons.MouseLookEnabled then
-            if mouselookstate then
-               MouselookStart()
-               mouselookstate = false
+            if mouselookhandlerstate then
+               addon.GamePadButtons:SetMouseLook(true)
+               mouselookhandlerstate = false
             end
          end
          if addon.GamePadButtons.GamePadLookEnabled then
-            if gamepadlookstate then
+            if gamepadlookhandlerstate then
                addon.GamePadButtons:SetGamePadMouse(false)
-               gamepadlookstate = false
+               gamepadlookhandlerstate = false
             end
          end
       end
@@ -951,10 +971,15 @@ function GamePadButtonsMixin:SetupGamePad()
    self.GamePadAutoDisableSticks = GetCVar('GamePadCursorAutoDisableSticks')
    self.GamePadAutoDisableJump = GetCVar('GamePadCursorAutoDisableJump')
    self.GamePadAutoEnable = GetCVar('GamePadCursorAutoEnable')
+
+   if self.MouseLookEnabled then
+      self.MouseOnUpdateFrame:Show()
+   end
    
    if self.GamePadLookEnabled then
       self:SetGamePadMouse(self.GamePadMouseMode)
    end
+
 end
 
 function GamePadButtonsMixin:ClearConfig()
