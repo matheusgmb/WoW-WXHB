@@ -633,8 +633,10 @@ function HotbarMixin:UpdateHotkeys()
             if  button:GetID() >= 9 then 
                button:SetAlpha(self.ExpandedAlpha1)
             else
-               button:SetAlpha(self.ExpandedAlpha2)
-               button.icon:SetDesaturated(self.DesatExpanded);
+               if expanded ~= 0 then
+                  button:SetAlpha(self.ExpandedAlpha2)
+                  button.icon:SetDesaturated(self.DesatExpanded);
+               end
             end
          end
       else

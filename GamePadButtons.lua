@@ -972,7 +972,8 @@ function GamePadButtonsMixin:SetupGamePad()
    self.GamePadAutoDisableJump = GetCVar('GamePadCursorAutoDisableJump')
    self.GamePadAutoEnable = GetCVar('GamePadCursorAutoEnable')
 
-   if self.MouseLookEnabled then
+   if self.MouseLookEnabled then      
+      self.MouseLookState = IsMouselooking();
       self.MouseOnUpdateFrame:Show()
    end
    
