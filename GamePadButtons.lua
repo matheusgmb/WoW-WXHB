@@ -503,19 +503,43 @@ local SetButtonExpanded = [[
 ]]
 
 local UpdateModifierName = [[
-   local newstate, modprefix1, modprefix2 = ...
-   local modname = self:GetAttribute("modname")
-   if newstate == 6 or newstate == 3 or newstate == 2 then
-      modname = string.gsub(modname, modprefix1, "")
-      self:SetAttribute("modname", modprefix1 .. modname)
-   elseif newstate == 7 or newstate == 5 or newstate == 1 then
-      modname = string.gsub(modname, modprefix2, "")
-      self:SetAttribute("modname", modprefix2 .. modname)
-   else
-      modname = string.gsub(modname, modprefix1, "")
-      modname = string.gsub(modname, modprefix2, "")
-      self:SetAttribute("modname", modname)
+   local type = ...
+   local trig = ""
+   local mod  = ""
+
+   if type == "trigger" then
+      type = self:GetAttribute("modtype")
    end
+
+   local triggerstate = self:GetAttribute("triggerstate")
+   if triggerstate ~= 0 and triggerstate ~= 4 then
+      trig = "TRIG"
+   end
+
+   if type == "shoulder" then
+      local shoulderstate = self:GetAttribute("shoulderstate")
+      self:SetAttribute("modtype", type)
+      if shoulderstate == 6 or shoulderstate == 3 or shoulderstate == 2 then
+         mod = "SPADL"
+      end
+      if shoulderstate == 7 or shoulderstate == 5 or shoulderstate == 1 then
+         mod = "SPADR"
+      end
+   end
+
+   if type == "paddle"  then
+      local paddlestate = self:GetAttribute("paddlestate")
+      self:SetAttribute("modtype", type)
+      if paddlestate == 6 or paddlestate == 3 or paddlestate == 2 then
+         mod = "PPADL"
+      end
+      if paddlestate == 7 or paddlestate == 5 or paddlestate == 1 then
+         mod = "PPADR"
+      end
+   end
+
+   self:SetAttribute("modname", mod .. trig)
+   -- print("[" .. mod .. trig .. "]")
 ]]
 
 function GamePadButtonsMixin:CreatePairButton(ButtonName)
@@ -611,7 +635,7 @@ function GamePadButtonsMixin:CreateModifierButton(Name)
    self[Name.."Button"]:SetAttribute("trigstate", 4)
    self[Name.."Button"]:SetAttribute("SetActionBindings", [[
       local modname = ...
-      if modname == "" or modname == "TRIG" then
+      if modname == "" then
          self:ClearBindings()
          self:SetAttribute("macrotext1", "")
       end
@@ -636,7 +660,7 @@ function GamePadButtonsMixin:AddTriggerHandler()
    self:SetAttribute("_onstate-trigger", [[
       self:SetAttribute("triggerstate", newstate)
 
-      self:RunAttribute("UpdateModifierName", newstate, "TRIG", "TRIG")
+      self:RunAttribute("UpdateModifierName", "trigger")
       local modname = self:GetAttribute("modname")
 
       local nbuttons = self:GetAttribute("NumModifierButtons")
@@ -664,7 +688,7 @@ function GamePadButtonsMixin:AddShoulderHandler()
    self:SetAttribute("_onstate-shoulder", [[
       self:SetAttribute("shoulderstate", newstate)
 
-      self:RunAttribute("UpdateModifierName", newstate, "SPADL", "SPADR")
+      self:RunAttribute("UpdateModifierName", "shoulder")
       local modname = self:GetAttribute("modname")
 
       local nbuttons = self:GetAttribute("NumModifierButtons")
@@ -692,7 +716,7 @@ function GamePadButtonsMixin:AddPaddleHandler()
    self:SetAttribute("_onstate-paddle", [[
       self:SetAttribute("paddlestate", newstate)
 
-      self:RunAttribute("UpdateModifierName", newstate, "PPADL", "PPADR")
+      self:RunAttribute("UpdateModifierName", "paddle")
       local modname = self:GetAttribute("modname")
 
       local nbuttons = self:GetAttribute("NumModifierButtons")
@@ -728,6 +752,7 @@ end
 
 function GamePadButtonsMixin:OnLoad()
    self:SetAttribute("modname", "")
+   self:SetAttribute("modtype", "")
    self:SetAttribute("UpdateModifierName", UpdateModifierName)
 
    self:AddTriggerHandler()

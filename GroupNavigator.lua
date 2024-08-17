@@ -105,6 +105,7 @@ function GroupNavigatorMixin:ApplyConfig()
       for i,modifier in ipairs(GamePadModifierList) do
          if ActionList[ attributes[modifier .. "ACTION"] ] then
             self:SetAttribute(modifier .. attributes[modifier .. "ACTION"], attributes.BIND)
+            self:SetAttribute(modifier .. "TRIG" .. attributes[modifier .. "ACTION"], attributes.BIND)
          end
       end
    end
