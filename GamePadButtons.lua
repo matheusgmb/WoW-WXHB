@@ -809,7 +809,7 @@ function GamePadButtonsMixin:OnEvent(event, ...)
                self.GamePadRightClickCache = GetCVar('GamePadCursorRightClick')
             end
             SetCVar('GamePadCursorLeftClick', self.SpellTargetConfirmButton)
-            SetCVar('GamePadCursorRightClick', self.SpellTargetCancelButton)
+         --   SetCVar('GamePadCursorRightClick', self.SpellTargetCancelButton)
             if GetCVar('GamePadCursorForTargeting') == "1" then
                SetGamePadCursorControl(true)
             end
@@ -818,7 +818,7 @@ function GamePadButtonsMixin:OnEvent(event, ...)
          if self.GamePadLookEnabled and not self.GamePadMouseMode then
             if not self.GamePadLookHold then
                SetCVar('GamePadCursorLeftClick', self.GamePadLeftClickCache)
-               SetCVar('GamePadCursorRightClick', self.GamePadRightClickCache)
+          --     SetCVar('GamePadCursorRightClick', self.GamePadRightClickCache)
                if GetCVar('GamePadCursorForTargeting') == "1" then
                   SetGamePadCursorControl(false)
                end
