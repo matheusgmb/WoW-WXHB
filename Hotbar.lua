@@ -212,6 +212,8 @@ function HotbarMixin:AddActionBar()
          self.Buttons[i] = LibActBtn:CreateButton(i, self.BtnPrefix .. i, self.ActionBar, ActBTnConfig)
          self.Buttons[i]:SetID(i)
          self.Buttons[i]:SetAttribute("checkmouseovercast", true);
+         -- Set attribute to tell Consoleport not to manage hotkey text.
+         self.Buttons[i]:SetAttribute("ignoregamepadhotkey", true)
          hooksecurefunc(self.Buttons[i], "SetAlpha", GenerateClosure(self.SetAlphaHook, self))
          hooksecurefunc(self.Buttons[i].icon, "SetDesaturated", GenerateClosure(self.HookDesatHook, self))
          local offset = 0
@@ -280,6 +282,8 @@ function HotbarMixin:AddActionBar()
       for i,container in ipairs(containers) do
          local buttons = { container:GetChildren() }
          for j,button in ipairs(buttons) do
+            -- Set attribute to tell Consoleport not to manage hotkey text.
+            button:SetAttribute("ignoregamepadhotkey", true)
             if button ~= nil and button:GetName() ~= nil then
                local index = button:GetID();
                if string.find(button:GetName(), "Button") then -- self.BtnPrefix

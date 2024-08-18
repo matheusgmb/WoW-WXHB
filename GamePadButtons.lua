@@ -789,9 +789,17 @@ function GamePadButtonsMixin:OnEvent(event, ...)
       if SpellIsTargeting() then
          if self.MouseLookEnabled then
             if IsMouselooking() then
-               self:SetMouseLook(false)               
+               -- We need to toggle the mouse
+               -- to show the retical
+               -- 11.0.2 can not change the
+               -- mouselook until next frame.
                local function togglemouse()
-                  self:SetMouseLook(true)
+                  if not IsMouseButtonDown() then
+                     self:SetMouseLook(false)
+                     self:SetMouseLook(true)
+                  else
+                     C_Timer.After(0.025, togglemouse)
+                  end
                end
                C_Timer.After(0, togglemouse)
             end
@@ -809,26 +817,37 @@ function GamePadButtonsMixin:OnEvent(event, ...)
                self.GamePadRightClickCache = GetCVar('GamePadCursorRightClick')
             end
             SetCVar('GamePadCursorLeftClick', self.SpellTargetConfirmButton)
-         --   SetCVar('GamePadCursorRightClick', self.SpellTargetCancelButton)
+            SetCVar('GamePadCursorRightClick', self.SpellTargetCancelButton)
             if GetCVar('GamePadCursorForTargeting') == "1" then
                SetGamePadCursorControl(true)
             end
          end
       elseif self.SpellTargetingStarted then
-         if self.GamePadLookEnabled and not self.GamePadMouseMode then
-            if not self.GamePadLookHold then
-               SetCVar('GamePadCursorLeftClick', self.GamePadLeftClickCache)
-          --     SetCVar('GamePadCursorRightClick', self.GamePadRightClickCache)
-               if GetCVar('GamePadCursorForTargeting') == "1" then
-                  SetGamePadCursorControl(false)
+         if self.GamePadLookEnabled and not self.GamePadMouseMode then                    
+            local function togglecvar()
+               -- We need to wait for the click to finish.
+               -- 11.0.2 was interacting with the world
+               -- while left mouse was down and errored
+               -- on cvar changes.
+               if not IsMouseButtonDown() then
+                  if not self.GamePadLookHold then
+                     SetCVar('GamePadCursorLeftClick', self.GamePadLeftClickCache)
+                     SetCVar('GamePadCursorRightClick', self.GamePadRightClickCache)
+                     if GetCVar('GamePadCursorForTargeting') == "1" then
+                        SetGamePadCursorControl(false)
+                     end
+                  end
+                  if config.GamePad.GPCenterCursor == 0 then
+                     SetCVar('GamePadCursorCentering', false)
+                  end
+                  if config.GamePad.GPCenterEmu == 0 then
+                     SetCVar('GamePadCursorCenteredEmulation', false)
+                  end
+               else
+                  C_Timer.After(0.025, togglecvar)
                end
             end
-            if config.GamePad.GPCenterCursor == 0 then
-               SetCVar('GamePadCursorCentering', false)
-            end
-            if config.GamePad.GPCenterEmu == 0 then
-               SetCVar('GamePadCursorCenteredEmulation', false)
-            end
+            C_Timer.After(0.0, togglecvar)
          end
          self.SpellTargetingStarted = false
       end
