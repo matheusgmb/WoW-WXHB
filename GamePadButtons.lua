@@ -209,7 +209,7 @@ local ModifierActions = {
             GamePadButtons:CallMethod("GPPlaySound", 1115)
          end
          local Crosshotbar = self:GetFrameRef('Crosshotbar')
-         local offset = abs(Crosshotbar:GetAttribute("pageoffset") - 2)%10
+         local offset = abs(Crosshotbar:GetAttribute("pageoffset") + 8)%10
          Crosshotbar:SetAttribute("state-nextpage", offset)
          Crosshotbar:SetAttribute("pageoffset", offset)
       end
