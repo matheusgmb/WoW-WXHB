@@ -19,7 +19,7 @@
       <Attribute name="actionpage" type="number" value="1"/>
       <Attribute name="activestate" type="number" value="0"/>
       <Attribute name="shownstate" type="number" value="0"/>
-      <Attribute name="currentstate" type="number" value="0"/>
+      <Attribute name="currentstate" type="number" value="99"/>
       <Attribute name="triggerstate" type="number" value="4"/>
       <Attribute name="shoulderstate" type="number" value="4"/>
       <Attribute name="paddlestate" type="number" value="4"/>

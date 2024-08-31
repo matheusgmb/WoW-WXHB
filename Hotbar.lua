@@ -391,6 +391,7 @@ function HotbarMixin:AddVisibilityHandler()
    self:SetAttribute('_onstate-hotbar-visibility', [[
       local actionbar = self:GetFrameRef('ActionBar')
       local shownstate = self:GetAttribute("shownstate")
+      local laststate = self:GetAttribute("currentstate")
 
       self:SetAttribute("currentstate", newstate)
 
@@ -401,11 +402,13 @@ function HotbarMixin:AddVisibilityHandler()
          RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;show")
          self:RunAttribute("SetHotbarBindings")
       else
-         for i = 1, 12 do
-            local b = self:GetFrameRef('ActionButton'..i)
-            if b then b:ClearBindings() end
+         if laststate == shownstate or laststate == 99 then
+            for i = 1, 12 do
+               local b = self:GetFrameRef('ActionButton'..i)
+               if b then b:ClearBindings() end
+            end
+            RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;hide")
          end
-         RegisterStateDriver(actionbar, "visibility", "[petbattle]hide;hide")
       end
    ]])
 end
@@ -428,7 +431,7 @@ function HotbarMixin:AddExpandHandler()
 
       self:SetAttribute("expanded", enable)
       self:SetAttribute("expanded-state", newstate)
-      self:CallMethod("UpdateExpanded", newstate)
+
    ]])
 end
 
@@ -579,31 +582,6 @@ function HotbarMixin:UpdateVisibility()
    self:UpdateHotbar();
 end
 
-function HotbarMixin:UpdateExpanded(newstate)
-   self.BtnLock = false
-   if ((newstate == 1 and self.Type == "LHotbar") or
-         (newstate == 2 and self.Type == "RHotbar")) then
-      for i, button in ipairs(self.Buttons) do
-         if  button:GetID() >= 9 then 
-            button:SetAlpha(self.ExpandedAlpha1)
-         else
-            button:SetAlpha(self.ExpandedAlpha2)
-            button.icon:SetDesaturated(self.DesatExpanded);
-         end
-      end
-   else
-      for i, button in ipairs(self.Buttons) do
-         if  button:GetID() >= 9 then 
-            button:SetAlpha(self.ExpandedAlpha1)
-         else
-         button:SetAlpha(1.0)
-         button.icon:SetDesaturated(false);
-         end
-      end
-   end
-   self.BtnLock = true
-end
-
 function HotbarMixin:UpdateHotkeys()   
    self.BtnLock = false
    local currentstate = self:GetAttribute("currentstate")
@@ -640,6 +618,9 @@ function HotbarMixin:UpdateHotkeys()
                if expanded ~= 0 then
                   button:SetAlpha(self.ExpandedAlpha2)
                   button.icon:SetDesaturated(self.DesatExpanded);
+               else
+                  button:SetAlpha(1.0)
+                  button.icon:SetDesaturated(false);
                end
             end
          end
