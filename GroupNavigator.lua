@@ -343,7 +343,7 @@ function GroupNavigatorMixin:AddUnitFrameRefs()
                   local frame_unit = frame:GetAttribute("unit")
                   if frame_unit then
                      hasUnits = true
-                     SecureHandlerSetFrameRef(self, "1_" .. (6 - j), frame)
+                     SecureHandlerSetFrameRef(self, "1_" .. j, frame)
                   end
                end
             end
