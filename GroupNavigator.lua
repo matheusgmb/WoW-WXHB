@@ -21,6 +21,7 @@ local GroupNavigatorMixin = {
 
 function GroupNavigatorMixin:OnLoad()
    self:RegisterEvent("ADDON_LOADED")
+   self:RegisterEvent("CVAR_UPDATE")
    self:RegisterEvent("GROUP_JOINED")
    self:RegisterEvent("GROUP_LEFT")
    self:RegisterEvent("GROUP_ROSTER_UPDATE")
@@ -36,6 +37,23 @@ end
 function GroupNavigatorMixin:OnEvent(event, ...)
    if event == "ADDON_LOADED" then
       self:updateRoster()
+
+      local value = GetCVarBool("ActionButtonUseKeyDown");
+
+      if value == 0 then
+         self:RegisterForClicks("AnyUp")
+      else
+         self:RegisterForClicks("AnyDown")
+      end
+   elseif event == "CVAR_UPDATE" then
+      local cvar, value = ...
+      if cvar == "ActionButtonUseKeyDown" then
+         if value == 0 then
+            self:RegisterForClicks("AnyUp")
+         else
+            self:RegisterForClicks("AnyDown")
+         end
+      end
    elseif event == "GROUP_JOINED" then
       self:updateRoster()
    elseif event == "GROUP_LEFT" then
@@ -257,6 +275,30 @@ function GroupNavigatorMixin:AddUnitFrameRefs()
                         SecureHandlerSetFrameRef(self, i .. "_" .. j, frame)
                      end
                   end
+                  local frame = _G["ElvUF_Raid1Group"..i.."UnitButton"..j]
+                  if frame and frame:IsVisible() then
+                     local frame_unit = frame:GetAttribute("unit")
+                     if frame_unit then
+                        hasUnits = true
+                        SecureHandlerSetFrameRef(self, i .. "_" .. j, frame)
+                     end
+                  end
+                  local frame = _G["ElvUF_Raid2Group"..i.."UnitButton"..j]
+                  if frame and frame:IsVisible() then
+                     local frame_unit = frame:GetAttribute("unit")
+                     if frame_unit then
+                        hasUnits = true
+                        SecureHandlerSetFrameRef(self, i .. "_" .. j, frame)
+                     end
+                  end
+                  local frame = _G["ElvUF_Raid3Group"..i.."UnitButton"..j]
+                  if frame and frame:IsVisible() then
+                     local frame_unit = frame:GetAttribute("unit")
+                     if frame_unit then
+                        hasUnits = true
+                        SecureHandlerSetFrameRef(self, i .. "_" .. j, frame)
+                     end
+                  end
                end
             end
          else
@@ -294,6 +336,14 @@ function GroupNavigatorMixin:AddUnitFrameRefs()
                   if frame_unit then
                      hasUnits = true
                      SecureHandlerSetFrameRef(self, "1_" .. j, frame)
+                  end
+               end
+               local frame = _G["ElvUF_PartyGroup1UnitButton"..j]
+               if frame and frame:IsVisible() then
+                  local frame_unit = frame:GetAttribute("unit")
+                  if frame_unit then
+                     hasUnits = true
+                     SecureHandlerSetFrameRef(self, "1_" .. (6 - j), frame)
                   end
                end
             end
