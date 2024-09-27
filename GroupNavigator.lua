@@ -21,7 +21,6 @@ local GroupNavigatorMixin = {
 
 function GroupNavigatorMixin:OnLoad()
    self:RegisterEvent("ADDON_LOADED")
-   self:RegisterEvent("CVAR_UPDATE")
    self:RegisterEvent("GROUP_JOINED")
    self:RegisterEvent("GROUP_LEFT")
    self:RegisterEvent("GROUP_ROSTER_UPDATE")
@@ -37,23 +36,8 @@ end
 function GroupNavigatorMixin:OnEvent(event, ...)
    if event == "ADDON_LOADED" then
       self:updateRoster()
-
       local value = GetCVarBool("ActionButtonUseKeyDown");
-
-      if value == 0 then
-         self:RegisterForClicks("AnyUp")
-      else
-         self:RegisterForClicks("AnyDown")
-      end
-   elseif event == "CVAR_UPDATE" then
-      local cvar, value = ...
-      if cvar == "ActionButtonUseKeyDown" then
-         if value == 0 then
-            self:RegisterForClicks("AnyUp")
-         else
-            self:RegisterForClicks("AnyDown")
-         end
-      end
+      self:RegisterForClicks("AnyUp", "AnyDown")
    elseif event == "GROUP_JOINED" then
       self:updateRoster()
    elseif event == "GROUP_LEFT" then
@@ -363,6 +347,9 @@ end
 function GroupNavigatorMixin:WrapOnClickDiscrete()
    SecureHandlerUnwrapScript(self, "OnClick")
    SecureHandlerWrapScript(self, "OnClick", self,  [[
+
+   if not down then return end
+
    if not lastunit then lastunit = 1 end
    if not lastgroup then lastgroup = 1 end
    
@@ -519,6 +506,9 @@ end
 function GroupNavigatorMixin:WrapOnClickFlush()
    SecureHandlerUnwrapScript(self, "OnClick")
    SecureHandlerWrapScript(self, "OnClick", self,  [[
+
+   if not down then return end
+
    if not lastunit then lastunit = 1 end
    if not lastgroup then lastgroup = 1 end
    if not group_units then group_units = table.new() end

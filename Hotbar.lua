@@ -432,7 +432,35 @@ function HotbarMixin:AddExpandHandler()
       self:SetAttribute("expanded", enable)
       self:SetAttribute("expanded-state", newstate)
 
+      if newstate ~= 0 and enable == 0 then
+        self:CallMethod("UpdateExpanded", newstate)
+      end
    ]])
+end
+
+function HotbarMixin:UpdateExpanded(newstate)
+   self.BtnLock = false
+   if ((newstate == 1 and self.Type == "LHotbar") or
+         (newstate == 2 and self.Type == "RHotbar")) then
+      for i, button in ipairs(self.Buttons) do
+         if  button:GetID() >= 9 then 
+            button:SetAlpha(self.ExpandedAlpha1)
+         else
+            button:SetAlpha(self.ExpandedAlpha2)
+            button.icon:SetDesaturated(self.DesatExpanded);
+         end
+      end
+   else
+      for i, button in ipairs(self.Buttons) do
+         if  button:GetID() >= 9 then 
+            button:SetAlpha(self.ExpandedAlpha1)
+         else
+         button:SetAlpha(1.0)
+         button.icon:SetDesaturated(false);
+         end
+      end
+   end
+   self.BtnLock = true
 end
 
 function HotbarMixin:AddNextPageHandler()
