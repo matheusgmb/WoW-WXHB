@@ -793,15 +793,16 @@ function GamePadButtonsMixin:OnEvent(event, ...)
                -- to show the retical
                -- 11.0.2 can not change the
                -- mouselook until next frame.
-               local function togglemouse()
+               local function togglemouse(timer)
                   if not IsMouseButtonDown() then
-                     self:SetMouseLook(false)
-                     self:SetMouseLook(true)
-                  else
-                     C_Timer.After(0.025, togglemouse)
+                     self.MouseLookEnabled = false
+                     MouselookStop()
+                     MouselookStart()
+                     self.MouseLookEnabled = true
+                     timer:Cancel()
                   end
                end
-               C_Timer.After(0, togglemouse)
+               C_Timer.NewTicker(0.1, togglemouse, 5)
             end
          end
          self.SpellTargetingStarted = true
